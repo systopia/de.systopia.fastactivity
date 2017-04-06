@@ -1,6 +1,8 @@
 <?php
 /**
  * This class generates form components for Activity Filter
+ * The activity filter is displayed on the "FastActivities" Tab and allows for selection/removal of multiple
+ * activity types.
  *
  */
 class CRM_Fastactivity_Form_ActivityFilter extends CRM_Core_Form {
