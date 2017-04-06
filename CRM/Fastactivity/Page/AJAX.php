@@ -70,7 +70,7 @@ class CRM_Fastactivity_Page_AJAX {
     $params['context'] = $context;
 
     // get the contact activities
-    $activities = CRM_Fastactivity_BAO_Activity::getContactActivitySelector($params);
+    $activities = CRM_Fastactivity_BAO_Activity::getContactActivitiesSelector($params);
 
     foreach ($activities as $key => $value) {
       //Check if recurring activity

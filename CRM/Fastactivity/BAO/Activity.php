@@ -55,7 +55,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
    * @return array
    *   Relevant data object values of open activities
    */
-  public static function getActivities(&$params) {
+  public static function getContactActivities(&$params) {
     //step 1: Get the basic activity data
     $bulkActivityTypeID = CRM_Core_OptionGroup::getValue(
       'activity_type',
@@ -129,12 +129,12 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       }
 
       // civicrm_activity_contact: record_type_id: 1 assignee, 2 creator, 3 focus or target.
-      $values[$activityID]['assignee_contact_count'] = self::getNamesCount($dao->activity_id, 1);
-      $values[$activityID]['source_contact_count'] = self::getNamesCount($dao->activity_id, 2);
-      $values[$activityID]['target_contact_count'] = self::getNamesCount($dao->activity_id, 3);
-      list($values[$activityID]['assignee_contact_name'], $values[$activityID]['assignee_contact_id']) = self::getNames($dao->activity_id,1, TRUE, $values[$activityID]['assignee_contact_count'], $params);
-      list($values[$activityID]['source_contact_name'], $values[$activityID]['source_contact_id']) = self::getNames($dao->activity_id,2, TRUE, $values[$activityID]['source_contact_count'], $params);
-      list($values[$activityID]['target_contact_name'], $values[$activityID]['target_contact_id']) = self::getNames($dao->activity_id,3, TRUE, $values[$activityID]['target_contact_count'], $params);
+      $values[$activityID]['assignee_contact_count'] = self::getContactActivitiesNamesCount($dao->activity_id, 1);
+      $values[$activityID]['source_contact_count'] = self::getContactActivitiesNamesCount($dao->activity_id, 2);
+      $values[$activityID]['target_contact_count'] = self::getContactActivitiesNamesCount($dao->activity_id, 3);
+      list($values[$activityID]['assignee_contact_name'], $values[$activityID]['assignee_contact_id']) = self::getContactActivitiesNames($dao->activity_id,1, TRUE, $values[$activityID]['assignee_contact_count'], $params);
+      list($values[$activityID]['source_contact_name'], $values[$activityID]['source_contact_id']) = self::getContactActivitiesNames($dao->activity_id,2, TRUE, $values[$activityID]['source_contact_count'], $params);
+      list($values[$activityID]['target_contact_name'], $values[$activityID]['target_contact_id']) = self::getContactActivitiesNames($dao->activity_id,3, TRUE, $values[$activityID]['target_contact_count'], $params);
 
       // if deleted, wrap in <del>
       if ($dao->is_deleted) {
@@ -182,7 +182,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
    *
    * @return int
    */
-  public static function getNamesCount($activityID, $recordTypeID) {
+  public static function getContactActivitiesNamesCount($activityID, $recordTypeID) {
     $query = "
 SELECT count(*) 
 FROM civicrm_activity_contact acon 
@@ -210,7 +210,7 @@ AND EXISTS (SELECT con.id FROM civicrm_contact con WHERE con.is_deleted=0)";
    *
    * @return array
    */
-  public static function getNames($activityID, $recordTypeID, $alsoIDs = FALSE, $count, &$params) {
+  public static function getContactActivitiesNames($activityID, $recordTypeID, $alsoIDs = FALSE, $count, &$params) {
     $myContact = '';
     if ($count > 10) {
       // This query gets slow when searching for 1000s as may be the case for target,
@@ -332,7 +332,7 @@ AND        contact_a.is_deleted = 0
    * @return int
    *   count of activities
    */
-  public static function getActivitiesCount(&$params) {
+  public static function getContactActivitiesCount(&$params) {
     $caseFilter = self::getCaseFilter();
 
     $whereClause = self::whereClause($params, FALSE);
@@ -356,7 +356,7 @@ AND        contact_a.is_deleted = 0
    * @return array
    *   Associated array of contact activities
    */
-  public static function getContactActivitySelector(&$params) {
+  public static function getContactActivitiesSelector(&$params) {
     // format the params
     $params['offset'] = ($params['page'] - 1) * $params['rp'];
     $params['rowCount'] = $params['rp'];
@@ -365,10 +365,10 @@ AND        contact_a.is_deleted = 0
     $context = CRM_Utils_Array::value('context', $params);
 
     // get contact activities
-    $activities = CRM_Fastactivity_BAO_Activity::getActivities($params);
+    $activities = CRM_Fastactivity_BAO_Activity::getContactActivities($params);
 
     // add total
-    $params['total'] = CRM_Fastactivity_BAO_Activity::getActivitiesCount($params);
+    $params['total'] = CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($params);
 
     // format params and add links
     $contactActivities = array();

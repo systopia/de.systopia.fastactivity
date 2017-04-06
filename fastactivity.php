@@ -135,7 +135,7 @@ function fastactivity_civicrm_tabs ( &$tabs, $contactID ) {
                   'id' => 'fastactivity',
                   'url' => '/civicrm/contact/view/fastactivity?reset=1&cid='.$contactID,
                   'weight' => 50,
-                  'count' => CRM_Fastactivity_BAO_Activity::getActivitiesCount($input),
+                  'count' => CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($input),
                  );
 }
 
