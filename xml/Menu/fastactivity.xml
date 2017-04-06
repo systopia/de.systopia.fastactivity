@@ -1,12 +1,6 @@
 <?xml version="1.0"?>
 <menu>
   <item>
-    <path>civicrm/testpage</path>
-    <page_callback>CRM_Fastactivity_Page_Test</page_callback>
-    <title>Test</title>
-    <access_arguments>access CiviCRM</access_arguments>
-  </item>
-  <item>
     <path>civicrm/contact/view/fastactivity</path>
     <path_arguments>show=1,cid=%%cid%%</path_arguments>
     <title>Activities</title>
@@ -16,10 +10,5 @@
     <path>civicrm/ajax/contactfastactivity</path>
     <page_callback>CRM_Fastactivity_Page_AJAX::getContactActivity</page_callback>
     <access_arguments>access CiviCRM</access_arguments>
-  </item>
-  <item>
-    <path>civicrm/fastactivity/search</path>
-    <title>Find Activities</title>
-    <page_callback>CRM_Fastactivity_Controller_Search</page_callback>
   </item>
 </menu>

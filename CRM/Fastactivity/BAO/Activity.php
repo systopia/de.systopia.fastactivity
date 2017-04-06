@@ -425,7 +425,7 @@ AND        contact_a.is_deleted = 0
           $accessMailingReport = TRUE;
         }
 
-        $actionLinks = CRM_Fastactivity_Selector_Activity::actionLinks(
+        $actionLinks = self::actionLinks(
           CRM_Utils_Array::value('activity_type_id', $values),
           CRM_Utils_Array::value('source_record_id', $values),
           $accessMailingReport,
@@ -490,5 +490,203 @@ AND        contact_a.is_deleted = 0
       }
     }
     return $result;
+  }
+
+  /**
+   * This method returns the action links that are given for each search row.
+   * currently the action links added for each row are
+   *
+   * - View
+   *
+   * @param int $activityTypeId
+   * @param int $sourceRecordId
+   * @param bool $accessMailingReport
+   * @param int $activityId
+   * @param null $key
+   * @param null $compContext
+   *
+   * @return array
+   */
+  public static function actionLinks(
+    $activityTypeId,
+    $sourceRecordId = NULL,
+    $accessMailingReport = FALSE,
+    $activityId = NULL,
+    $key = NULL,
+    $compContext = NULL) {
+    static $activityActTypes = NULL;
+    //CRM-14277 added addtitional param to handle activity search
+    $extraParams = "&searchContext=activity";
+
+    $extraParams .= ($key) ? "&key={$key}" : NULL;
+    if ($compContext) {
+      $extraParams .= "&compContext={$compContext}";
+    }
+
+    $showView = TRUE;
+    $showUpdate = $showDelete = FALSE;
+    $qsUpdate = NULL;
+
+    if (!$activityActTypes) {
+      $activeActTypes = CRM_Core_PseudoConstant::activityType(TRUE, TRUE, FALSE, 'name', TRUE);
+    }
+    $activityTypeName = CRM_Utils_Array::value($activityTypeId, $activeActTypes);
+
+    //CRM-7607
+    //lets allow to have normal operation for only activity types.
+    //when activity type is disabled or no more exists give only delete.
+    switch ($activityTypeName) {
+      case 'Event Registration':
+      case 'Change Registration':
+        $url = 'civicrm/contact/view/participant';
+        $qsView = "action=view&reset=1&id={$sourceRecordId}&cid=%%cid%%&context=%%cxt%%{$extraParams}";
+        break;
+
+      case 'Contribution':
+        $url = 'civicrm/contact/view/contribution';
+        $qsView = "action=view&reset=1&id={$sourceRecordId}&cid=%%cid%%&context=%%cxt%%{$extraParams}";
+        break;
+
+      case 'Payment':
+      case 'Refund':
+        $participantId = CRM_Core_DAO::getFieldValue('CRM_Event_BAO_ParticipantPayment', $sourceRecordId, 'participant_id', 'contribution_id');
+        if (!empty($participantId)) {
+          $url = 'civicrm/contact/view/participant';
+          $qsView = "action=view&reset=1&id={$participantId}&cid=%%cid%%&context=%%cxt%%{$extraParams}";
+        }
+        break;
+
+      case 'Membership Signup':
+      case 'Membership Renewal':
+      case 'Change Membership Status':
+      case 'Change Membership Type':
+        $url = 'civicrm/contact/view/membership';
+        $qsView = "action=view&reset=1&id={$sourceRecordId}&cid=%%cid%%&context=%%cxt%%{$extraParams}";
+        break;
+
+      case 'Pledge Reminder':
+      case 'Pledge Acknowledgment':
+        $url = 'civicrm/contact/view/activity';
+        $qsView = "atype={$activityTypeId}&action=view&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
+        break;
+
+      case 'Email':
+      case 'Bulk Email':
+        $url = 'civicrm/activity/view';
+        $delUrl = 'civicrm/activity';
+        $qsView = "atype={$activityTypeId}&action=view&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
+        if ($activityTypeName == 'Email') {
+          $showDelete = TRUE;
+        }
+        break;
+
+      case 'Inbound Email':
+        $url = 'civicrm/contact/view/activity';
+        $qsView = "atype={$activityTypeId}&action=view&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
+        break;
+
+      case 'Open Case':
+      case 'Change Case Type':
+      case 'Change Case Status':
+      case 'Change Case Start Date':
+        $showUpdate = $showDelete = FALSE;
+        $url = 'civicrm/activity';
+        $qsView = "atype={$activityTypeId}&action=view&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
+        $qsUpdate = "atype={$activityTypeId}&action=update&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
+        break;
+
+      default:
+        $url = 'civicrm/activity';
+        $showView = $showDelete = $showUpdate = TRUE;
+        $qsView = "atype={$activityTypeId}&action=view&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
+        $qsUpdate = "atype={$activityTypeId}&action=update&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
+
+        //when type is not available lets hide view and update.
+        if (empty($activityTypeName)) {
+          $showView = $showUpdate = FALSE;
+        }
+        break;
+    }
+
+    $qsDelete = "atype={$activityTypeId}&action=delete&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
+
+    $actionLinks = array();
+
+    if ($showView) {
+      $actionLinks += array(
+        CRM_Core_Action::
+        VIEW => array(
+          'name' => ts('View'),
+          'url' => $url,
+          'qs' => $qsView,
+          'title' => ts('View Activity'),
+        ),
+      );
+    }
+
+    if ($showUpdate) {
+      $updateUrl = 'civicrm/activity/add';
+      if ($activityTypeName == 'Email') {
+        $updateUrl = 'civicrm/activity/email/add';
+      }
+      elseif ($activityTypeName == 'Print PDF Letter') {
+        $updateUrl = 'civicrm/activity/pdf/add';
+      }
+      if (CRM_Activity_BAO_Activity::checkPermission($activityId, CRM_Core_Action::UPDATE)) {
+        $actionLinks += array(
+          CRM_Core_Action::
+          UPDATE => array(
+            'name' => ts('Edit'),
+            'url' => $updateUrl,
+            'qs' => $qsUpdate,
+            'title' => ts('Update Activity'),
+          ),
+        );
+      }
+    }
+
+    if (
+      $activityTypeName &&
+      CRM_Case_BAO_Case::checkPermission($activityId, 'File On Case', $activityTypeId)
+    ) {
+      $actionLinks += array(
+        CRM_Core_Action::
+        ADD => array(
+          'name' => ts('File on Case'),
+          'url' => '#',
+          'extra' => 'onclick="javascript:fileOnCase( \'file\', \'%%id%%\', null, this ); return false;"',
+          'title' => ts('File on Case'),
+        ),
+      );
+    }
+
+    if ($showDelete) {
+      if (!isset($delUrl) || !$delUrl) {
+        $delUrl = $url;
+      }
+      $actionLinks += array(
+        CRM_Core_Action::
+        DELETE => array(
+          'name' => ts('Delete'),
+          'url' => $delUrl,
+          'qs' => $qsDelete,
+          'title' => ts('Delete Activity'),
+        ),
+      );
+    }
+
+    if ($accessMailingReport) {
+      $actionLinks += array(
+        CRM_Core_Action::
+        BROWSE => array(
+          'name' => ts('Mailing Report'),
+          'url' => 'civicrm/mailing/report',
+          'qs' => "mid={$sourceRecordId}&reset=1&cid=%%cid%%&context=activitySelector",
+          'title' => ts('View Mailing Report'),
+        ),
+      );
+    }
+
+    return $actionLinks;
   }
 }
