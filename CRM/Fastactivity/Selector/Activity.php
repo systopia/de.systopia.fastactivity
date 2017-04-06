@@ -542,8 +542,6 @@ class CRM_Fastactivity_Selector_Activity extends CRM_Core_Selector_Base implemen
         array('desc' => ts('Actions')),
       );
     }
-
     return self::$_columnHeaders;
   }
-
 }
