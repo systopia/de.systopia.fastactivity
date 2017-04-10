@@ -115,7 +115,9 @@ COALESCE(source_contact_me.id,            source_contact_random.id)             
 COALESCE(source_contact_me.display_name,            source_contact_random.display_name)   AS source_display_name,   
 COUNT(DISTINCT(assignees.contact_id))            AS assignee_count,   
 COALESCE(assignee_contact_me.id,            assignee_contact_random.id)             AS assignee_contact_id,   
-COALESCE(assignee_contact_me.display_name,            assignee_contact_random.display_name)   AS assignee_display_name 
+COALESCE(assignee_contact_me.display_name,            assignee_contact_random.display_name)   AS assignee_display_name, 
+COALESCE(target_contact_me.id,            target_contact_random.id)             AS target_contact_id,   
+COALESCE(target_contact_me.display_name,            target_contact_random.display_name)   AS target_display_name 
 FROM civicrm_activity_contact acon 
 LEFT JOIN civicrm_activity activity ON acon.activity_id = activity.id 
 LEFT JOIN civicrm_activity_contact sources       ON (activity.id = sources.activity_id AND sources.record_type_id = 2) 
@@ -124,6 +126,9 @@ LEFT JOIN civicrm_contact source_contact_me      ON (sources.contact_id = source
 LEFT JOIN civicrm_activity_contact assignees     ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1) 
 LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0) 
 LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = %1) 
+LEFT JOIN civicrm_activity_contact targets     ON (activity.id = targets.activity_id AND targets.record_type_id = 1)
+LEFT JOIN civicrm_contact target_contact_random  ON (targets.contact_id = target_contact_random.id AND target_contact_random.is_deleted = 0) 
+LEFT JOIN civicrm_contact target_contact_me      ON (targets.contact_id = target_contact_me.id AND target_contact_me.id = %1)
 WHERE acon.contact_id = %1 GROUP BY activity.id";
 
     $params[1] = array($params['contact_id'], 'Int');
@@ -167,10 +172,10 @@ WHERE acon.contact_id = %1 GROUP BY activity.id";
       $values[$activityID]['target_contact_count'] = 0;
       $values[$activityID]['assignee_contact_name'][$dao->assignee_contact_id] = $dao->assignee_display_name;
       $values[$activityID]['source_contact_name'][$dao->source_contact_id] = $dao->source_display_name;
-
+      $values[$activityID]['target_contact_name'][$dao->target_contact_id] = $dao->target_display_name;
       $values[$activityID]['assignee_contact_id'] = $dao->assignee_contact_id;
       $values[$activityID]['source_contact_id'] = $dao->source_contact_id;
-      list($values[$activityID]['target_contact_name'], $values[$activityID]['target_contact_id']) = array(0,0);
+      //list($values[$activityID]['target_contact_name'], $values[$activityID]['target_contact_id']) = array(0,0);
 
       // if deleted, wrap in <del>
       if ($dao->is_deleted) {
@@ -428,8 +433,8 @@ AND        contact_a.is_deleted = 0
         $contactActivities[$activityId]['subject'] = $values['subject'];
 
         $contactActivities[$activityId]['source_contact'] = self::formatContactNames($values['source_contact_name'], $values['source_contact_count']);
-        $contactActivities[$activityId]['target_contact'] = '???';
-        //$contactActivities[$activityId]['target_contact'] = self::formatContactNames($values['target_contact_name'], $values['target_contact_count']);
+        //$contactActivities[$activityId]['target_contact'] = '???';
+        $contactActivities[$activityId]['target_contact'] = self::formatContactNames($values['target_contact_name'], $values['target_contact_count']) . ' + ???';
         $contactActivities[$activityId]['assignee_contact'] = self::formatContactNames($values['assignee_contact_name'], $values['assignee_contact_count']);
 
         if (isset($values['mailingId']) && !empty($values['mailingId'])) {
