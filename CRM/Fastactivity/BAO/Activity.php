@@ -105,7 +105,26 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
             {$limit}";
     */
     $query = "
-SELECT   activity.id AS activity_id, activity.activity_type_id                      AS activity_type_id,   activity.subject                               AS activity_subject,   activity.activity_date_time                    AS activity_date_time,   COUNT(DISTINCT(sources.contact_id))            AS source_count,   COALESCE(source_contact_me.id,            source_contact_random.id)             AS source_contact_id,   COALESCE(source_contact_me.display_name,            source_contact_random.display_name)   AS source_display_name,   COUNT(DISTINCT(assignees.contact_id))            AS assignee_count,   COALESCE(assignee_contact_me.id,            assignee_contact_random.id)             AS assignee_contact_id,   COALESCE(assignee_contact_me.display_name,            assignee_contact_random.display_name)   AS assignee_display_name FROM civicrm_activity_contact acon LEFT JOIN civicrm_activity activity ON acon.activity_id = activity.id LEFT JOIN civicrm_activity_contact sources       ON (activity.id = sources.activity_id AND sources.record_type_id = 2) LEFT JOIN civicrm_contact source_contact_random  ON (sources.contact_id = source_contact_random.id AND source_contact_random.is_deleted = 0) LEFT JOIN civicrm_contact source_contact_me      ON (sources.contact_id = source_contact_me.id AND source_contact_me.id = 203) LEFT JOIN civicrm_activity_contact assignees     ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1) LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0) LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = 203) WHERE acon.contact_id = 203 GROUP BY activity.id";
+SELECT   
+activity.id AS activity_id, 
+activity.activity_type_id                      AS activity_type_id,   
+activity.subject                               AS activity_subject,   
+activity.activity_date_time                    AS activity_date_time,   
+COUNT(DISTINCT(sources.contact_id))            AS source_count,   
+COALESCE(source_contact_me.id,            source_contact_random.id)             AS source_contact_id,   
+COALESCE(source_contact_me.display_name,            source_contact_random.display_name)   AS source_display_name,   
+COUNT(DISTINCT(assignees.contact_id))            AS assignee_count,   
+COALESCE(assignee_contact_me.id,            assignee_contact_random.id)             AS assignee_contact_id,   
+COALESCE(assignee_contact_me.display_name,            assignee_contact_random.display_name)   AS assignee_display_name 
+FROM civicrm_activity_contact acon 
+LEFT JOIN civicrm_activity activity ON acon.activity_id = activity.id 
+LEFT JOIN civicrm_activity_contact sources       ON (activity.id = sources.activity_id AND sources.record_type_id = 2) 
+LEFT JOIN civicrm_contact source_contact_random  ON (sources.contact_id = source_contact_random.id AND source_contact_random.is_deleted = 0) 
+LEFT JOIN civicrm_contact source_contact_me      ON (sources.contact_id = source_contact_me.id AND source_contact_me.id = {$params['contact_id']}) 
+LEFT JOIN civicrm_activity_contact assignees     ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1) 
+LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0) 
+LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = {$params['contact_id']}) 
+WHERE acon.contact_id = {$params['contact_id']} GROUP BY activity.id";
 
     $params[1] = $params['contact_id'];
     $dao = CRM_Core_DAO::executeQuery($query);
