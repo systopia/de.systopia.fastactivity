@@ -94,7 +94,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
 
     $caseFilter = self::getCaseFilter();
 
-    $query = "
+    /*$query = "
             SELECT DISTINCT acon.activity_id,act.* 
             FROM  civicrm_activity_contact acon  
             LEFT JOIN civicrm_activity act 
@@ -103,8 +103,15 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
             WHERE {$whereClause} 
             {$orderBy}
             {$limit}";
+    */
+    $query = "
+SELECT   activity.id AS activity_id, activity.activity_type_id                      AS activity_type_id,   activity.subject                               AS activity_subject,   activity.activity_date_time                    AS activity_date_time,   COUNT(DISTINCT(sources.contact_id))            AS source_count,   COALESCE(source_contact_me.id,            source_contact_random.id)             AS source_contact_id,   COALESCE(source_contact_me.display_name,            source_contact_random.display_name)   AS source_display_name,   COUNT(DISTINCT(assignees.contact_id))            AS assignee_count,   COALESCE(assignee_contact_me.id,            assignee_contact_random.id)             AS assignee_contact_id,   COALESCE(assignee_contact_me.display_name,            assignee_contact_random.display_name)   AS assignee_display_name FROM civicrm_activity_contact acon LEFT JOIN civicrm_activity activity ON acon.activity_id = activity.id LEFT JOIN civicrm_activity_contact sources       ON (activity.id = sources.activity_id AND sources.record_type_id = 2) LEFT JOIN civicrm_contact source_contact_random  ON (sources.contact_id = source_contact_random.id AND source_contact_random.is_deleted = 0) LEFT JOIN civicrm_contact source_contact_me      ON (sources.contact_id = source_contact_me.id AND source_contact_me.id = 203) LEFT JOIN civicrm_activity_contact assignees     ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1) LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0) LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = 203) WHERE acon.contact_id = 203 GROUP BY activity.id";
 
-    $dao = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Activity_DAO_Activity');
+    $params[1] = $params['contact_id'];
+    $dao = CRM_Core_DAO::executeQuery($query);
+
+
+    //$dao = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Activity_DAO_Activity');
 
     //get all activity types
     $activityTypes = CRM_Activity_BAO_Activity::buildOptions('activity_type_id', 'validate');
@@ -120,7 +127,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       $values[$activityID]['activity_type'] = $activityTypes[$dao->activity_type_id];
       $values[$activityID]['activity_date_time'] = $dao->activity_date_time;
       $values[$activityID]['status_id'] = $dao->status_id;
-      $values[$activityID]['subject'] = $dao->subject;
+      $values[$activityID]['subject'] = $dao->activity_subject;
       $values[$activityID]['campaign_id'] = $dao->campaign_id;
       $values[$activityID]['is_recurring_activity'] = $dao->is_recurring_activity;
 
@@ -129,12 +136,22 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       }
 
       // civicrm_activity_contact: record_type_id: 1 assignee, 2 creator, 3 focus or target.
-      $values[$activityID]['assignee_contact_count'] = self::getContactActivitiesNamesCount($dao->activity_id, 1);
+     /* $values[$activityID]['assignee_contact_count'] = self::getContactActivitiesNamesCount($dao->activity_id, 1);
       $values[$activityID]['source_contact_count'] = self::getContactActivitiesNamesCount($dao->activity_id, 2);
       $values[$activityID]['target_contact_count'] = self::getContactActivitiesNamesCount($dao->activity_id, 3);
       list($values[$activityID]['assignee_contact_name'], $values[$activityID]['assignee_contact_id']) = self::getContactActivitiesNames($dao->activity_id,1, TRUE, $values[$activityID]['assignee_contact_count'], $params);
       list($values[$activityID]['source_contact_name'], $values[$activityID]['source_contact_id']) = self::getContactActivitiesNames($dao->activity_id,2, TRUE, $values[$activityID]['source_contact_count'], $params);
       list($values[$activityID]['target_contact_name'], $values[$activityID]['target_contact_id']) = self::getContactActivitiesNames($dao->activity_id,3, TRUE, $values[$activityID]['target_contact_count'], $params);
+*/
+      $values[$activityID]['assignee_contact_count'] = $dao->assignee_count;
+      $values[$activityID]['source_contact_count'] = $dao->source_count;
+      $values[$activityID]['target_contact_count'] = 0;
+      $values[$activityID]['assignee_contact_name'][$dao->assignee_contact_id] = $dao->assignee_display_name;
+      $values[$activityID]['source_contact_name'][$dao->source_contact_id] = $dao->source_display_name;
+
+      $values[$activityID]['assignee_contact_id'] = $dao->assignee_contact_id;
+      $values[$activityID]['source_contact_id'] = $dao->source_contact_id;
+      list($values[$activityID]['target_contact_name'], $values[$activityID]['target_contact_id']) = array(0,0);
 
       // if deleted, wrap in <del>
       if ($dao->is_deleted) {
