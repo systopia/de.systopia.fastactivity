@@ -120,14 +120,14 @@ FROM civicrm_activity_contact acon
 LEFT JOIN civicrm_activity activity ON acon.activity_id = activity.id 
 LEFT JOIN civicrm_activity_contact sources       ON (activity.id = sources.activity_id AND sources.record_type_id = 2) 
 LEFT JOIN civicrm_contact source_contact_random  ON (sources.contact_id = source_contact_random.id AND source_contact_random.is_deleted = 0) 
-LEFT JOIN civicrm_contact source_contact_me      ON (sources.contact_id = source_contact_me.id AND source_contact_me.id = {$params['contact_id']}) 
+LEFT JOIN civicrm_contact source_contact_me      ON (sources.contact_id = source_contact_me.id AND source_contact_me.id = %1) 
 LEFT JOIN civicrm_activity_contact assignees     ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1) 
 LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0) 
-LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = {$params['contact_id']}) 
-WHERE acon.contact_id = {$params['contact_id']} GROUP BY activity.id";
+LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = %1) 
+WHERE acon.contact_id = %1 GROUP BY activity.id";
 
-    $params[1] = $params['contact_id'];
-    $dao = CRM_Core_DAO::executeQuery($query);
+    $params[1] = array($params['contact_id'], 'Int');
+    $dao = CRM_Core_DAO::executeQuery($query, $params);
 
 
     //$dao = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Activity_DAO_Activity');
