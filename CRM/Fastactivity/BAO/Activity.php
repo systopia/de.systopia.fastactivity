@@ -428,7 +428,8 @@ AND        contact_a.is_deleted = 0
         $contactActivities[$activityId]['subject'] = $values['subject'];
 
         $contactActivities[$activityId]['source_contact'] = self::formatContactNames($values['source_contact_name'], $values['source_contact_count']);
-        $contactActivities[$activityId]['target_contact'] = self::formatContactNames($values['target_contact_name'], $values['target_contact_count']);
+        $contactActivities[$activityId]['target_contact'] = '???';
+        //$contactActivities[$activityId]['target_contact'] = self::formatContactNames($values['target_contact_name'], $values['target_contact_count']);
         $contactActivities[$activityId]['assignee_contact'] = self::formatContactNames($values['assignee_contact_name'], $values['assignee_contact_count']);
 
         if (isset($values['mailingId']) && !empty($values['mailingId'])) {
@@ -503,7 +504,7 @@ AND        contact_a.is_deleted = 0
    */
   public static function formatContactNames($contacts, $contactCount) {
     // if $contactCount > 4 we only show the current contact ID if found
-    if (empty($contacts) && $contactCount <= 4) {
+    if (empty(array_filter($contacts)) && $contactCount <= 4) {
       return '<em>n/a</em>';
     }
 
