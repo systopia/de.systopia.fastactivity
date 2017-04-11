@@ -71,7 +71,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
         CRM_Core_Permission::check('create mailings'))
     );
 
-    //SELECT distinct acon.activity_id,act.subject FROM `civicrm_activity_contact` acon left join `civicrm_activity` act on acon.activity_id = act.id WHERE acon.contact_id=203
+    //SELECT distinct acon.activity_id,activity.subject FROM `civicrm_activity_contact` acon left join `civicrm_activity` act on acon.activity_id = activity.id WHERE acon.contact_id=203
     $whereClause = self::whereClause($params,FALSE);
 
     // Add limit clause
@@ -82,7 +82,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     }
 
     // Add order by clause
-    $orderBy = ' ORDER BY act.activity_date_time DESC';
+    $orderBy = ' ORDER BY activity.activity_date_time DESC';
     if (!empty($params['sort'])) {
       $orderBy = ' ORDER BY ' . CRM_Utils_Type::escape($params['sort'], 'String');
 
@@ -107,10 +107,10 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     $query = "
 SELECT   
 activity.id AS activity_id, 
-activity.activity_type_id                      AS activity_type_id,   
-activity.subject                               AS activity_subject,   
-activity.activity_date_time                    AS activity_date_time,   
-COUNT(DISTINCT(sources.contact_id))            AS source_count,   
+activity.activity_type_id                      AS activity_type_id,
+activity.subject                               AS activity_subject,
+activity.activity_date_time                    AS activity_date_time,
+COUNT(DISTINCT(sources.contact_id))            AS source_count,
 COALESCE(source_contact_me.id,            source_contact_random.id)             AS source_contact_id,   
 COALESCE(source_contact_me.display_name,            source_contact_random.display_name)   AS source_display_name,   
 COUNT(DISTINCT(assignees.contact_id))            AS assignee_count,   
@@ -128,10 +128,12 @@ LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = as
 LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = %1) 
 LEFT JOIN civicrm_activity_contact targets     ON (activity.id = targets.activity_id AND targets.record_type_id = 1)
 LEFT JOIN civicrm_contact target_contact_random  ON (targets.contact_id = target_contact_random.id AND target_contact_random.is_deleted = 0) 
-LEFT JOIN civicrm_contact target_contact_me      ON (targets.contact_id = target_contact_me.id AND target_contact_me.id = %1)
-WHERE acon.contact_id = %1 GROUP BY activity.id";
+LEFT JOIN civicrm_contact target_contact_me      ON (targets.contact_id = target_contact_me.id AND target_contact_me.id = %1) 
+{$caseFilter}
+WHERE {$whereClause} 
+GROUP BY activity.id";
 
-    $params[1] = array($params['contact_id'], 'Int');
+    //$params[1] = array($params['contact_id'], 'Int');
     $dao = CRM_Core_DAO::executeQuery($query, $params);
 
 
@@ -169,7 +171,7 @@ WHERE acon.contact_id = %1 GROUP BY activity.id";
 */
       $values[$activityID]['assignee_contact_count'] = $dao->assignee_count;
       $values[$activityID]['source_contact_count'] = $dao->source_count;
-      $values[$activityID]['target_contact_count'] = 0;
+      $values[$activityID]['target_contact_count'] = -1;
       $values[$activityID]['assignee_contact_name'][$dao->assignee_contact_id] = $dao->assignee_display_name;
       $values[$activityID]['source_contact_name'][$dao->source_contact_id] = $dao->source_display_name;
       $values[$activityID]['target_contact_name'][$dao->target_contact_id] = $dao->target_display_name;
@@ -210,7 +212,7 @@ WHERE acon.contact_id = %1 GROUP BY activity.id";
     $caseFilter = '';
     $components = CRM_Activity_BAO_Activity::activityComponents();
     if (!in_array('CiviCase', $components)) {
-      $caseFilter .= " LEFT JOIN  civicrm_case_activity acase ON ( acase.activity_id = act.id ) ";
+      $caseFilter .= " LEFT JOIN  civicrm_case_activity acase ON ( acase.activity_id = activity.id ) ";
     }
     return $caseFilter;
   }
@@ -301,43 +303,43 @@ AND        contact_a.is_deleted = 0
     // is_deleted
     $is_deleted = CRM_Utils_Array::value('is_deleted', $params);
     if ($is_deleted == '1') {
-      $clauses[] = "act.is_deleted = 1";
+      $clauses[] = "activity.is_deleted = 1";
     } else {
-      $clauses[] = "act.is_deleted = 0";
+      $clauses[] = "activity.is_deleted = 0";
     }
 
     // is_current_revision
     $is_current_revision = CRM_Utils_Array::value('is_current_revision', $params);
     if (empty($is_current_revision)) {
-      $clauses[] = "act.is_current_revision = 1";
+      $clauses[] = "activity.is_current_revision = 1";
     } else {
-      $clauses[] = "act.is_current_revision = 0";
+      $clauses[] = "activity.is_current_revision = 0";
     }
 
     // is_test
     $is_test = CRM_Utils_Array::value('is_test', $params);
     if ($is_test == '1') {
-      $clauses[] = "act.is_test = 1";
+      $clauses[] = "activity.is_test = 1";
     } else {
-      $clauses[] = "act.is_test = 0";
+      $clauses[] = "activity.is_test = 0";
     }
 
     // context
     $context = CRM_Utils_Array::value('context', $params);
     if ($context != 'activity') {
-      $clauses[] = "act.status_id = 1";
+      $clauses[] = "activity.status_id = 1";
     }
 
     // activity type ID clause
     $activity_type_id = CRM_Utils_Array::value('activity_type_id', $params);
     if (!empty($activity_type_id)) {
-      $clauses[] = "act.activity_type_id IN ( " . $activity_type_id . " ) ";
+      $clauses[] = "activity.activity_type_id IN ( " . $activity_type_id . " ) ";
     }
 
     // exclude by activity type clause
     $activity_type_exclude_id = CRM_Utils_Array::value('activity_type_exclude_id', $params);
     if (!empty($activity_type_exclude_id)) {
-      $clauses[] = "act.activity_type_id NOT IN ( " . $activity_type_exclude_id . " ) ";
+      $clauses[] = "activity.activity_type_id NOT IN ( " . $activity_type_exclude_id . " ) ";
     }
 
     // contact_id
@@ -380,8 +382,8 @@ AND        contact_a.is_deleted = 0
 
     $query = "SELECT COUNT(DISTINCT acon.activity_id) 
               FROM civicrm_activity_contact acon 
-              LEFT JOIN civicrm_activity act 
-              ON acon.activity_id = act.id 
+              LEFT JOIN civicrm_activity activity 
+              ON acon.activity_id = activity.id 
               {$caseFilter} ";
     $query .= " WHERE {$whereClause}";
 
@@ -434,7 +436,7 @@ AND        contact_a.is_deleted = 0
 
         $contactActivities[$activityId]['source_contact'] = self::formatContactNames($values['source_contact_name'], $values['source_contact_count']);
         //$contactActivities[$activityId]['target_contact'] = '???';
-        $contactActivities[$activityId]['target_contact'] = self::formatContactNames($values['target_contact_name'], $values['target_contact_count']) . ' + ???';
+        $contactActivities[$activityId]['target_contact'] = self::formatContactNames($values['target_contact_name'], $values['target_contact_count']);
         $contactActivities[$activityId]['assignee_contact'] = self::formatContactNames($values['assignee_contact_name'], $values['assignee_contact_count']);
 
         if (isset($values['mailingId']) && !empty($values['mailingId'])) {
@@ -508,8 +510,10 @@ AND        contact_a.is_deleted = 0
    * @return string
    */
   public static function formatContactNames($contacts, $contactCount) {
+    // Clear out any empty array values
+    $contacts = array_filter($contacts);
     // if $contactCount > 4 we only show the current contact ID if found
-    if (empty(array_filter($contacts)) && $contactCount <= 4) {
+    if (empty($contacts) && ($contactCount <= 4) && ($contactCount >= 0)) {
       return '<em>n/a</em>';
     }
 
@@ -530,6 +534,10 @@ AND        contact_a.is_deleted = 0
       } else {
         $result .= "<br/>(" .ts('and'). ' ' . $contactCount . ' ' . ts('more') . ")";
       }
+    }
+    elseif ($contactCount < 0) {
+        $result .= '<div style="text-align: center"><i class="crm-i fa-spinner fa-spin fa-2x fa-fw"></i>
+<span class="sr-only">(Loading...)</span></div>';
     }
     return $result;
   }
