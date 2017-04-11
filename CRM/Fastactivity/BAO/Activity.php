@@ -488,6 +488,7 @@ GROUP BY activity.id
     //CRM-7607
     //lets allow to have normal operation for only activity types.
     //when activity type is disabled or no more exists give only delete.
+    /*
     switch ($activityTypeName) {
       case 'Event Registration':
       case 'Change Registration':
@@ -559,7 +560,7 @@ GROUP BY activity.id
           $showView = $showUpdate = FALSE;
         }
         break;
-    }
+    }*/
 
     $qsDelete = "atype={$activityTypeId}&action=delete&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
 
@@ -570,8 +571,10 @@ GROUP BY activity.id
         CRM_Core_Action::
         VIEW => array(
           'name' => ts('View'),
-          'url' => $url,
-          'qs' => $qsView,
+          //'url' => $url,
+          //'qs' => $qsView,
+          'url' => 'civicrm/fastactivity/view',
+          'qs' => 'action=view&reset=1&id=%%id%%&cid=%%cid%%',
           'title' => ts('View Activity'),
         ),
       );

@@ -11,4 +11,10 @@
     <page_callback>CRM_Fastactivity_Page_AJAX::getContactActivity</page_callback>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
+  <item>
+    <path>civicrm/fastactivity/view</path>
+    <page_callback>CRM_Fastactivity_Form_View</page_callback>
+    <title>View</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
 </menu>
