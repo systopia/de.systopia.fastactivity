@@ -131,7 +131,9 @@ LEFT JOIN civicrm_contact target_contact_random  ON (targets.contact_id = target
 LEFT JOIN civicrm_contact target_contact_me      ON (targets.contact_id = target_contact_me.id AND target_contact_me.id = %1) 
 {$caseFilter}
 WHERE {$whereClause} 
-GROUP BY activity.id";
+GROUP BY activity.id 
+{$orderBy} 
+{$limit}";
 
     //$params[1] = array($params['contact_id'], 'Int');
     $dao = CRM_Core_DAO::executeQuery($query, $params);
