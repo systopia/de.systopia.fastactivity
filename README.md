@@ -10,4 +10,7 @@ This is implemented in the "standard" CiviCRM format with a separate whereClause
 - A new filter is provided which uses a multi-select to allow filtering on multiple activity types.
 
 ## Not implemented
-- The built-in View/Edit activity dialog also needs to be replaced with one that uses the CRM_Fastactivity_BAO_Activity class to benefit from the performance improvements.
+- The built-in View/Edit/Delete activity dialog also needs to be replaced with one that uses the CRM_Fastactivity_BAO_Activity class to benefit from the performance improvements.
+
+## Requirements
+- Requires fontawesome extension (to display spinner): https://github.com/mattwire/uk.co.mjwconsult.fontawesome
