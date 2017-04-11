@@ -95,6 +95,7 @@ SELECT
   activity.activity_type_id                                                          AS activity_type_id,
   activity.subject                                                                   AS activity_subject,
   activity.activity_date_time                                                        AS activity_date_time,
+  activity.status_id                                                                 AS activity_status_id,
   COUNT(DISTINCT(sources.contact_id))                                                AS source_count,
   COALESCE(source_contact_me.id, source_contact_random.id)                           AS source_contact_id,   
   COALESCE(source_contact_me.display_name, source_contact_random.display_name)       AS source_display_name,   
@@ -135,7 +136,7 @@ GROUP BY activity.id
       $values[$activityID]['activity_type_id'] = $dao->activity_type_id;
       $values[$activityID]['activity_type'] = $activityTypes[$dao->activity_type_id];
       $values[$activityID]['activity_date_time'] = $dao->activity_date_time;
-      $values[$activityID]['status_id'] = $dao->status_id;
+      $values[$activityID]['status_id'] = $dao->activity_status_id;
       $values[$activityID]['subject'] = $dao->activity_subject;
       $values[$activityID]['campaign_id'] = $dao->campaign_id;
       $values[$activityID]['is_recurring_activity'] = $dao->is_recurring_activity;
@@ -319,7 +320,7 @@ GROUP BY activity.id
 
     if (!empty($activities)) {
       //$activityStatus = CRM_Core_PseudoConstant::activityStatus();
-      $activityStatus = CRM_Activity_BAO_Activity::buildOptions('activity_status', 'validate');
+      $activityStatus = CRM_Activity_BAO_Activity::buildOptions('activity_status_id', 'validate');
 
       // check logged in user for permission
       $page = new CRM_Core_Page();
