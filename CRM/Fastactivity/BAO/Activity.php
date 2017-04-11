@@ -56,7 +56,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
    *   Relevant data object values of open activities
    */
   public static function getContactActivities(&$params) {
-    //step 1: Get the basic activity data
+    //Get bulk email activity type (used to modify activity display for bulk email)
     $bulkActivityTypeID = CRM_Core_OptionGroup::getValue(
       'activity_type',
       'Bulk Email',
@@ -71,7 +71,6 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
         CRM_Core_Permission::check('create mailings'))
     );
 
-    //SELECT distinct acon.activity_id,activity.subject FROM `civicrm_activity_contact` acon left join `civicrm_activity` act on acon.activity_id = activity.id WHERE acon.contact_id=203
     $whereClause = self::whereClause($params,FALSE);
 
     // Add limit clause
@@ -85,61 +84,43 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     $orderBy = ' ORDER BY activity.activity_date_time DESC';
     if (!empty($params['sort'])) {
       $orderBy = ' ORDER BY ' . CRM_Utils_Type::escape($params['sort'], 'String');
-
-      // CRM-16905 - Sort by count cannot be done with sql
-      if (strpos($params['sort'], 'count') === 0) {
-        $orderBy = $limit = '';
-      }
     }
-
+    // Exclude activities associated with cases
     $caseFilter = self::getCaseFilter();
 
-    /*$query = "
-            SELECT DISTINCT acon.activity_id,act.* 
-            FROM  civicrm_activity_contact acon  
-            LEFT JOIN civicrm_activity act 
-            ON acon.activity_id = act.id 
-            {$caseFilter}
-            WHERE {$whereClause} 
-            {$orderBy}
-            {$limit}";
-    */
+    // The main query.  This gets all the information (except target counts) for the tabbed activity display
     $query = "
 SELECT   
-activity.id AS activity_id, 
-activity.activity_type_id                      AS activity_type_id,
-activity.subject                               AS activity_subject,
-activity.activity_date_time                    AS activity_date_time,
-COUNT(DISTINCT(sources.contact_id))            AS source_count,
-COALESCE(source_contact_me.id,            source_contact_random.id)             AS source_contact_id,   
-COALESCE(source_contact_me.display_name,            source_contact_random.display_name)   AS source_display_name,   
-COUNT(DISTINCT(assignees.contact_id))            AS assignee_count,   
-COALESCE(assignee_contact_me.id,            assignee_contact_random.id)             AS assignee_contact_id,   
-COALESCE(assignee_contact_me.display_name,            assignee_contact_random.display_name)   AS assignee_display_name, 
-COALESCE(target_contact_me.id,            target_contact_random.id)             AS target_contact_id,   
-COALESCE(target_contact_me.display_name,            target_contact_random.display_name)   AS target_display_name 
+  activity.id AS activity_id, 
+  activity.activity_type_id                                                          AS activity_type_id,
+  activity.subject                                                                   AS activity_subject,
+  activity.activity_date_time                                                        AS activity_date_time,
+  COUNT(DISTINCT(sources.contact_id))                                                AS source_count,
+  COALESCE(source_contact_me.id, source_contact_random.id)                           AS source_contact_id,   
+  COALESCE(source_contact_me.display_name, source_contact_random.display_name)       AS source_display_name,   
+  COUNT(DISTINCT(assignees.contact_id))                                              AS assignee_count,   
+  COALESCE(assignee_contact_me.id, assignee_contact_random.id)                       AS assignee_contact_id,   
+  COALESCE(assignee_contact_me.display_name, assignee_contact_random.display_name)   AS assignee_display_name, 
+  COALESCE(target_contact_me.id, target_contact_random.id)                           AS target_contact_id,   
+  COALESCE(target_contact_me.display_name, target_contact_random.display_name)       AS target_display_name 
 FROM civicrm_activity_contact acon 
-LEFT JOIN civicrm_activity activity ON acon.activity_id = activity.id 
-LEFT JOIN civicrm_activity_contact sources       ON (activity.id = sources.activity_id AND sources.record_type_id = 2) 
-LEFT JOIN civicrm_contact source_contact_random  ON (sources.contact_id = source_contact_random.id AND source_contact_random.is_deleted = 0) 
-LEFT JOIN civicrm_contact source_contact_me      ON (sources.contact_id = source_contact_me.id AND source_contact_me.id = %1) 
-LEFT JOIN civicrm_activity_contact assignees     ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1) 
+LEFT JOIN civicrm_activity activity                ON acon.activity_id = activity.id 
+LEFT JOIN civicrm_activity_contact sources         ON (activity.id = sources.activity_id AND sources.record_type_id = 2) 
+LEFT JOIN civicrm_contact source_contact_random    ON (sources.contact_id = source_contact_random.id AND source_contact_random.is_deleted = 0) 
+LEFT JOIN civicrm_contact source_contact_me        ON (sources.contact_id = source_contact_me.id AND source_contact_me.id = %1) 
+LEFT JOIN civicrm_activity_contact assignees       ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1) 
 LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0) 
 LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = %1) 
-LEFT JOIN civicrm_activity_contact targets     ON (activity.id = targets.activity_id AND targets.record_type_id = 1)
-LEFT JOIN civicrm_contact target_contact_random  ON (targets.contact_id = target_contact_random.id AND target_contact_random.is_deleted = 0) 
-LEFT JOIN civicrm_contact target_contact_me      ON (targets.contact_id = target_contact_me.id AND target_contact_me.id = %1) 
+LEFT JOIN civicrm_activity_contact targets         ON (activity.id = targets.activity_id AND targets.record_type_id = 1)
+LEFT JOIN civicrm_contact target_contact_random    ON (targets.contact_id = target_contact_random.id AND target_contact_random.is_deleted = 0) 
+LEFT JOIN civicrm_contact target_contact_me        ON (targets.contact_id = target_contact_me.id AND target_contact_me.id = %1) 
 {$caseFilter}
 WHERE {$whereClause} 
 GROUP BY activity.id 
 {$orderBy} 
 {$limit}";
 
-    //$params[1] = array($params['contact_id'], 'Int');
     $dao = CRM_Core_DAO::executeQuery($query, $params);
-
-
-    //$dao = CRM_Core_DAO::executeQuery($query, $params, TRUE, 'CRM_Activity_DAO_Activity');
 
     //get all activity types
     $activityTypes = CRM_Activity_BAO_Activity::buildOptions('activity_type_id', 'validate');
@@ -163,23 +144,15 @@ GROUP BY activity.id
         $values[$activityID]['campaign'] = $allCampaigns[$dao->campaign_id];
       }
 
-      // civicrm_activity_contact: record_type_id: 1 assignee, 2 creator, 3 focus or target.
-     /* $values[$activityID]['assignee_contact_count'] = self::getContactActivitiesNamesCount($dao->activity_id, 1);
-      $values[$activityID]['source_contact_count'] = self::getContactActivitiesNamesCount($dao->activity_id, 2);
-      $values[$activityID]['target_contact_count'] = self::getContactActivitiesNamesCount($dao->activity_id, 3);
-      list($values[$activityID]['assignee_contact_name'], $values[$activityID]['assignee_contact_id']) = self::getContactActivitiesNames($dao->activity_id,1, TRUE, $values[$activityID]['assignee_contact_count'], $params);
-      list($values[$activityID]['source_contact_name'], $values[$activityID]['source_contact_id']) = self::getContactActivitiesNames($dao->activity_id,2, TRUE, $values[$activityID]['source_contact_count'], $params);
-      list($values[$activityID]['target_contact_name'], $values[$activityID]['target_contact_id']) = self::getContactActivitiesNames($dao->activity_id,3, TRUE, $values[$activityID]['target_contact_count'], $params);
-*/
+      // Assign contact counts / names
       $values[$activityID]['assignee_contact_count'] = $dao->assignee_count;
       $values[$activityID]['source_contact_count'] = $dao->source_count;
-      $values[$activityID]['target_contact_count'] = -1;
+      $values[$activityID]['target_contact_count'] = -1; // -1 means we didn't count at all
       $values[$activityID]['assignee_contact_name'][$dao->assignee_contact_id] = $dao->assignee_display_name;
       $values[$activityID]['source_contact_name'][$dao->source_contact_id] = $dao->source_display_name;
       $values[$activityID]['target_contact_name'][$dao->target_contact_id] = $dao->target_display_name;
       $values[$activityID]['assignee_contact_id'] = $dao->assignee_contact_id;
       $values[$activityID]['source_contact_id'] = $dao->source_contact_id;
-      //list($values[$activityID]['target_contact_name'], $values[$activityID]['target_contact_id']) = array(0,0);
 
       // if deleted, wrap in <del>
       if ($dao->is_deleted) {
@@ -217,80 +190,6 @@ GROUP BY activity.id
       $caseFilter .= " LEFT JOIN  civicrm_case_activity acase ON ( acase.activity_id = activity.id ) ";
     }
     return $caseFilter;
-  }
-
-  /**
-   * Retrieve count of names for activity_id and record_type_id
-   *
-   * @param int $activityID - ID of activity
-   * @param int $recordTypeID - one of 1: Assignee, 2: Source, 3: target
-   *
-   * @return int
-   */
-  public static function getContactActivitiesNamesCount($activityID, $recordTypeID) {
-    $query = "
-SELECT count(*) 
-FROM civicrm_activity_contact acon 
-WHERE acon.activity_id=%1 
-AND acon.record_type_id=%2 
-AND EXISTS (SELECT con.id FROM civicrm_contact con WHERE con.is_deleted=0)";
-
-    $params = array(
-      1 => array($activityID, 'Integer'),
-      2 => array($recordTypeID, 'Integer'),
-    );
-    $count = CRM_Core_DAO::singleValueQuery($query, $params);
-    return $count;
-  }
-
-  /**
-   * Retrieve contact names for activities by activity_id and record_type_id.
-   * If $count > 10 we only look for our own contact ID so we can display "me+1000 others"
-   *
-   * @param int $activityID
-   * @param int $recordTypeID
-   * @param bool $alsoIDs
-   * @param int $count - number of contacts
-   * @param array $params
-   *
-   * @return array
-   */
-  public static function getContactActivitiesNames($activityID, $recordTypeID, $alsoIDs = FALSE, $count, &$params) {
-    $myContact = '';
-    if ($count > 10) {
-      // This query gets slow when searching for 1000s as may be the case for target,
-      //  so limit to 10.  Set to 0 to disable limit
-      $myContact = 'AND civicrm_activity_contact.contact_id = ' . CRM_Utils_Array::value('contact_id', $params);
-    }
-
-    $names = array();
-    $ids = array();
-
-    if (empty($activityID)) {
-      return $alsoIDs ? array($names, $ids) : $names;
-    }
-
-    $query = "
-SELECT     contact_a.id, contact_a.sort_name
-FROM       civicrm_contact contact_a
-INNER JOIN civicrm_activity_contact ON civicrm_activity_contact.contact_id = contact_a.id
-WHERE      civicrm_activity_contact.activity_id = %1 
-AND        civicrm_activity_contact.record_type_id = %2 
-AND        contact_a.is_deleted = 0 
-{$myContact}
-";
-    $queryParams = array(
-      1 => array($activityID, 'Integer'),
-      2 => array($recordTypeID, 'Integer'),
-    );
-
-    $dao = CRM_Core_DAO::executeQuery($query, $queryParams);
-    while ($dao->fetch()) {
-      $names[$dao->id] = $dao->sort_name;
-      $ids[] = $dao->id;
-    }
-
-    return $alsoIDs ? array($names, $ids) : $names;
   }
 
   /**
@@ -538,6 +437,7 @@ AND        contact_a.is_deleted = 0
       }
     }
     elseif ($contactCount < 0) {
+      // We didn't count so display a spinner until we load the data
         $result .= '<div style="text-align: center"><i class="crm-i fa-spinner fa-spin fa-2x fa-fw"></i>
 <span class="sr-only">(Loading...)</span></div>';
     }
