@@ -43,11 +43,11 @@ class CRM_Fastactivity_Page_AJAX {
     $context = CRM_Utils_Type::escape(CRM_Utils_Array::value('context', $_GET), 'String');
 
     $sortMapper = array(
-      0 => 'activity_type',
+      0 => 'activity_type_id',
       1 => 'subject',
-      2 => 'source_contact_name',
-      3 => '',
-      4 => '',
+      2 => 'source_display_name',
+      3 => 'target_display_name',
+      4 => 'assignee_display_name',
       5 => 'activity_date_time',
       6 => 'status_id',
     );
