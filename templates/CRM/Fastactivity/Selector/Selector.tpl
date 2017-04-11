@@ -43,7 +43,7 @@
       <th class='crm-contact-activity_subject'>{ts}Subject{/ts}</th>
       <th class='crm-contact-activity-source_contact'>{ts}Added By{/ts}</th>
       <th class='crm-contact-activity-target_contact nosort'>{ts}With{/ts}</th>
-      <th class='crm-contact-activity-assignee_contact nosort'>{ts}Assigned{/ts}</th>
+      <th class='crm-contact-activity-assignee_contact'>{ts}Assigned{/ts}</th>
       <th class='crm-contact-activity-activity_date'>{ts}Date{/ts}</th>
       <th class='crm-contact-activity-activity_status'>{ts}Status{/ts}</th>
       <th class='crm-contact-activity-links nosort'>&nbsp;</th>
@@ -94,7 +94,7 @@ CRM.$(function($) {
         {sClass:'crm-contact-activity_subject'},
         {sClass:'crm-contact-activity-source_contact'},
         {sClass:'crm-contact-activity-target_contact', bSortable:false},
-        {sClass:'crm-contact-activity-assignee_contact', bSortable:false},
+        {sClass:'crm-contact-activity-assignee_contact'},
         {sClass:'crm-contact-activity-activity_date'},
         {sClass:'crm-contact-activity-activity_status'},
         {sClass:'crm-contact-activity-links', bSortable:false},
