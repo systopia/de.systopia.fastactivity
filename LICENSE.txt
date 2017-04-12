@@ -1,5 +1,5 @@
 Package: de.systopia.fastactivity
-Copyright (C) 2017, systopia <endres@systopia.de>
+Copyright (C) 2017, SYSTOPIA <endres@systopia.de>
 Licensed under the GNU Affero Public License 3.0 (below).
 
 -------------------------------------------------------------------------------

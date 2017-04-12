@@ -1,39 +1,24 @@
 <?php
-/*
- +--------------------------------------------------------------------+
- | CiviCRM version 4.6                                                |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2017                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
- |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
- +--------------------------------------------------------------------+
- */
-
-/**
- *
- * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2017
- * $Id$
- */
+/*-------------------------------------------------------+
+| SYSTOPIA - Performance Boost for Activities            |
+| Copyright (C) 2017 SYSTOPIA                            |
+| Author: M. Wire (mjw@mjwconsult.co.uk)                 |
+|         B. Endres (endres@systopia.de)                 |
+| http://www.systopia.de/                                |
++--------------------------------------------------------+
+| This program is released as free software under the    |
+| Affero GPL license. You can redistribute it and/or     |
+| modify it under the terms of this license which you    |
+| can read by viewing the included agpl.txt or online    |
+| at www.gnu.org/licenses/agpl.html. Removal of this     |
+| copyright header is strictly prohibited without        |
+| written permission from the original author(s).        |
++--------------------------------------------------------*/
 
 /**
  * This class is for activity functions.
+ *
+ * @see based on CRM_Activity_BAO_Activity (CiviCRM LLC)
  */
 class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
 
@@ -90,35 +75,35 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
 
     // The main query.  This gets all the information (except target counts) for the tabbed activity display
     $query = "
-SELECT   
-  activity.id AS activity_id, 
+SELECT
+  activity.id AS activity_id,
   activity.activity_type_id                                                          AS activity_type_id,
   activity.subject                                                                   AS activity_subject,
   activity.activity_date_time                                                        AS activity_date_time,
   activity.status_id                                                                 AS activity_status_id,
   COUNT(DISTINCT(sources.contact_id))                                                AS source_count,
-  COALESCE(source_contact_me.id, source_contact_random.id)                           AS source_contact_id,   
-  COALESCE(source_contact_me.display_name, source_contact_random.display_name)       AS source_display_name,   
-  COUNT(DISTINCT(assignees.contact_id))                                              AS assignee_count,   
-  COALESCE(assignee_contact_me.id, assignee_contact_random.id)                       AS assignee_contact_id,   
-  COALESCE(assignee_contact_me.display_name, assignee_contact_random.display_name)   AS assignee_display_name, 
-  COALESCE(target_contact_me.id, target_contact_random.id)                           AS target_contact_id,   
-  COALESCE(target_contact_me.display_name, target_contact_random.display_name)       AS target_display_name 
-FROM civicrm_activity_contact acon 
-LEFT JOIN civicrm_activity activity                ON acon.activity_id = activity.id 
-LEFT JOIN civicrm_activity_contact sources         ON (activity.id = sources.activity_id AND sources.record_type_id = 2) 
-LEFT JOIN civicrm_contact source_contact_random    ON (sources.contact_id = source_contact_random.id AND source_contact_random.is_deleted = 0) 
-LEFT JOIN civicrm_contact source_contact_me        ON (sources.contact_id = source_contact_me.id AND source_contact_me.id = %1) 
-LEFT JOIN civicrm_activity_contact assignees       ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1) 
-LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0) 
-LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = %1) 
+  COALESCE(source_contact_me.id, source_contact_random.id)                           AS source_contact_id,
+  COALESCE(source_contact_me.display_name, source_contact_random.display_name)       AS source_display_name,
+  COUNT(DISTINCT(assignees.contact_id))                                              AS assignee_count,
+  COALESCE(assignee_contact_me.id, assignee_contact_random.id)                       AS assignee_contact_id,
+  COALESCE(assignee_contact_me.display_name, assignee_contact_random.display_name)   AS assignee_display_name,
+  COALESCE(target_contact_me.id, target_contact_random.id)                           AS target_contact_id,
+  COALESCE(target_contact_me.display_name, target_contact_random.display_name)       AS target_display_name
+FROM civicrm_activity_contact acon
+LEFT JOIN civicrm_activity activity                ON acon.activity_id = activity.id
+LEFT JOIN civicrm_activity_contact sources         ON (activity.id = sources.activity_id AND sources.record_type_id = 2)
+LEFT JOIN civicrm_contact source_contact_random    ON (sources.contact_id = source_contact_random.id AND source_contact_random.is_deleted = 0)
+LEFT JOIN civicrm_contact source_contact_me        ON (sources.contact_id = source_contact_me.id AND source_contact_me.id = %1)
+LEFT JOIN civicrm_activity_contact assignees       ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1)
+LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0)
+LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = %1)
 LEFT JOIN civicrm_activity_contact targets         ON (activity.id = targets.activity_id AND targets.record_type_id = 1)
-LEFT JOIN civicrm_contact target_contact_random    ON (targets.contact_id = target_contact_random.id AND target_contact_random.is_deleted = 0) 
-LEFT JOIN civicrm_contact target_contact_me        ON (targets.contact_id = target_contact_me.id AND target_contact_me.id = %1) 
+LEFT JOIN civicrm_contact target_contact_random    ON (targets.contact_id = target_contact_random.id AND target_contact_random.is_deleted = 0)
+LEFT JOIN civicrm_contact target_contact_me        ON (targets.contact_id = target_contact_me.id AND target_contact_me.id = %1)
 {$caseFilter}
-WHERE {$whereClause} 
-GROUP BY activity.id 
-{$orderBy} 
+WHERE {$whereClause}
+GROUP BY activity.id
+{$orderBy}
 {$limit}";
 
     $dao = CRM_Core_DAO::executeQuery($query, $params);
@@ -282,10 +267,10 @@ GROUP BY activity.id
 
     $whereClause = self::whereClause($params, FALSE);
 
-    $query = "SELECT COUNT(DISTINCT acon.activity_id) 
-              FROM civicrm_activity_contact acon 
-              LEFT JOIN civicrm_activity activity 
-              ON acon.activity_id = activity.id 
+    $query = "SELECT COUNT(DISTINCT acon.activity_id)
+              FROM civicrm_activity_contact acon
+              LEFT JOIN civicrm_activity activity
+              ON acon.activity_id = activity.id
               {$caseFilter} ";
     $query .= " WHERE {$whereClause}";
 
