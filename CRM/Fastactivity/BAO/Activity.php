@@ -373,21 +373,15 @@ GROUP BY activity.id
 
         $actionLinks = self::actionLinks(
           CRM_Utils_Array::value('activity_type_id', $values),
-          CRM_Utils_Array::value('source_record_id', $values),
-          $accessMailingReport,
-          CRM_Utils_Array::value('activity_id', $values)
+          CRM_Utils_Array::value('activity_id', $values),
+          CRM_Utils_Array::value('contact_id', $params)
         );
 
         $actionMask = array_sum(array_keys($actionLinks)) & $mask;
 
         $contactActivities[$activityId]['links'] = CRM_Core_Action::formLink($actionLinks,
           $actionMask,
-          array(
-            'id' => $values['activity_id'],
-            'cid' => $params['contact_id'],
-            'cxt' => $context,
-            'caseid' => CRM_Utils_Array::value('case_id', $values),
-          ),
+          array(),
           ts('more'),
           FALSE,
           'activity.tab.row',
@@ -460,7 +454,7 @@ GROUP BY activity.id
    *
    * @return array
    */
-  public static function actionLinks($activityTypeId, $sourceRecordId = NULL, $accessMailingReport = FALSE, $activityId = NULL) {
+  public static function actionLinks($activityTypeId, $activityId = NULL, $contactId = NULL) {
     $showView = TRUE;
     $showDelete = TRUE; //FIXME: May want to limit what types of activity can be deleted
     $showUpdate = FALSE;
@@ -545,8 +539,8 @@ GROUP BY activity.id
         break;
     }*/
 
-    $qsView = 'action=view&reset=1&id=%%id%%&cid=%%cid%%';
-    $qsDelete = 'action=delete&reset=1&id=%%id%%&cid=%%cid%%';
+    $qsView = "action=view&reset=1&id=$activityId&cid=$contactId";
+    $qsDelete = "action=delete&reset=1&id=$activityId&cid=$contactId";
     $actionLinks = array();
 
     $url = 'civicrm/fastactivity/view';
@@ -558,6 +552,7 @@ GROUP BY activity.id
           'url' => $url,
           'qs' => $qsView,
           'title' => ts('View Activity'),
+          'icon' => '<i class="crm-i fa-eye" aria-hidden="true"></i>',
         ),
       );
     }
@@ -578,6 +573,7 @@ GROUP BY activity.id
             'url' => $updateUrl,
             'qs' => $qsUpdate,
             'title' => ts('Update Activity'),
+            'icon' => '<i class="crm-i fa-pencil" aria-hidden="true"></i>',
           ),
         );
       }
@@ -606,6 +602,7 @@ GROUP BY activity.id
           'url' => $url,
           'qs' => $qsDelete,
           'title' => ts('Delete Activity'),
+          'icon' => '<i class="crm-i fa-trash" aria-hidden="true"></i>',
         ),
       );
     }

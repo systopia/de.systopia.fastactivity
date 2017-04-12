@@ -246,7 +246,14 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
   }
 
   public function buildQuickForm() {
+    $actionLinks = CRM_Fastactivity_BAO_Activity::actionLinks($this->_activityTypeId, $this->_activityId);
+    if (isset($actionLinks[$this->_action])) {
+      unset ($actionLinks[$this->_action]);
+    }
+    $this->assign('actionLinks', $actionLinks);
+    
     if ($this->_action & CRM_Core_Action::DELETE) {
+      // Delete activity action
       $this->addButtons(array(
           array(
             'type' => 'next',
@@ -262,11 +269,12 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
       return;
     }
     else {
+      // View activity action
       if (isset($this->_groupTree)) {
         CRM_Core_BAO_CustomGroup::buildCustomDataView($this, $this->_groupTree);
       }
       // form should be frozen for view mode
-      $this->freeze();
+      //$this->freeze();
 
       $buttons = array();
       $buttons[] = array(
