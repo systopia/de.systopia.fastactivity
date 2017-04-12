@@ -19,6 +19,9 @@
  * This class contains all the function that are called using AJAX (jQuery)
  *
  * @see based on CRM_Activity_Page_AJAX (CiviCRM LLC)
+ *
+ * @todo check if there isn't a hook to achieve this w/o cloning the AJAX class
+ *       (not sure, I might as well be wrong here...)
  */
 class CRM_Fastactivity_Page_AJAX {
 

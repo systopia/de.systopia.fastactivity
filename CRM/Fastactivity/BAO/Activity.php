@@ -141,11 +141,12 @@ GROUP BY activity.id
       $values[$activityID]['source_contact_id'] = $dao->source_contact_id;
 
       // if deleted, wrap in <del>
+      // FIXME: are you sure the current query still yields $dao->is_deleted?
       if ($dao->is_deleted) {
         $dao->contact_name = "<del>{$dao->contact_name}</del>";
       }
 
-
+      // TODO: is this distinction still needed? Can't we just treat all the same///?
       if (!$bulkActivityTypeID || ($bulkActivityTypeID != $dao->activity_type_id)) {
         if (!empty($caseFilter)) {
           // case related fields
@@ -169,6 +170,10 @@ GROUP BY activity.id
   }
 
   public static function getCaseFilter() {
+    // DISABLED for the moment
+    // TODO: see if we need/want this
+    return '';
+
     //filter case activities - CRM-5761
     $caseFilter = '';
     $components = CRM_Activity_BAO_Activity::activityComponents();
@@ -187,6 +192,10 @@ GROUP BY activity.id
    * @return string
    */
   public static function whereClause(&$params, $sortBy = TRUE, $excludeHidden = TRUE) {
+    // FIXME: are you sure these parameters are even set in our scenario?
+    //   (excect for contact_id of course) I would assume this is for the activity search
+    //   ... not sure if we want to replace it (yet)
+
     // is_deleted
     $is_deleted = CRM_Utils_Array::value('is_deleted', $params);
     if ($is_deleted == '1') {
@@ -444,6 +453,7 @@ GROUP BY activity.id
    * @param null $compContext
    *
    * @return array
+   * @todo do we need the full complexity here?
    */
   public static function actionLinks(
     $activityTypeId,
