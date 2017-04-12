@@ -17,4 +17,10 @@
     <title>View</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
+  <item>
+    <path>civicrm/fastactivity/add</path>
+    <page_callback>CRM_Fastactivity_Form_Add</page_callback>
+    <title>Add</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
 </menu>

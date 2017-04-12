@@ -457,7 +457,7 @@ GROUP BY activity.id
   public static function actionLinks($activityTypeId, $activityId = NULL, $contactId = NULL) {
     $showView = TRUE;
     $showDelete = TRUE; //FIXME: May want to limit what types of activity can be deleted
-    $showUpdate = FALSE;
+    $showUpdate = TRUE;
     $qsUpdate = NULL;
 
     list($activityTypeName, $activityTypeDescription) = CRM_Core_BAO_OptionValue::getActivityTypeDetails($activityTypeId);
@@ -539,11 +539,14 @@ GROUP BY activity.id
         break;
     }*/
 
-    $qsView = "action=view&reset=1&id=$activityId&cid=$contactId";
-    $qsDelete = "action=delete&reset=1&id=$activityId&cid=$contactId";
+    $qs = "&reset=1&id=$activityId&cid=$contactId";
+    $qsView = "action=view{$qs}";
+    $qsUpdate = "action=update{$qs}";
+    $qsDelete = "action=delete{$qs}";
     $actionLinks = array();
 
     $url = 'civicrm/fastactivity/view';
+
     if (CRM_Activity_BAO_Activity::checkPermission($activityId, CRM_Core_Action::VIEW)) {
       if ($showView) {
         $actionLinks += array(
@@ -560,7 +563,7 @@ GROUP BY activity.id
     }
 
     if ($showUpdate) {
-      $updateUrl = 'civicrm/activity/add';
+      $updateUrl = 'civicrm/fastactivity/add';
       if ($activityTypeName == 'Email') {
         $updateUrl = 'civicrm/activity/email/add';
       }
@@ -581,20 +584,6 @@ GROUP BY activity.id
       }
     }
 
-    /*if (
-      $activityTypeName &&
-      CRM_Case_BAO_Case::checkPermission($activityId, 'File On Case', $activityTypeId)
-    ) {
-      $actionLinks += array(
-        CRM_Core_Action::
-        ADD => array(
-          'name' => ts('File on Case'),
-          'url' => '#',
-          'extra' => 'onclick="javascript:fileOnCase( \'file\', \'%%id%%\', null, this ); return false;"',
-          'title' => ts('File on Case'),
-        ),
-      );
-    }*/
     if (CRM_Core_Permission::check('delete activities')) {
       if ($showDelete) {
         $actionLinks += array(
@@ -609,18 +598,6 @@ GROUP BY activity.id
         );
       }
     }
-
-    /*if ($accessMailingReport) {
-      $actionLinks += array(
-        CRM_Core_Action::
-        BROWSE => array(
-          'name' => ts('Mailing Report'),
-          'url' => 'civicrm/mailing/report',
-          'qs' => "mid={$sourceRecordId}&reset=1&cid=%%cid%%&context=activitySelector",
-          'title' => ts('View Mailing Report'),
-        ),
-      );
-    }*/
 
     return $actionLinks;
   }
