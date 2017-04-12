@@ -70,10 +70,12 @@
     <td class="label">Status</td>
     <td class="view-value">{$activityStatus}</td>
   </tr>
-  <tr class="crm-activity-form-block-activity_priority">
-    <td class="label">Priority</td>
-    <td class="view-value">{$activityPriority}</td>
-  </tr>
+    {if $activityPriority}
+      <tr class="crm-activity-form-block-activity_priority">
+        <td class="label">Priority</td>
+        <td class="view-value">{$activityPriority}</td>
+      </tr>
+    {/if}
     {if $activityMedium}
       <tr class="crm-activity-form-block-activity_medium">
         <td class="label">Medium</td>
