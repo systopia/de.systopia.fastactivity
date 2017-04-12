@@ -15,7 +15,10 @@
       </tr>
     {/if}
   <tr class="crm-activity-form-block-source_contact_id">
-    <td class="label">Added By</td>
+    <td class="label">
+      <i class="fa fa-user" aria-hidden="true"></i>
+      Added By
+    </td>
     <td class="view-value">
         {counter start=1 assign=count}
         {foreach from=$activitySourceContacts item=contact}
@@ -29,7 +32,10 @@
     </td>
   </tr>
   <tr class="crm-activity-form-block-assignee_contact_id">
-    <td class="label">Assigned To</td>
+    <td class="label">
+      <i class="fa fa-user" aria-hidden="true"></i>
+      Assigned To
+    </td>
     <td class="view-value">
         {counter start=1 assign=count}
         {foreach from=$activityAssigneeContacts item=contact}
@@ -43,7 +49,10 @@
     </td>
   </tr>
   <tr class="crm-activity-form-block-target_contact_id">
-    <td class="label">With</td>
+    <td class="label">
+      <i class="fa fa-users" aria-hidden="true"></i>
+      With
+    </td>
     <td class="view-value">
         {if $activityTargetContacts|@count lt $activityTargetContacts.count}
             {$activityTargetContacts.count} contacts
@@ -61,7 +70,10 @@
     </td>
   </tr>
   <tr class="crm-activity-form-block-activity_date_time">
-    <td class="label">Date</td>
+    <td class="label">
+      <i class="fa fa-calendar" aria-hidden="true"></i>
+      Date
+    </td>
     <td class="view-value">{$activityDateTime|crmDate}</td>
   </tr>
   <tr class="crm-activity-form-block-activity_status">
@@ -88,7 +100,10 @@
     {/if}
     {if $activityDetails}
       <tr class="crm-activity-form-block-activity_details">
-        <td class="label">Details</td>
+        <td class="label">
+          <i class="fa fa-info" aria-hidden="true"></i>
+          Details
+        </td>
         <td class="view-value">{$activityDetails}</td>
       </tr>
     {/if}
