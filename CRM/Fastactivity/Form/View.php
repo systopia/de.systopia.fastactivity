@@ -95,7 +95,7 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
     $this->assign('activityTargetContacts', $this->_activityTargetContacts);
 
     $this->assign('activityDateTime', $activityRecord['activity_date_time']);
-    $this->assign('activityPriority', $priorities[$activityRecord['priority_id']]);
+    $this->assign('activityPriority', isset($activityRecord['priority_id']) ? $priorities[$activityRecord['priority_id']] : null);
 
     if (isset($activityRecord['medium_id'])) {
       $activityMedium = CRM_Activity_BAO_Activity::buildOptions('medium_id', 'validate');

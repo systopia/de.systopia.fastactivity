@@ -97,17 +97,19 @@
       <tr class="crm-activity-form-block-custom_data">
         <td colspan="2">
             {foreach from=$customGroup item=customFields}
-              <div class="crm-accordion-header">{$customFields.title}</div>
-              <div class="crm-accordion-body">
-                <table class="crm-info-panel">
+              <div class="crm-accordion-wrapper collapsed">
+                <div class="crm-accordion-header">{$customFields.title}</div>
+                <div class="crm-accordion-body">
+                  <table class="crm-info-panel">
 
-                    {foreach from=$customFields.fields item=fields}
-                      <tr>
-                        <td class="label">{$fields.field_title}</td>
-                        <td class="view-value">{$fields.field_value}</td>
-                      </tr>
-                    {/foreach}
-                </table>
+                      {foreach from=$customFields.fields item=fields}
+                        <tr>
+                          <td class="label">{$fields.field_title}</td>
+                          <td class="view-value">{$fields.field_value}</td>
+                        </tr>
+                      {/foreach}
+                  </table>
+                </div>
               </div>
             {/foreach}
         </td>
