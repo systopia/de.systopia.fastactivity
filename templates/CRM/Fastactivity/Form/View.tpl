@@ -5,12 +5,10 @@
 </div>
 
 <table class="crm-info-panel">
-
+  <h3>{$activityHeader}</h3>
     {if $activityTypeDescription }
       <div class="help">Description: {$activityTypeDescription}</div>
     {/if}
-  <h3>{$activityTypeName}</h3>
-
     {if $surveyActivity}
       <tr class="crm-activity-form-block-survey">
         <td class="label">{ts}Survey Title{/ts}</td><td class="view-value">{$surveyTitle}</td>

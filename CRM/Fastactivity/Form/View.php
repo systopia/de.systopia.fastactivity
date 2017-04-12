@@ -76,11 +76,11 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
     if ($this->_activityTypeId) {
       //set activity type name and description to template
       list($this->_activityTypeName, $activityTypeDescription) = CRM_Core_BAO_OptionValue::getActivityTypeDetails($this->_activityTypeId);
-      $this->assign('activityTypeName', $this->_activityTypeName);
       $this->assign('activityTypeDescription', $activityTypeDescription);
     }
 
-    $this->assign('activitySubject', isset($activityRecord['subject']) ? $activityRecord['subject'] : null);
+    $this->_activitySubject = isset($activityRecord['subject']) ? $activityRecord['subject'] : null;
+    $this->assign('activitySubject', $this->_activitySubject);
     $this->assign('activityDetails', isset($activityRecord['details']) ? $activityRecord['details'] : null);
     $this->_activityStatusId = $activityRecord['status_id'];
     $this->assign('activityStatusId', $this->_activityStatusId);
@@ -109,18 +109,8 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
       $this->_activityId, 0, $this->_activityTypeId
     );
 
-    // Set title
-    if ($this->_currentlyViewedContactId) {
-      $displayName = CRM_Contact_BAO_Contact::displayName($this->_currentlyViewedContactId);
-      // Check if this is default domain contact CRM-10482
-      if (CRM_Contact_BAO_Contact::checkDomainContact($this->_currentlyViewedContactId)) {
-        $displayName .= ' (' . ts('default organization') . ')';
-      }
-      CRM_Utils_System::setTitle($displayName . ' - ' . $this->_activityTypeName);
-    }
-    else {
-      CRM_Utils_System::setTitle(ts('Activity: '. $this->_activityTypeName));
-    }
+    self::setActivityTitle();
+    self::setActivityHeader();
 
     // when custom data is included in this page
     if (!empty($_POST['hidden_custom'])) {
@@ -134,6 +124,35 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
       CRM_Custom_Form_CustomData::buildQuickForm($this);
       CRM_Custom_Form_CustomData::setDefaultValues($this);
     }
+  }
+
+  /**
+   * Set the title for the View Activity Form
+   */
+  public function setActivityTitle() {
+    // Set title
+    if ($this->_currentlyViewedContactId) {
+      $displayName = CRM_Contact_BAO_Contact::displayName($this->_currentlyViewedContactId);
+      // Check if this is default domain contact CRM-10482
+      if (CRM_Contact_BAO_Contact::checkDomainContact($this->_currentlyViewedContactId)) {
+        $displayName .= ' (' . ts('default organization') . ')';
+      }
+      CRM_Utils_System::setTitle($displayName . ' - ' . $this->_activityTypeName);
+    }
+    else {
+      CRM_Utils_System::setTitle(ts('Activity: '. $this->_activityTypeName));
+    }
+  }
+
+  /**
+   * Set the header that appears at the top of the activity display.
+   */
+  public function setActivityHeader() {
+    $header = $this->_activityTypeName;
+    if (isset($this->_activitySubject)) {
+      $header .= ': ' . $this->_activitySubject;
+    }
+    $this->assign('activityHeader', $header);
   }
 
   /**
