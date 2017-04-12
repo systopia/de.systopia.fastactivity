@@ -47,15 +47,19 @@
   <tr class="crm-activity-form-block-target_contact_id">
     <td class="label">With</td>
     <td class="view-value">
-        {counter start=1 assign=count}
-        {foreach from=$activityTargetContacts item=contact}
-            {if $contact.id}
-                {assign var=contactId value=$contact.id}
-                {capture assign=contactViewURL}{crmURL p='civicrm/contact/view' q="reset=1&cid=$contactId"}{/capture}
-              <a href="{$contactViewURL}">{$contact.name}</a>{if $count lt $activityTargetContacts.count},{/if}
-            {/if}
-            {counter}
-        {/foreach}
+        {if $activityTargetContacts|@count lt $activityTargetContacts.count}
+            {$activityTargetContacts.count} contacts
+        {else}
+            {counter start=1 assign=count}
+            {foreach from=$activityTargetContacts item=contact}
+                {if $contact.id}
+                    {assign var=contactId value=$contact.id}
+                    {capture assign=contactViewURL}{crmURL p='civicrm/contact/view' q="reset=1&cid=$contactId"}{/capture}
+                  <a href="{$contactViewURL}">{$contact.name}</a>{if $count lt $activityTargetContacts.count},{/if}
+                {/if}
+                {counter}
+            {/foreach}
+        {/if}
     </td>
   </tr>
   <tr class="crm-activity-form-block-activity_date_time">
