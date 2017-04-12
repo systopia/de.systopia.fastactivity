@@ -15,8 +15,9 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
   public $_activityStatusId;
   public $_activityStatus;
   public $_activityDetails;
-  public $_activitySourceContactId;
-  public $_activitySourceContactName;
+  public $_activitySourceContacts;
+  public $_activityAssigneeContacts;
+  public $_activityTargetContacts;
   public $_groupTree;
 
   public function preprocess()
@@ -84,14 +85,24 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
     $this->_activityStatusId = $activityRecord['status_id'];
     $this->assign('activityStatusId', $this->_activityStatusId);
     $this->assign('activityStatus', $activityStatus[$this->_activityStatusId]);
-    $this->_activitySourceContactId = $activityRecord['source_contact_id'];
-    $this->assign('activitySourceContactId', $this->_activitySourceContactId);
-    $this->assign('activitySourceContactName', CRM_Contact_BAO_Contact::displayName($this->_activitySourceContactId));
+
+    $this->_activitySourceContacts = self::getSourceContacts($this->_activityId);
+    $this->_activityAssigneeContacts = self::getAssigneeContacts($this->_activityId);
+    $this->_activityTargetContacts = self::getTargetContacts($this->_activityId);
+
+    $this->assign('activitySourceContacts', $this->_activitySourceContacts);
+    $this->assign('activityAssigneeContacts', $this->_activityAssigneeContacts);
+    $this->assign('activityTargetContacts', $this->_activityTargetContacts);
+
     $this->assign('activityDateTime', $activityRecord['activity_date_time']);
     $this->assign('activityPriority', $priorities[$activityRecord['priority_id']]);
+
+    if (isset($activityRecord['medium_id'])) {
+      $activityMedium = CRM_Activity_BAO_Activity::buildOptions('medium_id', 'validate');
+      $this->assign('mediumId', $activityMedium[$activityRecord['medium_id']]);
+    }
     $this->assign('customDataType', 'Activity');
     $this->assign('customDataSubType', $this->_activityTypeId);
-    $this->assign('urlPath', 'civicrm/activity');
 
     // Get custom fields
     $this->_groupTree = CRM_Core_BAO_CustomGroup::getTree('Activity', $this,
@@ -124,6 +135,54 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
       CRM_Custom_Form_CustomData::setDefaultValues($this);
     }
   }
+
+  public function getSourceContacts($activityId) {
+    return self::getContacts($activityId, "Activity Source");
+  }
+
+  public function getAssigneeContacts($activityId) {
+    return self::getContacts($activityId, "Activity Assignees");
+  }
+
+  public function getTargetContacts($activityId) {
+    $contactType = "Activity Targets";
+
+    $contacts = array();
+    $contactCount = civicrm_api3('ActivityContact', 'getcount', array(
+      'sequential' => 1,
+      'activity_id' => $activityId,
+      'record_type_id' => $contactType,
+    ));
+    $contacts['count'] = $contactCount;
+
+    if ($contactCount > 20) {
+      return $contacts;
+    }
+    else {
+      $contacts = self::getContacts($activityId, $contactType);
+      return $contacts;
+    }
+  }
+
+  public function getContacts($activityId, $contactType) {
+    $contacts = civicrm_api3('ActivityContact', 'get', array(
+      'sequential' => 1,
+      'activity_id' => $activityId,
+      'record_type_id' => $contactType,
+    ));
+    if (isset($contacts['count']) && ($contacts['count'] > 0)) {
+      foreach ($contacts['values'] as $contact) {
+        $contactList[] = array('id' => $contact['contact_id'], 'name' => CRM_Contact_BAO_Contact::displayName($contact['contact_id']));
+      }
+      $contactList['count'] = $contacts['count'];
+      return $contactList;
+    }
+    else {
+      $contacts['count'] = 0;
+      return $contacts;
+    }
+  }
+
 
   public function buildQuickForm() {
       if (isset($this->_groupTree)) {

@@ -18,11 +18,45 @@
     {/if}
   <tr class="crm-activity-form-block-source_contact_id">
     <td class="label">Added By</td>
-    <td class="view-value">{$activitySourceContactName}</td>
+    <td class="view-value">
+        {counter start=1 assign=count}
+        {foreach from=$activitySourceContacts item=contact}
+            {if $contact.id}
+                {assign var=contactId value=$contact.id}
+                {capture assign=contactViewURL}{crmURL p='civicrm/contact/view' q="reset=1&cid=$contactId"}{/capture}
+              <a href="{$contactViewURL}">{$contact.name}</a>{if $count lt $activitySourceContacts.count},{/if}
+            {/if}
+            {counter}
+        {/foreach}
+    </td>
   </tr>
   <tr class="crm-activity-form-block-assignee_contact_id">
     <td class="label">Assigned To</td>
-    <td class="view-value">{$assigneeContactName}</td>
+    <td class="view-value">
+        {counter start=1 assign=count}
+        {foreach from=$activityAssigneeContacts item=contact}
+            {if $contact.id}
+                {assign var=contactId value=$contact.id}
+                {capture assign=contactViewURL}{crmURL p='civicrm/contact/view' q="reset=1&cid=$contactId"}{/capture}
+              <a href="{$contactViewURL}">{$contact.name}</a>{if $count lt $activityAssigneeContacts.count},{/if}
+            {/if}
+            {counter}
+        {/foreach}
+    </td>
+  </tr>
+  <tr class="crm-activity-form-block-target_contact_id">
+    <td class="label">With</td>
+    <td class="view-value">
+        {counter start=1 assign=count}
+        {foreach from=$activityTargetContacts item=contact}
+            {if $contact.id}
+                {assign var=contactId value=$contact.id}
+                {capture assign=contactViewURL}{crmURL p='civicrm/contact/view' q="reset=1&cid=$contactId"}{/capture}
+              <a href="{$contactViewURL}">{$contact.name}</a>{if $count lt $activityTargetContacts.count},{/if}
+            {/if}
+            {counter}
+        {/foreach}
+    </td>
   </tr>
   <tr class="crm-activity-form-block-activity_date_time">
     <td class="label">Date</td>
@@ -36,6 +70,12 @@
     <td class="label">Priority</td>
     <td class="view-value">{$activityPriority}</td>
   </tr>
+    {if $activityMedium}
+      <tr class="crm-activity-form-block-activity_medium">
+        <td class="label">Medium</td>
+        <td class="view-value">{$mediumId}</td>
+      </tr>
+    {/if}
     {if $activitySubject}
       <tr class="crm-activity-form-block-activity_subject">
         <td class="label">Subject</td>
@@ -43,32 +83,32 @@
       </tr>
     {/if}
     {if $activityDetails}
-  <tr class="crm-activity-form-block-activity_details">
-    <td class="label">Details</td>
-    <td class="view-value">{$activityDetails}</td>
-  </tr>
-{/if}
+      <tr class="crm-activity-form-block-activity_details">
+        <td class="label">Details</td>
+        <td class="view-value">{$activityDetails}</td>
+      </tr>
+    {/if}
 
-{foreach from=$viewCustomData item=customGroup}
-  <tr class="crm-activity-form-block-custom_data">
-    <td colspan="2">
-    {foreach from=$customGroup item=customFields}
-      <div class="crm-accordion-header">{$customFields.title}</div>
-        <div class="crm-accordion-body">
-      <table class="crm-info-panel">
+    {foreach from=$viewCustomData item=customGroup}
+      <tr class="crm-activity-form-block-custom_data">
+        <td colspan="2">
+            {foreach from=$customGroup item=customFields}
+              <div class="crm-accordion-header">{$customFields.title}</div>
+              <div class="crm-accordion-body">
+                <table class="crm-info-panel">
 
-          {foreach from=$customFields.fields item=fields}
-            <tr>
-              <td class="label">{$fields.field_title}</td>
-              <td class="view-value">{$fields.field_value}</td>
-            </tr>
-          {/foreach}
-      </table>
-        </div>
+                    {foreach from=$customFields.fields item=fields}
+                      <tr>
+                        <td class="label">{$fields.field_title}</td>
+                        <td class="view-value">{$fields.field_value}</td>
+                      </tr>
+                    {/foreach}
+                </table>
+              </div>
+            {/foreach}
+        </td>
+      </tr>
     {/foreach}
-    </td>
-  </tr>
-{/foreach}
 </table>
 {* FIELD EXAMPLE: OPTION 2 (MANUAL LAYOUT)
 
