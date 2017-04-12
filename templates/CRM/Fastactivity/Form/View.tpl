@@ -13,6 +13,12 @@
       <td class="label">Type</td>
       <td class="view-value">{$activityTypeName}</td>
     </tr>
+    {if $activitySubject}
+      <tr class="crm-activity-form-block-activity_subject">
+        <td class="label">Subject</td>
+        <td class="view-value">{$activitySubject}</td>
+      </tr>
+    {/if}
     <tr class="crm-activity-form-block-activity_date_time">
       <td class="label">
         <i class="crm-i fa-calendar" aria-hidden="true"></i>

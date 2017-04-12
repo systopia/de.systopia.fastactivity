@@ -544,17 +544,19 @@ GROUP BY activity.id
     $actionLinks = array();
 
     $url = 'civicrm/fastactivity/view';
-    if ($showView) {
-      $actionLinks += array(
-        CRM_Core_Action::
-        VIEW => array(
-          'name' => ts('View'),
-          'url' => $url,
-          'qs' => $qsView,
-          'title' => ts('View Activity'),
-          'icon' => '<i class="crm-i fa-eye" aria-hidden="true"></i>',
-        ),
-      );
+    if (CRM_Activity_BAO_Activity::checkPermission($activityId, CRM_Core_Action::VIEW)) {
+      if ($showView) {
+        $actionLinks += array(
+          CRM_Core_Action::
+          VIEW => array(
+            'name' => ts('View'),
+            'url' => $url,
+            'qs' => $qsView,
+            'title' => ts('View Activity'),
+            'icon' => '<i class="crm-i fa-eye" aria-hidden="true"></i>',
+          ),
+        );
+      }
     }
 
     if ($showUpdate) {
@@ -593,18 +595,19 @@ GROUP BY activity.id
         ),
       );
     }*/
-
-    if ($showDelete) {
-      $actionLinks += array(
-        CRM_Core_Action::
-        DELETE => array(
-          'name' => ts('Delete'),
-          'url' => $url,
-          'qs' => $qsDelete,
-          'title' => ts('Delete Activity'),
-          'icon' => '<i class="crm-i fa-trash" aria-hidden="true"></i>',
-        ),
-      );
+    if (CRM_Core_Permission::check('delete activities')) {
+      if ($showDelete) {
+        $actionLinks += array(
+          CRM_Core_Action::
+          DELETE => array(
+            'name' => ts('Delete'),
+            'url' => $url,
+            'qs' => $qsDelete,
+            'title' => ts('Delete Activity'),
+            'icon' => '<i class="crm-i fa-trash" aria-hidden="true"></i>',
+          ),
+        );
+      }
     }
 
     /*if ($accessMailingReport) {

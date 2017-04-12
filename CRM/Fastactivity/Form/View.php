@@ -78,6 +78,9 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
       $this->assign('activityTypeName', $this->_activityTypeName);
       $this->assign('activityTypeDescription', $activityTypeDescription);
     }
+    // Get activity subject
+    $this->_activitySubject = isset($activityRecord['subject']) ? $activityRecord['subject'] : null;
+    $this->assign('activitySubject', $this->_activitySubject);
 
     if ($this->_action & CRM_Core_Action::DELETE) {
       // Don't need to load any more info about the activity
@@ -87,9 +90,6 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
     }
     else {
       $priorities = CRM_Core_PseudoConstant::get('CRM_Activity_DAO_Activity', 'priority_id');
-
-      $this->_activitySubject = isset($activityRecord['subject']) ? $activityRecord['subject'] : null;
-      $this->assign('activitySubject', $this->_activitySubject);
       $this->assign('activityDetails', isset($activityRecord['details']) ? $activityRecord['details'] : null);
 
       $this->_activitySourceContacts = self::getSourceContacts($this->_activityId);
@@ -251,7 +251,7 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
       unset ($actionLinks[$this->_action]);
     }
     $this->assign('actionLinks', $actionLinks);
-    
+
     if ($this->_action & CRM_Core_Action::DELETE) {
       // Delete activity action
       $this->addButtons(array(
