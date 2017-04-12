@@ -460,30 +460,13 @@ GROUP BY activity.id
    *
    * @return array
    */
-  public static function actionLinks(
-    $activityTypeId,
-    $sourceRecordId = NULL,
-    $accessMailingReport = FALSE,
-    $activityId = NULL,
-    $key = NULL,
-    $compContext = NULL) {
-    static $activityActTypes = NULL;
-    //CRM-14277 added addtitional param to handle activity search
-    $extraParams = "&searchContext=activity";
-
-    $extraParams .= ($key) ? "&key={$key}" : NULL;
-    if ($compContext) {
-      $extraParams .= "&compContext={$compContext}";
-    }
-
+  public static function actionLinks($activityTypeId, $sourceRecordId = NULL, $accessMailingReport = FALSE, $activityId = NULL) {
     $showView = TRUE;
-    $showUpdate = $showDelete = FALSE;
+    $showDelete = TRUE; //FIXME: May want to limit what types of activity can be deleted
+    $showUpdate = FALSE;
     $qsUpdate = NULL;
 
-    if (!$activityActTypes) {
-      $activeActTypes = CRM_Core_PseudoConstant::activityType(TRUE, TRUE, FALSE, 'name', TRUE);
-    }
-    $activityTypeName = CRM_Utils_Array::value($activityTypeId, $activeActTypes);
+    list($activityTypeName, $activityTypeDescription) = CRM_Core_BAO_OptionValue::getActivityTypeDetails($activityTypeId);
 
     //CRM-7607
     //lets allow to have normal operation for only activity types.
@@ -562,19 +545,18 @@ GROUP BY activity.id
         break;
     }*/
 
-    $qsDelete = "atype={$activityTypeId}&action=delete&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
-
+    $qsView = 'action=view&reset=1&id=%%id%%&cid=%%cid%%';
+    $qsDelete = 'action=delete&reset=1&id=%%id%%&cid=%%cid%%';
     $actionLinks = array();
 
+    $url = 'civicrm/fastactivity/view';
     if ($showView) {
       $actionLinks += array(
         CRM_Core_Action::
         VIEW => array(
           'name' => ts('View'),
-          //'url' => $url,
-          //'qs' => $qsView,
-          'url' => 'civicrm/fastactivity/view',
-          'qs' => 'action=view&reset=1&id=%%id%%&cid=%%cid%%',
+          'url' => $url,
+          'qs' => $qsView,
           'title' => ts('View Activity'),
         ),
       );
@@ -601,7 +583,7 @@ GROUP BY activity.id
       }
     }
 
-    if (
+    /*if (
       $activityTypeName &&
       CRM_Case_BAO_Case::checkPermission($activityId, 'File On Case', $activityTypeId)
     ) {
@@ -614,24 +596,21 @@ GROUP BY activity.id
           'title' => ts('File on Case'),
         ),
       );
-    }
+    }*/
 
     if ($showDelete) {
-      if (!isset($delUrl) || !$delUrl) {
-        $delUrl = $url;
-      }
       $actionLinks += array(
         CRM_Core_Action::
         DELETE => array(
           'name' => ts('Delete'),
-          'url' => $delUrl,
+          'url' => $url,
           'qs' => $qsDelete,
           'title' => ts('Delete Activity'),
         ),
       );
     }
 
-    if ($accessMailingReport) {
+    /*if ($accessMailingReport) {
       $actionLinks += array(
         CRM_Core_Action::
         BROWSE => array(
@@ -641,7 +620,7 @@ GROUP BY activity.id
           'title' => ts('View Mailing Report'),
         ),
       );
-    }
+    }*/
 
     return $actionLinks;
   }

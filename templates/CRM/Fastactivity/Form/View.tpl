@@ -4,19 +4,36 @@
     {include file="CRM/common/formButtons.tpl" location="top"}
 </div>
 
+{if $action eq 8} {* delete activity *}
+<table class="crm-info-panel">
+  <h3><i class="crm-i fa-question-circle" aria-hidden="true"></i>
+      {$activityHeader}
+  </h3>
+  <tr class="crm-activity-form-block-activity_type">
+    <td class="label">Type</td>
+    <td class="view-value">{$activityTypeName}</td>
+  </tr>
+  <tr class="crm-activity-form-block-activity_date_time">
+    <td class="label">
+      <i class="crm-i fa-calendar" aria-hidden="true"></i>
+      Date
+    </td>
+    <td class="view-value">{$activityDateTime|crmDate}</td>
+  </tr>
+  <tr class="crm-activity-form-block-activity_status">
+    <td class="label">Status</td>
+    <td class="view-value">{$activityStatus}</td>
+  </tr>
+</table>
+{else}
 <table class="crm-info-panel">
   <h3>{$activityHeader}</h3>
     {if $activityTypeDescription }
       <div class="help">Description: {$activityTypeDescription}</div>
     {/if}
-    {if $surveyActivity}
-      <tr class="crm-activity-form-block-survey">
-        <td class="label">{ts}Survey Title{/ts}</td><td class="view-value">{$surveyTitle}</td>
-      </tr>
-    {/if}
   <tr class="crm-activity-form-block-source_contact_id">
     <td class="label">
-      <i class="fa fa-user" aria-hidden="true"></i>
+      <i class="crm-i fa-user" aria-hidden="true"></i>
       Added By
     </td>
     <td class="view-value">
@@ -33,7 +50,7 @@
   </tr>
   <tr class="crm-activity-form-block-assignee_contact_id">
     <td class="label">
-      <i class="fa fa-user" aria-hidden="true"></i>
+      <i class="crm-i fa-user" aria-hidden="true"></i>
       Assigned To
     </td>
     <td class="view-value">
@@ -50,7 +67,7 @@
   </tr>
   <tr class="crm-activity-form-block-target_contact_id">
     <td class="label">
-      <i class="fa fa-users" aria-hidden="true"></i>
+      <i class="crm-i fa-users" aria-hidden="true"></i>
       With
     </td>
     <td class="view-value">
@@ -71,7 +88,7 @@
   </tr>
   <tr class="crm-activity-form-block-activity_date_time">
     <td class="label">
-      <i class="fa fa-calendar" aria-hidden="true"></i>
+      <i class="crm-i fa-calendar" aria-hidden="true"></i>
       Date
     </td>
     <td class="view-value">{$activityDateTime|crmDate}</td>
@@ -101,7 +118,7 @@
     {if $activityDetails}
       <tr class="crm-activity-form-block-activity_details">
         <td class="label">
-          <i class="fa fa-info" aria-hidden="true"></i>
+          <i class="crm-i fa-info" aria-hidden="true"></i>
           Details
         </td>
         <td class="view-value">{$activityDetails}</td>
@@ -131,12 +148,7 @@
       </tr>
     {/foreach}
 </table>
-{* FIELD EXAMPLE: OPTION 2 (MANUAL LAYOUT)
-
-  <div>
-    <span>{$form.favorite_color.label}</span>
-    <span>{$form.favorite_color.html}</span>
-  </div>
+{/if}
 
 {* FOOTER *}
 <div class="crm-submit-buttons">
