@@ -136,14 +136,30 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
     }
   }
 
+  /**
+   * Get an array of source contacts ('id' => contact_id, 'name' => display_name)
+   * @param $activityId
+   * @return array
+   */
   public function getSourceContacts($activityId) {
     return self::getContacts($activityId, "Activity Source");
   }
 
+  /**
+   * Get an array of assignee contacts ('id' => contact_id, 'name' => display_name)
+   * @param $activityId
+   * @return array
+   */
   public function getAssigneeContacts($activityId) {
     return self::getContacts($activityId, "Activity Assignees");
   }
 
+  /**
+   * Get an array of target contacts ('id' => contact_id, 'name' => display_name)
+   * If target contacts > 20 we just return 'count' of contacts. If < 20 we return all names as well.
+   * @param $activityId
+   * @return array
+   */
   public function getTargetContacts($activityId) {
     $contactType = "Activity Targets";
 
@@ -164,6 +180,12 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
     }
   }
 
+  /**
+   * Shared function that gets contact names/Ids and count as an array.
+   * @param $activityId
+   * @param $contactType
+   * @return array
+   */
   public function getContacts($activityId, $contactType) {
     $contacts = civicrm_api3('ActivityContact', 'get', array(
       'sequential' => 1,
@@ -183,21 +205,19 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
     }
   }
 
-
   public function buildQuickForm() {
-      if (isset($this->_groupTree)) {
-        CRM_Core_BAO_CustomGroup::buildCustomDataView($this, $this->_groupTree);
-      }
-      // form should be frozen for view mode
-      $this->freeze();
+    if (isset($this->_groupTree)) {
+      CRM_Core_BAO_CustomGroup::buildCustomDataView($this, $this->_groupTree);
+    }
+    // form should be frozen for view mode
+    $this->freeze();
 
-      $buttons = array();
-      $buttons[] = array(
-        'type' => 'cancel',
-        'name' => ts('Done'),
-      );
-      $this->addButtons($buttons);
-
+    $buttons = array();
+    $buttons[] = array(
+      'type' => 'cancel',
+      'name' => ts('Done'),
+    );
+    $this->addButtons($buttons);
 
     parent::buildQuickForm();
   }
@@ -210,40 +230,4 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
     )));
     parent::postProcess();
   }
-
-  public function getColorOptions() {
-    $options = array(
-      '' => ts('- select -'),
-      '#f00' => ts('Red'),
-      '#0f0' => ts('Green'),
-      '#00f' => ts('Blue'),
-      '#f0f' => ts('Purple'),
-    );
-    foreach (array('1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e') as $f) {
-      $options["#{$f}{$f}{$f}"] = ts('Grey (%1)', array(1 => $f));
-    }
-    return $options;
-  }
-
-  /**
-   * Get the fields/elements defined in this form.
-   *
-   * @return array (string)
-   */
-  public function getRenderableElementNames() {
-    // The _elements list includes some items which should not be
-    // auto-rendered in the loop -- such as "qfKey" and "buttons".  These
-    // items don't have labels.  We'll identify renderable by filtering on
-    // the 'label'.
-    $elementNames = array();
-    foreach ($this->_elements as $element) {
-      /** @var HTML_QuickForm_Element $element */
-      $label = $element->getLabel();
-      if (!empty($label)) {
-        $elementNames[] = $element->getName();
-      }
-    }
-    return $elementNames;
-  }
-
 }
