@@ -285,6 +285,7 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
     if (isset($this->_activityId)) {
       if ($this->_action & CRM_Core_Action::DELETE) {
         try {
+          // TODO: Re-enable this after testing
           /*$result = civicrm_api3('Activity', 'delete', array(
             'sequential' => 1,
             'id' => $this->_activityId,
