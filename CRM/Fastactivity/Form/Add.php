@@ -795,10 +795,6 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
       $defaults['activity_type_id'] = $this->_activityTypeId;
     }
 
-    if (!empty($this->_contactIds)) {
-      $defaults['target_contact_id'] = $this->_contactIds;
-    }
-
     // TODO: With Contacts defaults with add/remove entityRef
     // CRM-15472 - 50 is around the practial limit of how many items a select2 entityRef can handle
     /*if (!empty($defaults['target_contact_id'])) {
@@ -807,10 +803,6 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
         $this->freeze(array('target_contact_id'));
       }
     }*/
-
-    if ($this->_action & (CRM_Core_Action::DELETE | CRM_Core_Action::RENEW)) {
-      $this->assign('delName', CRM_Utils_Array::value('subject', $defaults));
-    }
 
     if (empty($defaults['priority_id'])) {
       $priority = CRM_Core_PseudoConstant::get('CRM_Activity_DAO_Activity', 'priority_id');
