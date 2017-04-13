@@ -14,17 +14,13 @@
 | written permission from the original author(s).        |
 +-------------------------------------------------------*}
 
-<h3>{$activityHeader}</h3>
-{if $activityTypeDescription }
-  <div class="help">Description: {$activityTypeDescription}</div>
-{/if}
-
 {* this template is used for adding/editing other (custom) activities. *}
 {if $cdType }
   {include file="CRM/Custom/Form/CustomData.tpl"}
 {else}
+  <h3>{$activityHeader}</h3>
   {if $activityTypeDescription }
-    <div class="help">{$activityTypeDescription}</div>
+    <div class="help">Description: {$activityTypeDescription}</div>
   {/if}
   <div class="crm-block crm-form-block crm-activity-form-block">
 
