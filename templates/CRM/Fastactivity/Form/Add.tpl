@@ -52,7 +52,7 @@
           {$targetContactCount} contacts
           {if $action eq 1 or $single eq false}
             <div class="crm-is-multi-activity-wrapper">
-              {$form.is_multi_activity.html}&nbsp;{$form.is_multi_activity.label} {help id="id-is_multi_activity"}
+              {$form.is_multi_activity.html}&nbsp;{$form.is_multi_activity.label}
             </div>
           {/if}
         </td>
@@ -62,7 +62,7 @@
           {$form.target_contact_id.html}
           {if $action eq 1 or $single eq false}
             <div class="crm-is-multi-activity-wrapper">
-              {$form.is_multi_activity.html}&nbsp;{$form.is_multi_activity.label} {help id="id-is_multi_activity"}
+              {$form.is_multi_activity.html}&nbsp;{$form.is_multi_activity.label}
             </div>
           {/if}
         </td>
@@ -71,7 +71,7 @@
     <tr class="crm-activity-form-block-assignee_contact_id">
       <td class="label">
         {$form.assignee_contact_id.label}
-        {edit}{help id="assignee_contact_id" title=$form.assignee_contact_id.label}{/edit}
+        {edit}{title=$form.assignee_contact_id.label}{/edit}
       </td>
       <td>
         {$form.assignee_contact_id.html}
