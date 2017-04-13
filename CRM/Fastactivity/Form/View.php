@@ -36,7 +36,7 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
   protected $_activityTargetContacts;
   protected $_groupTree;
 
-  public function preprocess()
+  public function preProcess()
   {
     // Get currently viewed contact ID
     $this->_currentlyViewedContactId = $this->get('contactId');
