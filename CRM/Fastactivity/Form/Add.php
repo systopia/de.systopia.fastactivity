@@ -79,6 +79,14 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
         'type' => 'select',
         'required' => TRUE,
       ),
+      'activity_type_id' => array(
+        'type' => 'select',
+        'label' => ts('Activity Type'),
+        'required' => TRUE,
+        'onchange' => "CRM.buildCustomData( 'Activity', this.value );",
+        'attributes' => array('' => '- ' . ts('select activity') . ' -') + CRM_Core_PseudoConstant::ActivityType(FALSE),
+        'extra' => array('class' => 'crm-select2'),
+      ),
       'priority_id' => array(
         'type' => 'select',
         'required' => TRUE,
@@ -198,37 +206,6 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
       }
     }
 
-    if (!in_array($this->_action, array(CRM_Core_Action::ADD, CRM_Core_Action::UPDATE))) {
-      // Get Activity Status
-      $activityStatus = CRM_Activity_BAO_Activity::buildOptions('activity_status_id', 'validate');
-      $this->_activityStatusId = $activityRecord['status_id'];
-      $this->assign('activityStatusId', $this->_activityStatusId);
-      $this->assign('activityStatus', $activityStatus[$this->_activityStatusId]);
-      // Get Activity Date/Time
-      $this->assign('activityDateTime', $activityRecord['activity_date_time']);
-      // Get activity subject
-      $this->_activitySubject = isset($activityRecord['subject']) ? $activityRecord['subject'] : null;
-      $this->assign('activitySubject', $this->_activitySubject);
-
-      $priorities = CRM_Core_PseudoConstant::get('CRM_Activity_DAO_Activity', 'priority_id');
-      $this->assign('activityDetails', isset($activityRecord['details']) ? $activityRecord['details'] : null);
-
-      $this->_activitySourceContacts = self::getSourceContacts($this->_activityId);
-      $this->_activityAssigneeContacts = self::getAssigneeContacts($this->_activityId);
-      $this->_activityTargetContacts = self::getTargetContacts($this->_activityId);
-
-      $this->assign('activitySourceContacts', $this->_activitySourceContacts);
-      $this->assign('activityAssigneeContacts', $this->_activityAssigneeContacts);
-      $this->assign('activityTargetContacts', $this->_activityTargetContacts);
-
-      $this->assign('activityPriority', isset($activityRecord['priority_id']) ? $priorities[$activityRecord['priority_id']] : null);
-
-      if (isset($activityRecord['medium_id'])) {
-        $activityMedium = CRM_Activity_BAO_Activity::buildOptions('medium_id', 'validate');
-        $this->assign('mediumId', $activityMedium[$activityRecord['medium_id']]);
-      }
-    }
-
     // Assign values for use by buildCustomData functions
     $this->assign('customDataType', 'Activity');
     $this->assign('customDataSubType', $this->_activityTypeId);
@@ -272,79 +249,70 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
       return;
     }
 
+    // Get action links to display at bottom of activity (not for new activity as nothing to view/edit/delete!).
     if (!in_array($this->_action, array(CRM_Core_Action::ADD))) {
       $actionLinks = CRM_Fastactivity_BAO_Activity::actionLinks($this->_activityTypeId, $this->_activityId);
       if (isset($actionLinks[$this->_action])) {
+        // Don't show our own action
         unset ($actionLinks[$this->_action]);
       }
       $this->assign('actionLinks', $actionLinks);
     }
 
-    // FIXME: Start Copy from Form/Activity.php
-
-    $element = &$this->add('select', 'activity_type_id', ts('Activity Type'),
-      array('' => '- ' . ts('select') . ' -') + $this->_fields['followup_activity_type_id']['attributes'],
-      FALSE, array(
-        'onchange' => "CRM.buildCustomData( 'Activity', this.value );",
-        'class' => 'crm-select2 required',
-      )
-    );
-
-    //freeze for update mode.
-    if ($this->_action & CRM_Core_Action::UPDATE) {
-      $element->freeze();
-    }
-
-    //Call to RecurringEntity buildQuickForm for add/update mode
-    if ($this->_action & (CRM_Core_Action::UPDATE | CRM_Core_Action::ADD)) {
-      CRM_Core_Form_RecurringEntity::buildQuickForm($this);
-    }
-
+    // Add fields defined by setFields
     foreach ($this->_fields as $field => $values) {
       if (!empty($this->_fields[$field])) {
         $attribute = CRM_Utils_Array::value('attributes', $values);
         $required = !empty($values['required']);
-
         if ($values['type'] == 'wysiwyg') {
-          $this->addWysiwyg($field, $values['label'], $attribute, $required);
+          $element = $this->addWysiwyg($field, $values['label'], $attribute, $required);
         }
         elseif ($values['type'] == 'select' && empty($attribute)) {
-          $this->addSelect($field, array('entity' => 'activity'), $required);
+          $element = $this->addSelect($field, array('entity' => 'activity'), $required);
         }
         elseif ($values['type'] == 'entityRef') {
-          $this->addEntityRef($field, $values['label'], $attribute, $required);
+          $element = $this->addEntityRef($field, $values['label'], $attribute, $required);
         }
         else {
-          $this->add($values['type'], $field, $values['label'], $attribute, $required, CRM_Utils_Array::value('extra', $values));
+          $element = $this->add($values['type'], $field, $values['label'], $attribute, $required, CRM_Utils_Array::value('extra', $values));
+        }
+        if ($field == 'activity_type_id' && ($this->_action == CRM_Core_Action::UPDATE)) {
+          $element->freeze();
         }
       }
     }
 
+    // Add campaign elements
     self::buildFormElementsCampaign();
 
     // this option should be available only during add mode
-    if ($this->_action != CRM_Core_Action::UPDATE) {
+    if ($this->_action == CRM_Core_Action::ADD) {
       $this->add('advcheckbox', 'is_multi_activity', ts('Create a separate activity for each contact.'));
     }
 
-    $this->addRule('duration',
-      ts('Please enter the duration as number of minutes (integers only).'), 'positiveInteger'
-    );
+    // Add activity Date Time
     $this->addDateTime('activity_date_time', ts('Date'), TRUE, array('formatType' => 'activityDateTime'));
 
     //add followup date
     $this->addDateTime('followup_date', ts('in'), FALSE, array('formatType' => 'activityDateTime'));
 
-    // Only admins can change the activity source
+    // Only admins can change the activity source contact
     if (!CRM_Core_Permission::check('administer CiviCRM')) {
       $this->getElement('source_contact_id')->freeze();
     }
 
-    //need to assign custom data type and subtype to the template
+    // Add form elements for repeating options
+    if ($this->_action & (CRM_Core_Action::UPDATE | CRM_Core_Action::ADD)) {
+      CRM_Core_Form_RecurringEntity::buildQuickForm($this);
+    }
+
+    // Assign custom data type and subtype to the template to allow custom data to be shown
     $this->assign('customDataType', 'Activity');
     $this->assign('customDataSubType', $this->_activityTypeId);
+    // Assign entityID for use by the ConfirmRepeatMode.tpl that displays the options for repeat.
     $this->assign('entityID', $this->_activityId);
 
+    // TODO: Look at tags stuff - do we need it?
     CRM_Core_BAO_Tag::getTags('civicrm_activity', $tags, NULL,
       '&nbsp;&nbsp;', TRUE);
 
@@ -354,6 +322,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
       );
     }
 
+    // TODO: Do we want this or delete it?
     // we need to hide activity tagset for special activities
     $specialActivities = array('Open Case');
 
@@ -363,44 +332,35 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
       CRM_Core_Form_Tag::buildQuickForm($this, $parentNames, 'civicrm_activity', $this->_activityId);
     }
 
-    // if we're viewing, we're assigning different buttons than for adding/editing
-    if ($this->_action & CRM_Core_Action::VIEW) {
-      if (isset($this->_groupTree)) {
-        CRM_Core_BAO_CustomGroup::buildCustomDataView($this, $this->_groupTree);
-      }
-      // form should be frozen for view mode
-      $this->freeze();
 
-      $buttons = array();
-      $buttons[] = array(
-        'type' => 'cancel',
-        'name' => ts('Done'),
-      );
-      $this->addButtons($buttons);
-    }
-    else {
-      $message = array(
-        'completed' => ts('Are you sure? This is a COMPLETED activity with the DATE in the FUTURE. Click Cancel to change the date / status. Otherwise, click OK to save.'),
-        'scheduled' => ts('Are you sure? This is a SCHEDULED activity with the DATE in the PAST. Click Cancel to change the date / status. Otherwise, click OK to save.'),
-      );
-      $js = array('onclick' => "return activityStatus(" . json_encode($message) . ");");
-      $this->addButtons(array(
-          array(
-            'type' => 'upload',
-            'name' => ts('Save'),
-            'js' => $js,
-            'isDefault' => TRUE,
-          ),
-          array(
-            'type' => 'cancel',
-            'name' => ts('Cancel'),
-          ),
-        )
-      );
-    }
+    // FIXME: Where is this used/called? Delete it? not the buttons...
+    $message = array(
+      'completed' => ts('Are you sure? This is a COMPLETED activity with the DATE in the FUTURE. Click Cancel to change the date / status. Otherwise, click OK to save.'),
+      'scheduled' => ts('Are you sure? This is a SCHEDULED activity with the DATE in the PAST. Click Cancel to change the date / status. Otherwise, click OK to save.'),
+    );
+    $js = array('onclick' => "return activityStatus(" . json_encode($message) . ");");
+    $this->addButtons(array(
+        array(
+          'type' => 'upload',
+          'name' => ts('Save'),
+          'js' => $js,
+          'isDefault' => TRUE,
+        ),
+        array(
+          'type' => 'cancel',
+          'name' => ts('Cancel'),
+        ),
+      )
+    );
 
-    $this->addFormRule(array('CRM_Activity_Form_Activity', 'formRule'), $this);
+    // Add form validation rules
+    $this->addFormRule(array('CRM_Fastactivity_Form_Add', 'formRule'), $this);
+    // Validate duration
+    $this->addRule('duration',
+      ts('Please enter the duration as number of minutes (integers only).'), 'positiveInteger'
+    );
 
+    // Get notification preferences
     if (CRM_Core_BAO_Setting::getItem(
       CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
       'activity_assignee_notification'
@@ -413,11 +373,14 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
     }
   }
 
+  /**
+   * Add campaign elements to form
+   */
   public function buildFormElementsCampaign() {
-    //CRM-7362 --add campaigns.
+    // Add select element for campaign
     CRM_Campaign_BAO_Campaign::addCampaign($this, CRM_Utils_Array::value('campaign_id', $this->_values));
 
-    //add engagement level CRM-7775
+    // Add element for engagement level
     $buildEngagementLevel = FALSE;
     if (CRM_Campaign_BAO_Campaign::isCampaignEnable() &&
       CRM_Campaign_BAO_Campaign::accessCampaign()
@@ -460,6 +423,51 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
     $this->assign('surveyActivity', $this->_isSurveyActivity);
   }
 
+  /**
+   * Global form rule.
+   * Copied straight from CRM_Activity_Form_Activity
+   *
+   * @param array $fields
+   *   The input form values.
+   * @param array $files
+   *   The uploaded files if any.
+   * @param $self
+   *
+   * @return bool|array
+   *   true if no errors, else array of errors
+   */
+  public static function formRule($fields, $files, $self) {
+    // TODO: Do we want to remove any of these rules?
+    // skip form rule if deleting
+    if (CRM_Utils_Array::value('_qf_Activity_next_', $fields) == 'Delete') {
+      return TRUE;
+    }
+    $errors = array();
+    if ((array_key_exists('activity_type_id', $fields) || !$self->_single) && empty($fields['activity_type_id'])) {
+      $errors['activity_type_id'] = ts('Activity Type is a required field');
+    }
+
+    if (CRM_Utils_Array::value('activity_type_id', $fields) == 3 &&
+      CRM_Utils_Array::value('status_id', $fields) == 1
+    ) {
+      $errors['status_id'] = ts('You cannot record scheduled email activity.');
+    }
+    elseif (CRM_Utils_Array::value('activity_type_id', $fields) == 4 &&
+      CRM_Utils_Array::value('status_id', $fields) == 1
+    ) {
+      $errors['status_id'] = ts('You cannot record scheduled SMS activity.');
+    }
+
+    if (!empty($fields['followup_activity_type_id']) && empty($fields['followup_date'])) {
+      $errors['followup_date_time'] = ts('Followup date is a required field.');
+    }
+    //Activity type is mandatory if subject or follow-up date is specified for an Follow-up activity, CRM-4515
+    if ((!empty($fields['followup_activity_subject']) || !empty($fields['followup_date'])) && empty($fields['followup_activity_type_id'])) {
+      $errors['followup_activity_subject'] = ts('Follow-up Activity type is a required field.');
+    }
+    return $errors;
+  }
+
   public function postProcess($params = NULL) {
     // store the submitted values in an array
     if (!$params) {
@@ -471,6 +479,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
       $params['activity_type_id'] = $this->_activityTypeId;
     }
 
+    // Get custom data
     if (!empty($params['hidden_custom']) &&
       !isset($params['custom'])
     ) {
@@ -492,6 +501,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
     // store the date with proper format
     $params['activity_date_time'] = CRM_Utils_Date::processDate($params['activity_date_time'], $params['activity_date_time_time']);
 
+    // TODO: Need to intercept saving of target contacts here when updating as we won't have full list if > 20
     // format params as arrays
     foreach (array('target', 'assignee', 'followup_assignee') as $name) {
       if (!empty($params["{$name}_contact_id"])) {
@@ -507,6 +517,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
       $params['source_contact_id'] = $this->_currentUserId;
     }
 
+    // Get activity Id
     if (isset($this->_activityId)) {
       $params['id'] = $this->_activityId;
     }
@@ -518,6 +529,9 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
       $this->_activityId
     );
 
+    // Handle multi activities
+    // TODO: Do we try and handle multi-activities in this extension?
+    // TODO: Probably yes, but only when creating a new activity?
     $activity = array();
     if (!empty($params['is_multi_activity']) &&
       !CRM_Utils_Array::crmIsEmptyArray($params['target_contact_id'])
@@ -696,17 +710,32 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
       }
     }
 
-    // set status message
+    // Set subject for confirmation message
     $subject = '';
     if (!empty($params['subject'])) {
       $subject = "'" . $params['subject'] . "'";
     }
 
-    CRM_Core_Session::setStatus(ts('Activity %1 has been saved. %2 %3',
+    // Set activity type name for confirmation message
+    $typeName = '';
+    if (isset($params['activity_type_id'])) {
+      list($typeName, $activityTypeDescription) = CRM_Core_BAO_OptionValue::getActivityTypeDetails($params['activityTypeId']);
+    }
+    // Set activity state for confirmation message
+    $state = '';
+    if ($this->_action == CRM_Core_Action::ADD) {
+      $state = 'created';
+    }
+    elseif ($this->_action == CRM_Core_Action::UPDATE) {
+      $state = 'updated';
+    }
+    CRM_Core_Session::setStatus(ts('%1 Activity %2 has been %3. %4 %5',
       array(
-        1 => $subject,
-        2 => $followupStatus,
-        3 => $mailStatus,
+        1 => $typeName,
+        2 => $subject,
+        3 => $state,
+        4 => $followupStatus,
+        5 => $mailStatus,
       )
     ), ts('Saved'), 'success');
 
@@ -799,23 +828,26 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
    */
   public function setActivityTitle($title = null) {
     // Set title
-    if (!empty($title)) {
-      // If we've been given a title use it
-      CRM_Utils_System::setTitle($title);
-    }
-    else {
-      // Otherwise generate a title based on activity details
-      if ($this->_currentlyViewedContactId) {
+    if (empty($title)) {
+      // If we were passed a title we'll use it, otherwise create below:
+      if (empty($this->_activityId)) {
+        // No activity Id = new activity
+        $title = 'New Activity';
+      }
+      elseif ($this->_currentlyViewedContactId) {
+        // Otherwise generate a title based on activity details
         $displayName = CRM_Contact_BAO_Contact::displayName($this->_currentlyViewedContactId);
         // Check if this is default domain contact CRM-10482
         if (CRM_Contact_BAO_Contact::checkDomainContact($this->_currentlyViewedContactId)) {
           $displayName .= ' (' . ts('default organization') . ')';
         }
-        CRM_Utils_System::setTitle($displayName . ' - ' . $this->_activityTypeName);
-      } else {
-        CRM_Utils_System::setTitle(ts('Activity: ' . $this->_activityTypeName));
+        $title = $displayName . ' - ' . $this->_activityTypeName;
+      }
+      else {
+        $title = ts('Activity: ' . $this->_activityTypeName);
       }
     }
+    CRM_Utils_System::setTitle($title);
   }
 
   /**
@@ -823,18 +855,21 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
    * @param null $header
    */
   public function setActivityHeader($header = null) {
-    if (!empty($header)) {
-      // Use passed in header if we are given it
-      $this->assign('activityHeader', $header);
-    }
-    else {
-      // Otherwise generate a header based on activity details
-      $header = $this->_activityTypeName;
-      if (isset($this->_activitySubject)) {
-        $header .= ': ' . $this->_activitySubject;
+    // Use passed in header if we are given it
+    if (empty($header)) {
+      if (empty($this->_activityId)) {
+        // We still want the header to display
+        $header = '&nbsp;';
       }
-      $this->assign('activityHeader', $header);
+      else {
+        // Otherwise generate a header based on activity details
+        $header = $this->_activityTypeName;
+        if (isset($this->_activitySubject)) {
+          $header .= ': ' . $this->_activitySubject;
+        }
+      }
     }
+    $this->assign('activityHeader', $header);
   }
 
   /**
