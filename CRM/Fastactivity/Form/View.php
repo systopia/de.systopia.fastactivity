@@ -148,6 +148,77 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
     self::setActivityTitle();
   }
 
+  public function buildQuickForm() {
+    $actionLinks = CRM_Fastactivity_BAO_Activity::actionLinks($this->_activityTypeId, $this->_activityId);
+    if (isset($actionLinks[$this->_action])) {
+      unset ($actionLinks[$this->_action]);
+    }
+    $this->assign('actionLinks', $actionLinks);
+
+    if ($this->_action & CRM_Core_Action::DELETE) {
+      // Delete activity action
+      $this->addButtons(array(
+          array(
+            'type' => 'next',
+            'name' => ts('Delete'),
+            'isDefault' => TRUE,
+          ),
+          array(
+            'type' => 'cancel',
+            'name' => ts('Cancel'),
+          ),
+        )
+      );
+      return;
+    }
+    else {
+      // View activity action
+      if (isset($this->_groupTree)) {
+        CRM_Core_BAO_CustomGroup::buildCustomDataView($this, $this->_groupTree);
+      }
+      // form should be frozen for view mode
+      //$this->freeze();
+
+      $buttons = array();
+      $buttons[] = array(
+        'type' => 'cancel',
+        'name' => ts('Done'),
+      );
+      $this->addButtons($buttons);
+
+      parent::buildQuickForm();
+    }
+  }
+
+  public function postProcess() {
+    $session = CRM_Core_Session::singleton();
+
+    if (isset($this->_activityId)) {
+      if ($this->_action & CRM_Core_Action::DELETE) {
+        try {
+          // TODO: Re-enable this after testing
+          /*$result = civicrm_api3('Activity', 'delete', array(
+            'sequential' => 1,
+            'id' => $this->_activityId,
+          ));
+          */
+          CRM_Core_Session::setStatus('Activity deletion disabled during development', ts('Activity deletion disabled'), 'info');
+        }
+        catch (Exception $e) {
+          // Delete will fail if, for example the activity is already deleted
+          $errorMsg = $e->getMessage();
+          CRM_Core_Session::setStatus($errorMsg . ' (id='.$this->_activityId.')', ts('Error deleting Activity'), 'error');
+          $session->replaceUserContext($session->readUserContext());
+          return;
+        }
+        CRM_Core_Session::setStatus(ts('Activity has been deleted.'), ts('Activity Deleted'), 'success');
+        $session->replaceUserContext($session->readUserContext());
+        return;
+      }
+    }
+    parent::postProcess();
+  }
+
   /**
    * Set the title for the View Activity Form
    * @param null $title
@@ -259,76 +330,5 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
       $contacts['count'] = 0;
       return $contacts;
     }
-  }
-
-  public function buildQuickForm() {
-    $actionLinks = CRM_Fastactivity_BAO_Activity::actionLinks($this->_activityTypeId, $this->_activityId);
-    if (isset($actionLinks[$this->_action])) {
-      unset ($actionLinks[$this->_action]);
-    }
-    $this->assign('actionLinks', $actionLinks);
-
-    if ($this->_action & CRM_Core_Action::DELETE) {
-      // Delete activity action
-      $this->addButtons(array(
-          array(
-            'type' => 'next',
-            'name' => ts('Delete'),
-            'isDefault' => TRUE,
-          ),
-          array(
-            'type' => 'cancel',
-            'name' => ts('Cancel'),
-          ),
-        )
-      );
-      return;
-    }
-    else {
-      // View activity action
-      if (isset($this->_groupTree)) {
-        CRM_Core_BAO_CustomGroup::buildCustomDataView($this, $this->_groupTree);
-      }
-      // form should be frozen for view mode
-      //$this->freeze();
-
-      $buttons = array();
-      $buttons[] = array(
-        'type' => 'cancel',
-        'name' => ts('Done'),
-      );
-      $this->addButtons($buttons);
-
-      parent::buildQuickForm();
-    }
-  }
-
-  public function postProcess() {
-    $session = CRM_Core_Session::singleton();
-
-    if (isset($this->_activityId)) {
-      if ($this->_action & CRM_Core_Action::DELETE) {
-        try {
-          // TODO: Re-enable this after testing
-          /*$result = civicrm_api3('Activity', 'delete', array(
-            'sequential' => 1,
-            'id' => $this->_activityId,
-          ));
-          */
-          CRM_Core_Session::setStatus('Activity deletion disabled during development', ts('Activity deletion disabled'), 'info');
-        }
-        catch (Exception $e) {
-          // Delete will fail if, for example the activity is already deleted
-          $errorMsg = $e->getMessage();
-          CRM_Core_Session::setStatus($errorMsg . ' (id='.$this->_activityId.')', ts('Error deleting Activity'), 'error');
-          $session->replaceUserContext($session->readUserContext());
-          return;
-        }
-        CRM_Core_Session::setStatus(ts('Activity has been deleted.'), ts('Activity Deleted'), 'success');
-        $session->replaceUserContext($session->readUserContext());
-        return;
-      }
-    }
-    parent::postProcess();
   }
 }
