@@ -241,33 +241,39 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
           ));
           $this->_values = $activityRecord;
 
-          $activityAssigneeContacts = civicrm_api3('ActivityContact', 'get', array(
+          $assigneeContacts = civicrm_api3('ActivityContact', 'get', array(
             'sequential' => 1,
             'activity_id' => $this->_activityId,
             'record_type_id' => "Activity Assignees",
           ));
-          if (!empty($activityAssigneeContacts['count'])) {
-            foreach ($activityAssigneeContacts['values'] as $contact) {
+          if (!empty($assigneeContacts['count'])) {
+            foreach ($assigneeContacts['values'] as $contact) {
               $this->_values['assignee_contact_id'][] = $contact['contact_id'];
-              // FIXME: Add assignee_contact_value here too?
             }
           }
 
-          $result = civicrm_api3('ActivityContact', 'getcount', array(
+          $targetContactCount = civicrm_api3('ActivityContact', 'getcount', array(
             'sequential' => 1,
             'activity_id' => $this->_activityId,
             'record_type_id' => "Activity Targets",
           ));
-
-          $activityTargetContacts = civicrm_api3('ActivityContact', 'get', array(
-            'sequential' => 1,
-            'activity_id' => $this->_activityId,
-            'record_type_id' => "Activity Targets",
-          ));
-          if (!empty($activityTargetContacts['count'])) {
-            foreach ($activityTargetContacts['values'] as $contact) {
-              $this->_values['target_contact_id'][] = $contact['contact_id'];
-              // FIXME: Add target_contact_value here too?
+          if (!empty($targetContactCount)) {
+            if ($targetContactCount > 20) {
+              // Don't show contacts, just a count
+              $this->assign('targetContactCount', $targetContactCount);
+            }
+            else {
+              // Retrieve all the target contacts
+              $targetContacts = civicrm_api3('ActivityContact', 'get', array(
+                'sequential' => 1,
+                'activity_id' => $this->_activityId,
+                'record_type_id' => "Activity Targets",
+              ));
+              if (!empty($targetContacts['count'])) {
+                foreach ($targetContacts['values'] as $contact) {
+                  $this->_values['target_contact_id'][] = $contact['contact_id'];
+                }
+              }
             }
           }
         }
@@ -657,7 +663,10 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
       }
     }
 
-    $activity = CRM_Activity_BAO_Activity::create($params);
+    // FIXME: Disable because it won't save with contact properly if > 20 contacts at the moment.
+    //$activity = CRM_Activity_BAO_Activity::create($params);
+    CRM_Core_Session::setStatus('FIXME: Activity add/update disabled during development');
+    return;
 
     // add tags if exists
     $tagParams = array();
@@ -812,10 +821,6 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
           ) = CRM_Utils_Date::setDateDefaults($defaults['activity_date_time'], 'activityDateTime');
         list($defaults['repetition_start_date'], $defaults['repetition_start_date_time']) = CRM_Utils_Date::setDateDefaults($defaults['activity_date_time'], 'activityDateTime');
       }
-
-      // Fixme: why are we getting the wrong keys from upstream?
-      //$defaults['target_contact_id'] = CRM_Utils_Array::value('target_contact', $defaults);
-      //$defaults['assignee_contact_id'] = CRM_Utils_Array::value('assignee_contact', $defaults);
 
       // set default tags if exists
       $defaults['tag'] = CRM_Core_BAO_EntityTag::getTag($this->_activityId, 'civicrm_activity');

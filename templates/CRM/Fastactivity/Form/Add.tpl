@@ -45,19 +45,29 @@
         {$form.source_contact_id.html}
       </td>
     </tr>
-
     <tr class="crm-activity-form-block-target_contact_id">
-      <td class="label">{$form.target_contact_id.label}</td>
-      <td class="view-value">
-        {$form.target_contact_id.html}
-        {if $action eq 1 or $single eq false}
-          <div class="crm-is-multi-activity-wrapper">
-            {$form.is_multi_activity.html}&nbsp;{$form.is_multi_activity.label} {help id="id-is_multi_activity"}
-          </div>
-        {/if}
-      </td>
+      {if $targetContactCount}
+        <td class="label">{$form.target_contact_id.label}</td>
+        <td class="view-value">
+          {$targetContactCount} contacts
+          {if $action eq 1 or $single eq false}
+            <div class="crm-is-multi-activity-wrapper">
+              {$form.is_multi_activity.html}&nbsp;{$form.is_multi_activity.label} {help id="id-is_multi_activity"}
+            </div>
+          {/if}
+        </td>
+      {else}
+        <td class="label">{$form.target_contact_id.label}</td>
+        <td class="view-value">
+          {$form.target_contact_id.html}
+          {if $action eq 1 or $single eq false}
+            <div class="crm-is-multi-activity-wrapper">
+              {$form.is_multi_activity.html}&nbsp;{$form.is_multi_activity.label} {help id="id-is_multi_activity"}
+            </div>
+          {/if}
+        </td>
+      {/if}
     </tr>
-
     <tr class="crm-activity-form-block-assignee_contact_id">
       <td class="label">
         {$form.assignee_contact_id.label}
