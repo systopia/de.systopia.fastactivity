@@ -148,8 +148,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
     $this->assign('cdType', FALSE);
     if ($this->_cdType) {
       $this->assign('cdType', TRUE);
-      CRM_Custom_Form_CustomData::preProcess($this);
-      return;
+      return CRM_Custom_Form_CustomData::preProcess($this);
     }
 
     // Check if we should be accessing this page
@@ -233,7 +232,51 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
       $this->_values = array();
       if (isset($this->_activityId) && $this->_activityId) {
         $params = array('id' => $this->_activityId);
-        CRM_Activity_BAO_Activity::retrieve($params, $this->_values);
+        //CRM_Activity_BAO_Activity::retrieve($params, $this->_values);
+        try {
+          $activityRecord = civicrm_api3('Activity', 'getsingle', array(
+            'sequential' => 1,
+            //'return' => "subject, duration, location, details, status_id, activity_type_id, priority_id, source_contact_id, campaign_id, engagement_level",
+            'id' => $this->_activityId,
+          ));
+          $this->_values = $activityRecord;
+
+          $activityAssigneeContacts = civicrm_api3('ActivityContact', 'get', array(
+            'sequential' => 1,
+            'activity_id' => $this->_activityId,
+            'record_type_id' => "Activity Assignees",
+          ));
+          if (!empty($activityAssigneeContacts['count'])) {
+            foreach ($activityAssigneeContacts['values'] as $contact) {
+              $this->_values['assignee_contact_id'][] = $contact['contact_id'];
+              // FIXME: Add assignee_contact_value here too?
+            }
+          }
+
+          $result = civicrm_api3('ActivityContact', 'getcount', array(
+            'sequential' => 1,
+            'activity_id' => $this->_activityId,
+            'record_type_id' => "Activity Targets",
+          ));
+
+          $activityTargetContacts = civicrm_api3('ActivityContact', 'get', array(
+            'sequential' => 1,
+            'activity_id' => $this->_activityId,
+            'record_type_id' => "Activity Targets",
+          ));
+          if (!empty($activityTargetContacts['count'])) {
+            foreach ($activityTargetContacts['values'] as $contact) {
+              $this->_values['target_contact_id'][] = $contact['contact_id'];
+              // FIXME: Add target_contact_value here too?
+            }
+          }
+        }
+        catch (Exception $e) {
+          // Get activity will fail if not found
+          $errorMsg = $e->getMessage();
+          CRM_Core_Error::statusBounce($errorMsg . ' (id='.$this->_activityId.')', ts('Activity not found'), 'error');
+          return;
+        }
       }
       $this->set('values', $this->_values);
     }
@@ -245,8 +288,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
     if ($this->_cdType) {
       // AJAX query for custom data is called to civicrm/fastactivity/add
       // This handles that query and returns the edit form block for customData
-      CRM_Custom_Form_CustomData::buildQuickForm($this);
-      return;
+      return CRM_Custom_Form_CustomData::buildQuickForm($this);
     }
 
     // Get action links to display at bottom of activity (not for new activity as nothing to view/edit/delete!).
@@ -719,7 +761,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
     // Set activity type name for confirmation message
     $typeName = '';
     if (isset($params['activity_type_id'])) {
-      list($typeName, $activityTypeDescription) = CRM_Core_BAO_OptionValue::getActivityTypeDetails($params['activityTypeId']);
+      list($typeName, $activityTypeDescription) = CRM_Core_BAO_OptionValue::getActivityTypeDetails($params['activity_type_id']);
     }
     // Set activity state for confirmation message
     $state = '';
@@ -754,8 +796,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
     if ($this->_cdType) {
       // AJAX query for custom data is called to civicrm/fastactivity/add
       // This handles that query and returns the edit form block for customData
-      CRM_Custom_Form_CustomData::setDefaultValues($this);
-      return;
+      return CRM_Custom_Form_CustomData::setDefaultValues($this);
     }
 
     $defaults = $this->_values + CRM_Core_Form_RecurringEntity::setDefaultValues();
@@ -773,8 +814,8 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
       }
 
       // Fixme: why are we getting the wrong keys from upstream?
-      $defaults['target_contact_id'] = CRM_Utils_Array::value('target_contact', $defaults);
-      $defaults['assignee_contact_id'] = CRM_Utils_Array::value('assignee_contact', $defaults);
+      //$defaults['target_contact_id'] = CRM_Utils_Array::value('target_contact', $defaults);
+      //$defaults['assignee_contact_id'] = CRM_Utils_Array::value('assignee_contact', $defaults);
 
       // set default tags if exists
       $defaults['tag'] = CRM_Core_BAO_EntityTag::getTag($this->_activityId, 'civicrm_activity');
