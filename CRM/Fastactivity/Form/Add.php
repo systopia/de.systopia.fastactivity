@@ -33,7 +33,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
   protected $_activitySourceContacts;
   protected $_activityAssigneeContacts;
   protected $_activityTargetContacts;
-  protected $_groupTree;
+  public $_groupTree;
   protected $_values;
 
   /**
@@ -135,6 +135,15 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
 
   public function preprocess()
   {
+    // AJAX query for custom data is called to civicrm/fastactivity/add
+    // This handles that query and returns the edit form block for customData
+    $this->_cdType = CRM_Utils_Array::value('type', $_GET);
+    $this->assign('cdType', FALSE);
+    if ($this->_cdType) {
+      $this->assign('cdType', TRUE);
+      return CRM_Custom_Form_CustomData::preProcess($this);
+    }
+
     // Check if we should be accessing this page
     $allowedActions = array(CRM_Core_Action::ADD, CRM_Core_Action::UPDATE);
     if (!in_array($this->_action, $allowedActions)) {
@@ -362,6 +371,12 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
   }
 
   public function buildQuickForm() {
+    if ($this->_cdType) {
+      // AJAX query for custom data is called to civicrm/fastactivity/add
+      // This handles that query and returns the edit form block for customData
+      return CRM_Custom_Form_CustomData::buildQuickForm($this);
+    }
+
     if (!in_array($this->_action, array(CRM_Core_Action::ADD))) {
       $actionLinks = CRM_Fastactivity_BAO_Activity::actionLinks($this->_activityTypeId, $this->_activityId);
       if (isset($actionLinks[$this->_action])) {
@@ -591,6 +606,8 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
    */
   public function setDefaultValues() {
     if ($this->_cdType) {
+      // AJAX query for custom data is called to civicrm/fastactivity/add
+      // This handles that query and returns the edit form block for customData
       return CRM_Custom_Form_CustomData::setDefaultValues($this);
     }
 

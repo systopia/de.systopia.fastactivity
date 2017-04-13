@@ -14,10 +14,10 @@
 | written permission from the original author(s).        |
 +-------------------------------------------------------*}
 
-    <h3>{$activityHeader}</h3>
-    {if $activityTypeDescription }
-      <div class="help">Description: {$activityTypeDescription}</div>
-    {/if}
+<h3>{$activityHeader}</h3>
+{if $activityTypeDescription }
+  <div class="help">Description: {$activityTypeDescription}</div>
+{/if}
 
 {* this template is used for adding/editing other (custom) activities. *}
 {if $cdType }
@@ -155,13 +155,11 @@
       <tr class="crm-activity-form-block-tag_set">{include file="CRM/common/Tagset.tpl" tagsetType='activity' tableLayout=true}</tr>
     {/if}
 
-    {if $viewCustomData}
-      <tr class="crm-activity-form-block-custom_data">
-        <td colspan="2">
-          <div id="customData"></div>
-        </td>
-      </tr>
-    {/if}
+    <tr class="crm-activity-form-block-custom_data">
+      <td colspan="2">
+        <div id="customData"></div>
+      </td>
+    </tr>
 
     <tr class="crm-activity-form-block-attachment">
       <td colspan="2">
