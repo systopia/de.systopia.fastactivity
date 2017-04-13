@@ -663,10 +663,14 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
       }
     }
 
-    // FIXME: Disable because it won't save with contact properly if > 20 contacts at the moment.
-    //$activity = CRM_Activity_BAO_Activity::create($params);
-    CRM_Core_Session::setStatus('FIXME: Activity add/update disabled during development');
-    return;
+    // FIXME: Disable because it won't save with contact properly if > 20 contacts until we implement code to detect this.
+    if ($this->_action != CRM_Core_Action::UPDATE) {
+      $activity = CRM_Activity_BAO_Activity::create($params);
+    }
+    else {
+      CRM_Core_Session::setStatus('FIXME: Activity update disabled during development');
+      return;
+    }
 
     // add tags if exists
     $tagParams = array();
@@ -841,7 +845,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
       $defaults['activity_type_id'] = $this->_activityTypeId;
     }
 
-    // TODO: With Contacts defaults with add/remove entityRef
+    // FIXME: Replace/remove this
     // CRM-15472 - 50 is around the practial limit of how many items a select2 entityRef can handle
     /*if (!empty($defaults['target_contact_id'])) {
       $count = count(is_array($defaults['target_contact_id']) ? $defaults['target_contact_id'] : explode(',', $defaults['target_contact_id']));
