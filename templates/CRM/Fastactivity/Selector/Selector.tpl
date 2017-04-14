@@ -21,8 +21,14 @@
     </div><!-- /.crm-accordion-header -->
     <div class="crm-accordion-body">
       <div class="no-border form-layout-compressed" id="searchOptions">
-        <div class="crm-contact-form-block-activity_type_id crm-inline-edit-field">
-        {$form.activity_type_id.label} {$form.activity_type_id.html|crmAddClass:big}
+        <div class="crm-contact-form-block-activity_type_id">
+          <div class="crm-block crm-form-block crm-activity-search-form-block">
+          <table class="form-layout"><tr>
+              <td class="label">{$form.activity_type_id.label}</td>
+              <td class="view-value">{$form.activity_type_id.html|crmAddClass:fullwidth}</td>
+            </tr>
+          </table>
+          </div>
         </div>
     </div><!-- /.crm-accordion-body -->
   </div><!-- /.crm-accordion-wrapper -->

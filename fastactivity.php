@@ -172,3 +172,14 @@ function fastactivity_civicrm_tabs ( &$tabs, $contactID ) {
 function fastactivity_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
   _fastactivity_civix_civicrm_alterSettingsFolders($metaDataFolders);
 }
+
+/**
+ * Implements hook_coreResourceList
+ *
+ * @param array $list
+ * @param string $region
+ */
+function fastactivity_civicrm_coreResourceList(&$list, $region) {
+  Civi::resources()
+    ->addStyleFile('de.systopia.fastactivity', 'css/fastactivity.css', 0, 'page-header');
+}
