@@ -28,10 +28,11 @@ class CRM_Fastactivity_Page_AJAX {
     $contactID = CRM_Utils_Type::escape($_POST['contact_id'], 'Integer');
     $context = CRM_Utils_Type::escape(CRM_Utils_Array::value('context', $_GET), 'String');
 
+    // Map column Id to the actual SQL query result column we are going to order by
     $sortMapper = array(
       0 => 'activity_type_id',
-      1 => 'subject',
-      2 => 'campaign_id',
+      1 => 'activity_subject',
+      2 => 'activity_campaign_title',
       3 => 'source_display_name',
       4 => 'target_display_name',
       5 => 'assignee_display_name',
