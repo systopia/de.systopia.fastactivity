@@ -105,7 +105,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
       ),
       'target_contact_id' => array(
         'type' => 'entityRef',
-        'label' => ts('With Contact'),
+        'label' => ts('With Contacts'),
         'attributes' => array('multiple' => TRUE, 'create' => TRUE),
       ),
       'assignee_contact_id' => array(
