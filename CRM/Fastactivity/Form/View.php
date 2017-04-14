@@ -196,13 +196,10 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
     if (isset($this->_activityId)) {
       if ($this->_action & CRM_Core_Action::DELETE) {
         try {
-          // FIXME: Activity deletion disabled during development
-          /*$result = civicrm_api3('Activity', 'delete', array(
+          $result = civicrm_api3('Activity', 'delete', array(
             'sequential' => 1,
             'id' => $this->_activityId,
           ));
-          */
-          CRM_Core_Session::setStatus('FIXME: Activity deletion disabled during development', ts('Activity deletion disabled'), 'info');
         }
         catch (Exception $e) {
           // Delete will fail if, for example the activity is already deleted

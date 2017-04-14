@@ -46,10 +46,11 @@
       </td>
     </tr>
     <tr class="crm-activity-form-block-target_contact_id">
-      {if $targetContactCount}
+      {if $activityTargetCount}
         <td class="label">{$form.target_contact_id.label}</td>
         <td class="view-value">
-          {$targetContactCount} contacts
+          {$form.activityTargetCount.html}
+          {$activityTargetCount} contacts
           {if $action eq 1 or $single eq false}
             <div class="crm-is-multi-activity-wrapper">
               {$form.is_multi_activity.html}&nbsp;{$form.is_multi_activity.label}
@@ -71,11 +72,10 @@
     <tr class="crm-activity-form-block-assignee_contact_id">
       <td class="label">
         {$form.assignee_contact_id.label}
-        {edit}{title=$form.assignee_contact_id.label}{/edit}
       </td>
       <td>
         {$form.assignee_contact_id.html}
-        {if !$form.target_contact_id.frozen}
+        {if !$activityTargetCount}
           <a href="#" class="crm-hover-button" id="swap_target_assignee" title="{ts}Swap Target and Assignee Contacts{/ts}" style="position:relative; bottom: 1em;">
             <span class="icon ui-icon-shuffle"></span>
           </a>

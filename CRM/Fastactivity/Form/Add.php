@@ -34,8 +34,11 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
   protected $_activitySourceContacts;
   protected $_activityAssigneeContacts;
   protected $_activityTargetContacts;
+  protected $_activityTargetCount;
   public $_groupTree;
   protected $_values;
+
+  const MAX_TARGETCONTACTS = 10;
 
   /**
    * The array of form field attributes.
@@ -262,11 +265,14 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
             'record_type_id' => "Activity Targets",
           ));
           if (!empty($targetContactCount)) {
-            if ($targetContactCount > 20) {
-              // Don't show contacts, just a count
-              $this->assign('targetContactCount', $targetContactCount);
+            $this->_activityTargetCount = $targetContactCount;
+            // Don't show contacts, just a count
+            if ($targetContactCount > $this::MAX_TARGETCONTACTS) {
+              // Only assign count if > MAX_TARGETCONTACTS so we can use this in smarty template to decide what to display
+              $this->assign('activityTargetCount', $this->_activityTargetCount);
             }
-            else {
+            $this->add('hidden', 'activityTargetCount', $this->_activityTargetCount);
+            if ($targetContactCount <= $this::MAX_TARGETCONTACTS) {
               // Retrieve all the target contacts
               $targetContacts = civicrm_api3('ActivityContact', 'get', array(
                 'sequential' => 1,
@@ -329,6 +335,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
           $element = $this->add($values['type'], $field, $values['label'], $attribute, $required, CRM_Utils_Array::value('extra', $values));
         }
         if ($field == 'activity_type_id' && ($this->_action == CRM_Core_Action::UPDATE)) {
+          // Don't allow changing activity type in edit mode
           $element->freeze();
         }
       }
@@ -384,18 +391,11 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
       CRM_Core_Form_Tag::buildQuickForm($this, $parentNames, 'civicrm_activity', $this->_activityId);
     }
 
-
-    // FIXME: Where is this used/called? Delete it? not the buttons...
-    $message = array(
-      'completed' => ts('Are you sure? This is a COMPLETED activity with the DATE in the FUTURE. Click Cancel to change the date / status. Otherwise, click OK to save.'),
-      'scheduled' => ts('Are you sure? This is a SCHEDULED activity with the DATE in the PAST. Click Cancel to change the date / status. Otherwise, click OK to save.'),
-    );
-    $js = array('onclick' => "return activityStatus(" . json_encode($message) . ");");
+    // Add buttons to form
     $this->addButtons(array(
         array(
           'type' => 'upload',
           'name' => ts('Save'),
-          'js' => $js,
           'isDefault' => TRUE,
         ),
         array(
@@ -523,7 +523,9 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
   public function postProcess($params = NULL) {
     // store the submitted values in an array
     if (!$params) {
-      $params = $this->controller->exportValues($this->_name);
+      // TODO: What is the difference between exportValues and submitValues, submitValues has all the info we need, exportValues is missing some (eg. activityContactCount)
+      //$params = $this->controller->exportValues($this->_name);
+      $params = $this->_submitValues;
     }
 
     //set activity type id
@@ -553,7 +555,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     // store the date with proper format
     $params['activity_date_time'] = CRM_Utils_Date::processDate($params['activity_date_time'], $params['activity_date_time_time']);
 
-    // TODO: Need to intercept saving of target contacts here when updating as we won't have full list if > 20
+    // TODO: Need to intercept saving of target contacts here when updating as we won't have full list if > MAX_TARGETS
     // format params as arrays
     foreach (array('target', 'assignee', 'followup_assignee') as $name) {
       if (!empty($params["{$name}_contact_id"])) {
@@ -667,14 +669,14 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
       }
     }
 
-    // FIXME: Disable because it won't save with contact properly if > 20 contacts until we implement code to detect this.
-    if ($this->_action != CRM_Core_Action::UPDATE) {
-      $activity = CRM_Activity_BAO_Activity::create($params);
+    // Don't pass in target_contact_id array if > MAX_TARGETCONTACTS as it will be empty and we don't want to clear association
+    if (!empty($params['activityTargetCount']) && $params['activityTargetCount'] > $this::MAX_TARGETCONTACTS) {
+      unset($params['target_contact_id']);
     }
-    else {
-      CRM_Core_Session::setStatus('FIXME: Activity update disabled during development');
-      return;
-    }
+
+    // BAO::create requires that target_contact_id is passed in. API does not so we must use API here or we lose target contacts
+    //   when count > MAX_TARGETCONTACTS
+    $activity = civicrm_api3('Activity', 'create', $params);
 
     // add tags if exists
     $tagParams = array();
@@ -685,26 +687,26 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     }
 
     //save static tags
-    CRM_Core_BAO_EntityTag::create($tagParams, 'civicrm_activity', $activity->id);
+    CRM_Core_BAO_EntityTag::create($tagParams, 'civicrm_activity', $activity['id']);
 
     //save free tags
     if (isset($params['activity_taglist']) && !empty($params['activity_taglist'])) {
-      CRM_Core_Form_Tag::postProcess($params['activity_taglist'], $activity->id, 'civicrm_activity', $this);
+      CRM_Core_Form_Tag::postProcess($params['activity_taglist'], $activity['id'], 'civicrm_activity', $this);
     }
 
     // CRM-9590
     if (!empty($params['is_multi_activity'])) {
-      $this->_activityIds[] = $activity->id;
+      $this->_activityIds[] = $activity['id'];
     }
     else {
-      $this->_activityId = $activity->id;
+      $this->_activityId = $activity['id'];
     }
 
     // create follow up activity if needed
     $followupStatus = '';
     $followupActivity = NULL;
     if (!empty($params['followup_activity_type_id'])) {
-      $followupActivity = CRM_Activity_BAO_Activity::createFollowupActivity($activity->id, $params);
+      $followupActivity = CRM_Activity_BAO_Activity::createFollowupActivity($activity['id'], $params);
       $followupStatus = ts('A followup activity has been scheduled.');
     }
 
@@ -714,7 +716,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
       'activity_assignee_notification')
     ) {
-      $activityIDs = array($activity->id);
+      $activityIDs = array($activity['id']);
       if ($followupActivity) {
         $activityIDs = array_merge($activityIDs, array($followupActivity->id));
       }
@@ -732,13 +734,14 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
 
         if (!CRM_Utils_array::crmIsEmptyArray($mailToContacts)) {
           //include attachments while sending a copy of activity.
-          $attachments = CRM_Core_BAO_File::getEntityFile('civicrm_activity', $activity->id);
+          $attachments = CRM_Core_BAO_File::getEntityFile('civicrm_activity', $activity['id']);
 
-          $ics = new CRM_Activity_BAO_ICalendar($activity);
-          $ics->addAttachment($attachments, $mailToContacts);
+          // FIXME: We don't have an activity object anymore
+          //$ics = new CRM_Activity_BAO_ICalendar($activity);
+          //$ics->addAttachment($attachments, $mailToContacts);
 
           // CRM-8400 add param with _currentlyViewedContactId for URL link in mail
-          CRM_Case_BAO_Case::sendActivityCopy(NULL, $activity->id, $mailToContacts, $attachments, NULL);
+          CRM_Case_BAO_Case::sendActivityCopy(NULL, $activity['id'], $mailToContacts, $attachments, NULL);
 
           $ics->cleanup();
 
@@ -830,6 +833,8 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
         list($defaults['repetition_start_date'], $defaults['repetition_start_date_time']) = CRM_Utils_Date::setDateDefaults($defaults['activity_date_time'], 'activityDateTime');
       }
 
+      $defaults['activityTargetCount'] = $this->_activityTargetCount;
+
       // set default tags if exists
       $defaults['tag'] = CRM_Core_BAO_EntityTag::getTag($this->_activityId, 'civicrm_activity');
     }
@@ -848,15 +853,6 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     if ($this->_activityTypeId) {
       $defaults['activity_type_id'] = $this->_activityTypeId;
     }
-
-    // FIXME: Replace/remove this
-    // CRM-15472 - 50 is around the practial limit of how many items a select2 entityRef can handle
-    /*if (!empty($defaults['target_contact_id'])) {
-      $count = count(is_array($defaults['target_contact_id']) ? $defaults['target_contact_id'] : explode(',', $defaults['target_contact_id']));
-      if ($count > 50) {
-        $this->freeze(array('target_contact_id'));
-      }
-    }*/
 
     if (empty($defaults['priority_id'])) {
       $priority = CRM_Core_PseudoConstant::get('CRM_Activity_DAO_Activity', 'priority_id');
