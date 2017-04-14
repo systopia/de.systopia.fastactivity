@@ -70,8 +70,6 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     if (!empty($params['sort'])) {
       $orderBy = ' ORDER BY ' . CRM_Utils_Type::escape($params['sort'], 'String');
     }
-    // Exclude activities associated with cases
-    $caseFilter = self::getCaseFilter();
 
     // The main query.  This gets all the information (except target counts) for the tabbed activity display
     // We can't do anything with targets (like see if our contact is listed) as it slows down the query too much on large datasets
@@ -96,7 +94,6 @@ LEFT JOIN civicrm_contact source_contact_me        ON (sources.contact_id = sour
 LEFT JOIN civicrm_activity_contact assignees       ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1) 
 LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0) 
 LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = %1) 
-{$caseFilter}
 WHERE {$whereClause}
 GROUP BY activity.id
 {$orderBy}
@@ -135,48 +132,9 @@ GROUP BY activity.id
       $values[$activityID]['target_contact_name'][$dao->target_contact_id] = $dao->target_display_name;
       $values[$activityID]['assignee_contact_id'] = $dao->assignee_contact_id;
       $values[$activityID]['source_contact_id'] = $dao->source_contact_id;
-
-      // if deleted, wrap in <del>
-      // FIXME: are you sure the current query still yields $dao->is_deleted?
-      if ($dao->is_deleted) {
-        $dao->contact_name = "<del>{$dao->contact_name}</del>";
-      }
-
-      // TODO: is this distinction still needed? Can't we just treat all the same///?
-      if (!$bulkActivityTypeID || ($bulkActivityTypeID != $dao->activity_type_id)) {
-        if (!empty($caseFilter)) {
-          // case related fields
-          $values[$activityID]['case_id'] = $dao->case_id;
-          $values[$activityID]['case_subject'] = $dao->case_subject;
-        }
-      }
-      else {
-        $values[$activityID]['recipients'] = ts('(%1 recipients)', array(1 => $values[$activityID]['target_contact_count']));
-        $values[$activityID]['mailingId'] = FALSE;
-        if (
-          $accessCiviMail &&
-          ($mailingIDs === TRUE || in_array($dao->source_record_id, $mailingIDs))
-        ) {
-          $values[$activityID]['mailingId'] = TRUE;
-        }
-      }
     }
 
     return $values;
-  }
-
-  public static function getCaseFilter() {
-    // DISABLED for the moment
-    // TODO: see if we need/want this
-    return '';
-
-    //filter case activities - CRM-5761
-    $caseFilter = '';
-    $components = CRM_Activity_BAO_Activity::activityComponents();
-    if (!in_array('CiviCase', $components)) {
-      $caseFilter .= " LEFT JOIN  civicrm_case_activity acase ON ( acase.activity_id = activity.id ) ";
-    }
-    return $caseFilter;
   }
 
   /**
@@ -188,50 +146,10 @@ GROUP BY activity.id
    * @return string
    */
   public static function whereClause(&$params, $sortBy = TRUE, $excludeHidden = TRUE) {
-    // FIXME: are you sure these parameters are even set in our scenario?
-    //   (excect for contact_id of course) I would assume this is for the activity search
-    //   ... not sure if we want to replace it (yet)
-
-    // is_deleted
-    $is_deleted = CRM_Utils_Array::value('is_deleted', $params);
-    if ($is_deleted == '1') {
-      $clauses[] = "activity.is_deleted = 1";
-    } else {
-      $clauses[] = "activity.is_deleted = 0";
-    }
-
-    // is_current_revision
-    $is_current_revision = CRM_Utils_Array::value('is_current_revision', $params);
-    if (empty($is_current_revision)) {
-      $clauses[] = "activity.is_current_revision = 1";
-    } else {
-      $clauses[] = "activity.is_current_revision = 0";
-    }
-
-    // is_test
-    $is_test = CRM_Utils_Array::value('is_test', $params);
-    if ($is_test == '1') {
-      $clauses[] = "activity.is_test = 1";
-    } else {
-      $clauses[] = "activity.is_test = 0";
-    }
-
-    // context
-    $context = CRM_Utils_Array::value('context', $params);
-    if ($context != 'activity') {
-      $clauses[] = "activity.status_id = 1";
-    }
-
     // activity type ID clause
     $activity_type_id = CRM_Utils_Array::value('activity_type_id', $params);
     if (!empty($activity_type_id)) {
       $clauses[] = "activity.activity_type_id IN ( " . $activity_type_id . " ) ";
-    }
-
-    // exclude by activity type clause
-    $activity_type_exclude_id = CRM_Utils_Array::value('activity_type_exclude_id', $params);
-    if (!empty($activity_type_exclude_id)) {
-      $clauses[] = "activity.activity_type_id NOT IN ( " . $activity_type_exclude_id . " ) ";
     }
 
     // contact_id
@@ -241,19 +159,11 @@ GROUP BY activity.id
       $params[1] = array($contact_id, 'Integer');
     }
 
-    // Exclude case activities
-    $components = CRM_Activity_BAO_Activity::activityComponents();
-    if (!in_array('CiviCase', $components)) {
-      $clauses[] = 'acase.id IS NULL';
-    }
-
-    //FIXME Do we need a permission clause?
-
     return implode(' AND ', $clauses);
   }
 
   /**
-   * Get the activity Count.
+   * Get the activity Count.  Used for the count on the tab
    *
    * @param array $input
    *   Array of parameters.
@@ -268,15 +178,12 @@ GROUP BY activity.id
    *   count of activities
    */
   public static function getContactActivitiesCount(&$params) {
-    $caseFilter = self::getCaseFilter();
-
     $whereClause = self::whereClause($params, FALSE);
 
     $query = "SELECT COUNT(DISTINCT acon.activity_id)
               FROM civicrm_activity_contact acon
               LEFT JOIN civicrm_activity activity
-              ON acon.activity_id = activity.id
-              {$caseFilter} ";
+              ON acon.activity_id = activity.id ";
     $query .= " WHERE {$whereClause}";
 
     return CRM_Core_DAO::singleValueQuery($query, $params);
@@ -330,15 +237,6 @@ GROUP BY activity.id
         //$contactActivities[$activityId]['target_contact'] = '???';
         $contactActivities[$activityId]['target_contact'] = self::formatContactNames($values['target_contact_name'], $values['target_contact_count']);
         $contactActivities[$activityId]['assignee_contact'] = self::formatContactNames($values['assignee_contact_name'], $values['assignee_contact_count']);
-
-        if (isset($values['mailingId']) && !empty($values['mailingId'])) {
-          $contactActivities[$activityId]['target_contact'] = CRM_Utils_System::href($values['recipients'],
-            'civicrm/mailing/report/event',
-            "mid={$values['source_record_id']}&reset=1&event=queue&cid={$params['contact_id']}&context=activitySelector");
-        }
-        elseif (!empty($values['recipients'])) {
-          $contactActivities[$activityId]['target_contact'] = $values['recipients'];
-        }
 
         $contactActivities[$activityId]['activity_date'] = CRM_Utils_Date::customFormat($values['activity_date_time']);
         $contactActivities[$activityId]['status'] = $activityStatus[$values['status_id']];
@@ -431,19 +329,12 @@ GROUP BY activity.id
 
   /**
    * This method returns the action links that are given for each search row.
-   * currently the action links added for each row are
-   *
-   * - View
+   * currently the action links added for each row are View, Edit, Delete
    *
    * @param int $activityTypeId
-   * @param int $sourceRecordId
-   * @param bool $accessMailingReport
    * @param int $activityId
-   * @param null $key
-   * @param null $compContext
-   *
+   * @param int $contactId
    * @return array
-   * @todo do we need the full complexity here?
    */
   public static function actionLinks($activityTypeId, $activityId = NULL, $contactId = NULL) {
     $showView = TRUE;
@@ -452,83 +343,6 @@ GROUP BY activity.id
     $qsUpdate = NULL;
 
     list($activityTypeName, $activityTypeDescription) = CRM_Core_BAO_OptionValue::getActivityTypeDetails($activityTypeId);
-
-    //CRM-7607
-    //lets allow to have normal operation for only activity types.
-    //when activity type is disabled or no more exists give only delete.
-    /*
-    switch ($activityTypeName) {
-      case 'Event Registration':
-      case 'Change Registration':
-        $url = 'civicrm/contact/view/participant';
-        $qsView = "action=view&reset=1&id={$sourceRecordId}&cid=%%cid%%&context=%%cxt%%{$extraParams}";
-        break;
-
-      case 'Contribution':
-        $url = 'civicrm/contact/view/contribution';
-        $qsView = "action=view&reset=1&id={$sourceRecordId}&cid=%%cid%%&context=%%cxt%%{$extraParams}";
-        break;
-
-      case 'Payment':
-      case 'Refund':
-        $participantId = CRM_Core_DAO::getFieldValue('CRM_Event_BAO_ParticipantPayment', $sourceRecordId, 'participant_id', 'contribution_id');
-        if (!empty($participantId)) {
-          $url = 'civicrm/contact/view/participant';
-          $qsView = "action=view&reset=1&id={$participantId}&cid=%%cid%%&context=%%cxt%%{$extraParams}";
-        }
-        break;
-
-      case 'Membership Signup':
-      case 'Membership Renewal':
-      case 'Change Membership Status':
-      case 'Change Membership Type':
-        $url = 'civicrm/contact/view/membership';
-        $qsView = "action=view&reset=1&id={$sourceRecordId}&cid=%%cid%%&context=%%cxt%%{$extraParams}";
-        break;
-
-      case 'Pledge Reminder':
-      case 'Pledge Acknowledgment':
-        $url = 'civicrm/contact/view/activity';
-        $qsView = "atype={$activityTypeId}&action=view&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
-        break;
-
-      case 'Email':
-      case 'Bulk Email':
-        $url = 'civicrm/activity/view';
-        $delUrl = 'civicrm/activity';
-        $qsView = "atype={$activityTypeId}&action=view&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
-        if ($activityTypeName == 'Email') {
-          $showDelete = TRUE;
-        }
-        break;
-
-      case 'Inbound Email':
-        $url = 'civicrm/contact/view/activity';
-        $qsView = "atype={$activityTypeId}&action=view&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
-        break;
-
-      case 'Open Case':
-      case 'Change Case Type':
-      case 'Change Case Status':
-      case 'Change Case Start Date':
-        $showUpdate = $showDelete = FALSE;
-        $url = 'civicrm/activity';
-        $qsView = "atype={$activityTypeId}&action=view&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
-        $qsUpdate = "atype={$activityTypeId}&action=update&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
-        break;
-
-      default:
-        $url = 'civicrm/activity';
-        $showView = $showDelete = $showUpdate = TRUE;
-        $qsView = "atype={$activityTypeId}&action=view&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
-        $qsUpdate = "atype={$activityTypeId}&action=update&reset=1&id=%%id%%&cid=%%cid%%&context=%%cxt%%{$extraParams}";
-
-        //when type is not available lets hide view and update.
-        if (empty($activityTypeName)) {
-          $showView = $showUpdate = FALSE;
-        }
-        break;
-    }*/
 
     $qs = "&reset=1&id=$activityId&cid=$contactId";
     $qsView = "action=view{$qs}";

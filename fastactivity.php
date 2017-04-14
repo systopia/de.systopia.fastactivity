@@ -131,26 +131,36 @@ _fastactivity_civix_civicrm_angularModules($angularModules);
 }
 
 
-function fastactivity_civicrm_tabset($tabsetName, &$tabs, $context) {
-  CRM_Core_Error::debug_log_message($tabsetName . ' : ' . $context);
-}
+/*function fastactivity_civicrm_tabset($tabsetName, &$tabs, $context) {
+  // FIXME: For CiviCRM 4.7 we can use this hook instead.
+}*/
 
+/**
+ * Replace the existing activities tab
+ * @param $tabs
+ * @param $contactID
+ */
 function fastactivity_civicrm_tabs ( &$tabs, $contactID ) {
-  $input = array(
-                 'contact_id' => $contactID,
-                 'admin' => FALSE,
-                 'caseId' => NULL,
-                 'context' => 'activity',
-    );
-
-  //CRM_Core_Error::debug_log_message( print_r($tabs, true) ); //DEBUG
-  //FIXME replace real activities tab when ready
+  $params = array('contact_id' => $contactID);
+  /*
+   * FIXME: Uncomment this to replace "Activities" tab
+  $tabId = 0;
+  foreach ($tabs as $tab) {
+    if (!empty($tab['title']) && $tab['title'] == 'Activities') {
+      $tabs[$tabId]['url'] = '/civicrm/contact/view/fastactivity?reset=1&cid='.$contactID;
+      $tabs[$tabId]['count'] = CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($params);
+      break;
+    }
+    $tabId++;
+  }
+  */
+  //FIXME remove this when we replace "Activities" tab (commented) above
   $tabs[] = array('title' => 'FastActivities',
                   'class' => 'livePage',
                   'id' => 'fastactivity',
                   'url' => '/civicrm/contact/view/fastactivity?reset=1&cid='.$contactID,
                   'weight' => 50,
-                  'count' => CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($input),
+                  'count' => CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($params),
                  );
 }
 

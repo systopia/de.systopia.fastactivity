@@ -555,7 +555,6 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     // store the date with proper format
     $params['activity_date_time'] = CRM_Utils_Date::processDate($params['activity_date_time'], $params['activity_date_time_time']);
 
-    // TODO: Need to intercept saving of target contacts here when updating as we won't have full list if > MAX_TARGETS
     // format params as arrays
     foreach (array('target', 'assignee', 'followup_assignee') as $name) {
       if (!empty($params["{$name}_contact_id"])) {
@@ -736,9 +735,9 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
           //include attachments while sending a copy of activity.
           $attachments = CRM_Core_BAO_File::getEntityFile('civicrm_activity', $activity['id']);
 
-          // FIXME: We don't have an activity object anymore
-          //$ics = new CRM_Activity_BAO_ICalendar($activity);
-          //$ics->addAttachment($attachments, $mailToContacts);
+          // FIXME: Check if this works now $activity is not an object
+          $ics = new CRM_Activity_BAO_ICalendar($activity['values']);
+          $ics->addAttachment($attachments, $mailToContacts);
 
           // CRM-8400 add param with _currentlyViewedContactId for URL link in mail
           CRM_Case_BAO_Case::sendActivityCopy(NULL, $activity['id'], $mailToContacts, $attachments, NULL);
