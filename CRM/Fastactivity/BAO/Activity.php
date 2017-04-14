@@ -1,39 +1,24 @@
 <?php
-/*
- +--------------------------------------------------------------------+
- | CiviCRM version 4.6                                                |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2017                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
- |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
- +--------------------------------------------------------------------+
- */
-
-/**
- *
- * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2017
- * $Id$
- */
+/*-------------------------------------------------------+
+| SYSTOPIA - Performance Boost for Activities            |
+| Copyright (C) 2017 SYSTOPIA                            |
+| Author: M. Wire (mjw@mjwconsult.co.uk)                 |
+|         B. Endres (endres@systopia.de)                 |
+| http://www.systopia.de/                                |
++--------------------------------------------------------+
+| This program is released as free software under the    |
+| Affero GPL license. You can redistribute it and/or     |
+| modify it under the terms of this license which you    |
+| can read by viewing the included agpl.txt or online    |
+| at www.gnu.org/licenses/agpl.html. Removal of this     |
+| copyright header is strictly prohibited without        |
+| written permission from the original author(s).        |
++--------------------------------------------------------*/
 
 /**
  * This class is for activity functions.
+ *
+ * @see based on CRM_Activity_BAO_Activity (CiviCRM LLC)
  */
 class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
 
@@ -91,8 +76,8 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     // The main query.  This gets all the information (except target counts) for the tabbed activity display
     // We can't do anything with targets (like see if our contact is listed) as it slows down the query too much on large datasets
     $query = "
-SELECT   
-  activity.id AS activity_id, 
+SELECT
+  activity.id AS activity_id,
   activity.activity_type_id                                                          AS activity_type_id,
   activity.subject                                                                   AS activity_subject,
   activity.activity_date_time                                                        AS activity_date_time,
@@ -112,9 +97,9 @@ LEFT JOIN civicrm_activity_contact assignees       ON (activity.id = assignees.a
 LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0) 
 LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = %1) 
 {$caseFilter}
-WHERE {$whereClause} 
-GROUP BY activity.id 
-{$orderBy} 
+WHERE {$whereClause}
+GROUP BY activity.id
+{$orderBy}
 {$limit}";
 
     $dao = CRM_Core_DAO::executeQuery($query, $params);
@@ -152,11 +137,12 @@ GROUP BY activity.id
       $values[$activityID]['source_contact_id'] = $dao->source_contact_id;
 
       // if deleted, wrap in <del>
+      // FIXME: are you sure the current query still yields $dao->is_deleted?
       if ($dao->is_deleted) {
         $dao->contact_name = "<del>{$dao->contact_name}</del>";
       }
 
-
+      // TODO: is this distinction still needed? Can't we just treat all the same///?
       if (!$bulkActivityTypeID || ($bulkActivityTypeID != $dao->activity_type_id)) {
         if (!empty($caseFilter)) {
           // case related fields
@@ -180,6 +166,10 @@ GROUP BY activity.id
   }
 
   public static function getCaseFilter() {
+    // DISABLED for the moment
+    // TODO: see if we need/want this
+    return '';
+
     //filter case activities - CRM-5761
     $caseFilter = '';
     $components = CRM_Activity_BAO_Activity::activityComponents();
@@ -198,6 +188,10 @@ GROUP BY activity.id
    * @return string
    */
   public static function whereClause(&$params, $sortBy = TRUE, $excludeHidden = TRUE) {
+    // FIXME: are you sure these parameters are even set in our scenario?
+    //   (excect for contact_id of course) I would assume this is for the activity search
+    //   ... not sure if we want to replace it (yet)
+
     // is_deleted
     $is_deleted = CRM_Utils_Array::value('is_deleted', $params);
     if ($is_deleted == '1') {
@@ -278,10 +272,10 @@ GROUP BY activity.id
 
     $whereClause = self::whereClause($params, FALSE);
 
-    $query = "SELECT COUNT(DISTINCT acon.activity_id) 
-              FROM civicrm_activity_contact acon 
-              LEFT JOIN civicrm_activity activity 
-              ON acon.activity_id = activity.id 
+    $query = "SELECT COUNT(DISTINCT acon.activity_id)
+              FROM civicrm_activity_contact acon
+              LEFT JOIN civicrm_activity activity
+              ON acon.activity_id = activity.id
               {$caseFilter} ";
     $query .= " WHERE {$whereClause}";
 
@@ -449,6 +443,7 @@ GROUP BY activity.id
    * @param null $compContext
    *
    * @return array
+   * @todo do we need the full complexity here?
    */
   public static function actionLinks($activityTypeId, $activityId = NULL, $contactId = NULL) {
     $showView = TRUE;
