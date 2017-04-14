@@ -21,7 +21,7 @@
  *
  * @see https://wiki.civicrm.org/confluence/display/CRMDOC/QuickForm+Reference
  */
-class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
+class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
   protected $_currentlyViewedContactId;
   protected $_currentUserId;
   protected $_activityId;
@@ -228,8 +228,8 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
       CRM_Custom_Form_CustomData::setDefaultValues($this);
     }
 
-    self::setActivityHeader();
-    self::setActivityTitle();
+    $this->setActivityHeader();
+    $this->setActivityTitle();
 
     $this->_values = $this->get('values');
     if (!is_array($this->_values)) {
@@ -866,124 +866,5 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
       $defaults['status_id'] = CRM_Core_OptionGroup::getDefaultValue('activity_status');
     }
     return $defaults;
-  }
-
-  /**
-   * Set the title for the View Activity Form
-   * @param null $title
-   */
-  public function setActivityTitle($title = null) {
-    // Set title
-    if (empty($title)) {
-      // If we were passed a title we'll use it, otherwise create below:
-      if (empty($this->_activityId)) {
-        // No activity Id = new activity
-        $title = 'New Activity';
-      }
-      elseif ($this->_currentlyViewedContactId) {
-        // Otherwise generate a title based on activity details
-        $displayName = CRM_Contact_BAO_Contact::displayName($this->_currentlyViewedContactId);
-        // Check if this is default domain contact CRM-10482
-        if (CRM_Contact_BAO_Contact::checkDomainContact($this->_currentlyViewedContactId)) {
-          $displayName .= ' (' . ts('default organization') . ')';
-        }
-        $title = $displayName . ' - ' . $this->_activityTypeName;
-      }
-      else {
-        $title = ts('Activity: ' . $this->_activityTypeName);
-      }
-    }
-    CRM_Utils_System::setTitle($title);
-  }
-
-  /**
-   * Set the header that appears at the top of the activity display.
-   * @param null $header
-   */
-  public function setActivityHeader($header = null) {
-    // Use passed in header if we are given it
-    if (empty($header)) {
-      if (empty($this->_activityId)) {
-        // We still want the header to display
-        $header = '&nbsp;';
-      }
-      else {
-        // Otherwise generate a header based on activity details
-        $header = $this->_activityTypeName;
-        if (isset($this->_activitySubject)) {
-          $header .= ': ' . $this->_activitySubject;
-        }
-      }
-    }
-    $this->assign('activityHeader', $header);
-  }
-
-  /**
-   * Get an array of source contacts ('id' => contact_id, 'name' => display_name)
-   * @param $activityId
-   * @return array
-   */
-  public function getSourceContacts($activityId) {
-    return self::getContacts($activityId, "Activity Source");
-  }
-
-  /**
-   * Get an array of assignee contacts ('id' => contact_id, 'name' => display_name)
-   * @param $activityId
-   * @return array
-   */
-  public function getAssigneeContacts($activityId) {
-    return self::getContacts($activityId, "Activity Assignees");
-  }
-
-  /**
-   * Get an array of target contacts ('id' => contact_id, 'name' => display_name)
-   * If target contacts > 20 we just return 'count' of contacts. If < 20 we return all names as well.
-   * @param $activityId
-   * @return array
-   */
-  public function getTargetContacts($activityId) {
-    $contactType = "Activity Targets";
-
-    $contacts = array();
-    $contactCount = civicrm_api3('ActivityContact', 'getcount', array(
-      'sequential' => 1,
-      'activity_id' => $activityId,
-      'record_type_id' => $contactType,
-    ));
-    $contacts['count'] = $contactCount;
-
-    if ($contactCount > 20) {
-      return $contacts;
-    }
-    else {
-      $contacts = self::getContacts($activityId, $contactType);
-      return $contacts;
-    }
-  }
-
-  /**
-   * Shared function that gets contact names/Ids and count as an array.
-   * @param $activityId
-   * @param $contactType
-   * @return array
-   */
-  public function getContacts($activityId, $contactType) {
-    $contacts = civicrm_api3('ActivityContact', 'get', array(
-      'sequential' => 1,
-      'activity_id' => $activityId,
-      'record_type_id' => $contactType,
-    ));
-    if (isset($contacts['count']) && ($contacts['count'] > 0)) {
-      foreach ($contacts['values'] as $contact) {
-        $contactList[] = array('id' => $contact['contact_id'], 'name' => CRM_Contact_BAO_Contact::displayName($contact['contact_id']));
-      }
-      $contactList['count'] = $contacts['count'];
-      return $contactList;
-    }
-    else {
-      $contacts['count'] = 0;
-      return $contacts;
-    }
   }
 }

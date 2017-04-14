@@ -21,7 +21,7 @@
  *
  * @see https://wiki.civicrm.org/confluence/display/CRMDOC/QuickForm+Reference
  */
-class CRM_Fastactivity_Form_View extends CRM_Core_Form {
+class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
 
   protected $_currentlyViewedContactId;
   protected $_activityId;
@@ -101,8 +101,8 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
     if ($this->_action & CRM_Core_Action::DELETE) {
       // Don't need to load any more info about the activity
       // But we still display activity type, status and date for the user to confirm delete.
-      self::setActivityTitle(ts('Delete Activity'));
-      self::setActivityHeader(ts('Are you sure you want to delete this activity?'));
+      $this->setActivityTitle(ts('Delete Activity'));
+      $this->setActivityHeader(ts('Are you sure you want to delete this activity?'));
     }
     else {
       $priorities = CRM_Core_PseudoConstant::get('CRM_Activity_DAO_Activity', 'priority_id');
@@ -130,7 +130,7 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
         $this->_activityId, 0, $this->_activityTypeId
       );
 
-      self::setActivityHeader();
+      $this->setActivityHeader();
 
       // when custom data is included in this page
       if (!empty($_POST['hidden_custom'])) {
@@ -145,7 +145,7 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
         CRM_Custom_Form_CustomData::setDefaultValues($this);
       }
     }
-    self::setActivityTitle();
+    $this->setActivityTitle();
   }
 
   public function buildQuickForm() {
@@ -217,50 +217,6 @@ class CRM_Fastactivity_Form_View extends CRM_Core_Form {
       }
     }
     parent::postProcess();
-  }
-
-  /**
-   * Set the title for the View Activity Form
-   * @param null $title
-   */
-  public function setActivityTitle($title = null) {
-    // Set title
-    if (!empty($title)) {
-      // If we've been given a title use it
-      CRM_Utils_System::setTitle($title);
-    }
-    else {
-      // Otherwise generate a title based on activity details
-      if ($this->_currentlyViewedContactId) {
-        $displayName = CRM_Contact_BAO_Contact::displayName($this->_currentlyViewedContactId);
-        // Check if this is default domain contact CRM-10482
-        if (CRM_Contact_BAO_Contact::checkDomainContact($this->_currentlyViewedContactId)) {
-          $displayName .= ' (' . ts('default organization') . ')';
-        }
-        CRM_Utils_System::setTitle($displayName . ' - ' . $this->_activityTypeName);
-      } else {
-        CRM_Utils_System::setTitle(ts('Activity: ' . $this->_activityTypeName));
-      }
-    }
-  }
-
-  /**
-   * Set the header that appears at the top of the activity display.
-   * @param null $header
-   */
-  public function setActivityHeader($header = null) {
-    if (!empty($header)) {
-      // Use passed in header if we are given it
-      $this->assign('activityHeader', $header);
-    }
-    else {
-      // Otherwise generate a header based on activity details
-      $header = $this->_activityTypeName;
-      if (isset($this->_activitySubject)) {
-        $header .= ': ' . $this->_activitySubject;
-      }
-      $this->assign('activityHeader', $header);
-    }
   }
 
   /**
