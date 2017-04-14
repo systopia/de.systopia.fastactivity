@@ -112,7 +112,7 @@ LEFT JOIN civicrm_contact source_contact_me        ON (sources.contact_id = sour
 LEFT JOIN civicrm_activity_contact assignees       ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1) 
 LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0) 
 LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = %1) 
-LEFT JOIN civicrm_activity_contact targets         ON (activity.id = targets.activity_id AND targets.record_type_id = 1)
+LEFT JOIN civicrm_activity_contact targets         ON (activity.id = targets.activity_id AND targets.record_type_id = 3)
 LEFT JOIN civicrm_contact target_contact_random    ON (targets.contact_id = target_contact_random.id AND target_contact_random.is_deleted = 0) 
 LEFT JOIN civicrm_contact target_contact_me        ON (targets.contact_id = target_contact_me.id AND target_contact_me.id = %1) 
 {$caseFilter}
