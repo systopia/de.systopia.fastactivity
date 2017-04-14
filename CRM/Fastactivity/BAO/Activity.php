@@ -89,6 +89,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     $caseFilter = self::getCaseFilter();
 
     // The main query.  This gets all the information (except target counts) for the tabbed activity display
+    // We can't do anything with targets (like see if our contact is listed) as it slows down the query too much on large datasets
     $query = "
 SELECT   
   activity.id AS activity_id, 
@@ -101,9 +102,7 @@ SELECT
   COALESCE(source_contact_me.display_name, source_contact_random.display_name)       AS source_display_name,
   COUNT(DISTINCT(assignees.contact_id))                                              AS assignee_count,
   COALESCE(assignee_contact_me.id, assignee_contact_random.id)                       AS assignee_contact_id,
-  COALESCE(assignee_contact_me.display_name, assignee_contact_random.display_name)   AS assignee_display_name,
-  COALESCE(target_contact_me.id)                                                     AS target_contact_id,
-  COALESCE(target_contact_me.display_name)                                           AS target_display_name 
+  COALESCE(assignee_contact_me.display_name, assignee_contact_random.display_name)   AS assignee_display_name 
 FROM civicrm_activity_contact acon 
 LEFT JOIN civicrm_activity activity                ON acon.activity_id = activity.id 
 LEFT JOIN civicrm_activity_contact sources         ON (activity.id = sources.activity_id AND sources.record_type_id = 2) 
@@ -112,8 +111,6 @@ LEFT JOIN civicrm_contact source_contact_me        ON (sources.contact_id = sour
 LEFT JOIN civicrm_activity_contact assignees       ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1) 
 LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0) 
 LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = %1) 
-LEFT JOIN civicrm_activity_contact targets         ON (activity.id = targets.activity_id AND targets.record_type_id = 3) 
-LEFT JOIN civicrm_contact target_contact_me        ON (targets.contact_id = target_contact_me.id AND target_contact_me.id = %1) 
 {$caseFilter}
 WHERE {$whereClause} 
 GROUP BY activity.id 
