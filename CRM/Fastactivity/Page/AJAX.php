@@ -31,11 +31,12 @@ class CRM_Fastactivity_Page_AJAX {
     $sortMapper = array(
       0 => 'activity_type_id',
       1 => 'subject',
-      2 => 'source_display_name',
-      3 => 'target_display_name',
-      4 => 'assignee_display_name',
-      5 => 'activity_date_time',
-      6 => 'status_id',
+      2 => 'campaign_id',
+      3 => 'source_display_name',
+      4 => 'target_display_name',
+      5 => 'assignee_display_name',
+      6 => 'activity_date_time',
+      7 => 'status_id',
     );
 
     $sEcho = CRM_Utils_Type::escape($_REQUEST['sEcho'], 'Integer');
@@ -104,6 +105,7 @@ class CRM_Fastactivity_Page_AJAX {
     $selectorElements = array(
       'activity_type',
       'subject',
+      'campaign',
       'source_contact',
       'target_contact',
       'assignee_contact',
