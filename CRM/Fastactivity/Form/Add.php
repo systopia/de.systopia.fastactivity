@@ -91,6 +91,10 @@ class CRM_Fastactivity_Form_Add extends CRM_Core_Form {
         'type' => 'select',
         'required' => TRUE,
       ),
+      'medium_id' => array(
+        'type' => 'select',
+        'required' => TRUE,
+      ),
       'source_contact_id' => array(
         'type' => 'entityRef',
         'label' => ts('Added By'),
