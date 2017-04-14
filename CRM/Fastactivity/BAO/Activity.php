@@ -80,6 +80,7 @@ SELECT
   activity.subject                                                                   AS activity_subject,
   activity.activity_date_time                                                        AS activity_date_time,
   activity.status_id                                                                 AS activity_status_id,
+  activity.campaign_id                                                               AS activity_campaign_id,
   COUNT(DISTINCT(sources.contact_id))                                                AS source_count,
   COALESCE(source_contact_me.id, source_contact_random.id)                           AS source_contact_id,
   COALESCE(source_contact_me.display_name, source_contact_random.display_name)       AS source_display_name,
@@ -116,11 +117,25 @@ GROUP BY activity.id
       $values[$activityID]['activity_date_time'] = $dao->activity_date_time;
       $values[$activityID]['status_id'] = $dao->activity_status_id;
       $values[$activityID]['subject'] = $dao->activity_subject;
-      $values[$activityID]['campaign_id'] = $dao->campaign_id;
+      $values[$activityID]['campaign_id'] = $dao->activity_campaign_id;
       $values[$activityID]['is_recurring_activity'] = $dao->is_recurring_activity;
 
-      if ($dao->campaign_id) {
-        $values[$activityID]['campaign'] = $allCampaigns[$dao->campaign_id];
+      if (!empty($values[$activityID]['campaign_id'])) {
+        try {
+          $campaign = civicrm_api3('Campaign', 'getsingle', array(
+            'return' => "title",
+            'id' => $values[$activityID]['campaign_id'],
+          ));
+          if (isset($campaign['title'])) {
+            $values[$activityID]['campaign'] = $campaign['title'];
+          }
+        }
+        catch (Exception $e) {
+          // Do nothing, just means we don't get a campaign shown in the list
+        }
+      }
+      else {
+        $values[$activityID]['campaign'] = NULL;
       }
 
       // Assign contact counts / names
@@ -240,6 +255,8 @@ GROUP BY activity.id
 
         $contactActivities[$activityId]['activity_date'] = CRM_Utils_Date::customFormat($values['activity_date_time']);
         $contactActivities[$activityId]['status'] = $activityStatus[$values['status_id']];
+
+        $contactActivities[$activityId]['campaign'] = $values['campaign'];
 
         // add class to this row if overdue
         $contactActivities[$activityId]['class'] = '';
