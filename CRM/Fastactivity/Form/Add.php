@@ -38,7 +38,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
   public $_groupTree;
   protected $_values;
 
-  const MAX_TARGETCONTACTS = 10;
+  const MAX_TARGETCONTACTS = 20;
 
   /**
    * The array of form field attributes.
