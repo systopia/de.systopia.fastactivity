@@ -134,7 +134,7 @@
       </td>
     </tr>
     <tr class="crm-activity-form-block-activity_medium">
-      <td class="label">Engagement Level</td>
+      <td class="label">Engagement Index</td>
       <td class="view-value">
         {if $activity.engagementLevelStars}
           {$activity.engagementLevelStars}
