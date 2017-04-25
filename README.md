@@ -8,9 +8,10 @@ This is implemented in the "standard" CiviCRM format with a separate whereClause
 
 ## Features
 - A new filter is provided which uses a multi-select to allow filtering on multiple activity types.
+- An add/remove filter is added on edit activity for "With Contact" when > 20 to allow editing this field on large records.
 
 ## Not implemented
-- The built-in View/Edit/Delete activity dialog also needs to be replaced with one that uses the CRM_Fastactivity_BAO_Activity class to benefit from the performance improvements.
+- The activity search functions are not in the scope of this extension.
 
 ## Requirements
-- Requires fontawesome extension (to display spinner): https://github.com/mattwire/uk.co.mjwconsult.fontawesome
+- Requires fontawesome extension (for various icons / engagement level): https://github.com/mattwire/uk.co.mjwconsult.fontawesome
