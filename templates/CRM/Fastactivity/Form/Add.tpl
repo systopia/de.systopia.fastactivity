@@ -263,8 +263,9 @@ CRM.$(function($) {
 {if $actionLinks}
   <div class="actionlinks">
     {foreach from=$actionLinks item=links}
-      {if $links.icon}{$links.icon}{/if}
-      <a href="/{$links.url}?{$links.qs}" class="action-item">{$links.name}</a>&nbsp;
+      <a href="/{$links.url}?{$links.qs}" class="action-item crm-hover-button no-popup">
+        {if $links.icon}{$links.icon}{/if} {$links.name}
+      </a>
     {/foreach}
   </div>
 {/if}
