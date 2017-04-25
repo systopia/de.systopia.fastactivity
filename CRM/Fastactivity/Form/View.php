@@ -245,7 +245,7 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
 
   /**
    * Get an array of target contacts ('id' => contact_id, 'name' => display_name)
-   * If target contacts > 20 we just return 'count' of contacts. If < 20 we return all names as well.
+   * If target contacts > MAX_TARGET_CONTACTS we just return 'count' of contacts. If < MAX_TARGET_CONTACTS we return all names as well.
    * @param $activityId
    * @return array
    */
@@ -260,7 +260,7 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
     ));
     $contacts['count'] = $contactCount;
 
-    if ($contactCount > 20) {
+    if ($contactCount > CRM_Fastactivity_Form_Add::MAX_TARGETCONTACTS) {
       return $contacts;
     }
     else {
