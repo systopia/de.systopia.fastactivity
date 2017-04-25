@@ -108,6 +108,16 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
         'label' => ts('With Contacts'),
         'attributes' => array('multiple' => TRUE, 'create' => TRUE),
       ),
+      'target_contact_add_id' => array(
+        'type' => 'entityRef',
+        'label' => ts('Add to With Contacts'),
+        'attributes' => array('multiple' => TRUE, 'create' => TRUE),
+      ),
+      'target_contact_remove_id' => array(
+        'type' => 'entityRef',
+        'label' => ts('Remove from With Contacts'),
+        'attributes' => array('multiple' => TRUE, 'create' => FALSE),
+      ),
       'assignee_contact_id' => array(
         'type' => 'entityRef',
         'label' => ts('Assigned to'),
@@ -682,6 +692,23 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     if (!empty($params['tag'])) {
       foreach ($params['tag'] as $tag) {
         $tagParams[$tag] = 1;
+      }
+    }
+
+    // target_contact_add_id may contain a list of contacts to add, target_contact_remove_id may contain a list of contacts to remove
+    // Process target_contact_add_id
+    if (!empty($params['target_contact_add_id'])) {
+      $targetsAdded = CRM_Fastactivity_BAO_Activity::addTargetContacts($activity['id'], explode(',', $params['target_contact_add_id']));
+      if (count($targetsAdded) > 0) {
+        CRM_Core_Session::setStatus('Added contact Ids: '. implode(',', $targetsAdded) . ' to "With Contact" for activity ' . $activity['id']);
+      }
+    }
+
+    // Process target_contact_remove_id
+    if (!empty($params['target_contact_remove_id'])) {
+      $targetsRemoved = CRM_Fastactivity_BAO_Activity::removeTargetContacts($activity['id'], explode(',', $params['target_contact_remove_id']));
+      if (count($targetsRemoved) > 0) {
+        CRM_Core_Session::setStatus('Removed contact Ids: '. implode(',', $targetsRemoved) . ' from "With Contact" for activity ' . $activity['id']);
       }
     }
 

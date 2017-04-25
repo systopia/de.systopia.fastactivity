@@ -190,6 +190,106 @@ GROUP BY activity.id
   }
 
   /**
+   * This function removes an array of target contacts from the activity without retrieving all existing targets first
+   *
+   * @param $activityId
+   * @param $targetIds (array of contact Ids)
+   */
+  public static function removeTargetContacts($activityId, $targetIds) {
+    // Run query to see if the contacts are already a target contact
+    // Generate list of contacts which we need to remove
+    $missingIds = CRM_Fastactivity_BAO_Activity::isNotTargetContact($activityId, $targetIds);
+    // Generate list of target contact Ids that exist and should be removed (don't try to remove non-existing Ids)
+    $contactIds = array_diff($targetIds, $missingIds);
+    // Remove those contacts
+    $contactIdsList = implode(',', $contactIds);
+    $query = "DELETE FROM `civicrm_activity_contact` WHERE (record_type_id=3) AND (activity_id=$activityId) AND (contact_id IN ($contactIdsList));";
+    if (!empty($contactIdsList)) {
+      try {
+        $dao = CRM_Core_DAO::executeQuery($query);
+      }
+      catch (Exception $e) {
+        CRM_Core_Error::debug_log_message('fastactivity addTargetContacts: Error: '.$e->getMessage());
+        return array();
+      }
+
+      // Return an array of Ids that we deleted
+      return $contactIds;
+    }
+    else {
+      // We should always have values to remove, but in case we don't
+      return array();
+    }
+  }
+
+  /**
+   * This function adds an array of target contacts to the activity without retrieving existing targets
+   *
+   * @param $activityId
+   * @param $targetIds (array of contact Ids)
+   */
+  public static function addTargetContacts($activityId, $targetIds) {
+    // Run query to see if the contacts are already a target contact
+    // Generate list of contacts which we need to remove
+    $contactIds = CRM_Fastactivity_BAO_Activity::isNotTargetContact($activityId, $targetIds);
+    // Add those contacts
+    $query = "INSERT INTO `civicrm_activity_contact` (record_type_id,activity_id,contact_id) VALUES";
+    $values = '';
+    foreach ($contactIds as $id) {
+      if (!empty($values)) { $values .= ','; }
+      $values .= "(3,{$activityId},{$id})";
+    }
+    if (!empty($values)) {
+      $values .= ';';
+      $query = $query.$values;
+      try {
+        $dao = CRM_Core_DAO::executeQuery($query);
+      }
+      catch (Exception $e) {
+        CRM_Core_Error::debug_log_message('fastactivity addTargetContacts: Error: '.$e->getMessage());
+        return array();
+      }
+      // Return an array of Ids that we added
+      return $contactIds;
+    }
+    else {
+      // We should always have values to add, but in case we don't
+      return array();
+    }
+  }
+
+  public static function isNotTargetContact($activityId, $targetIds) {
+    if (empty($targetIds) || empty($activityId)) {
+      return array();
+    }
+
+    // activity_id, contact_id, record_type_id=3
+    // Build query to find all matching target contacts
+    $query="SELECT DISTINCT(contact_id) FROM `civicrm_activity_contact` WHERE record_type_id=3 and activity_id=%1 and contact_id IN (%2)";
+    $params[1] = array($activityId, 'Integer');
+    $params[2] = array(implode(',', $targetIds), 'String');
+
+    // Run query
+    try {
+      $dao = CRM_Core_DAO::executeQuery($query, $params);
+    }
+    catch (Exception $e) {
+      CRM_Core_Error::debug_log_message('fastactivity isNotTargetContact: Error: '.$e->getMessage());
+      return array();
+    }
+
+    // Build list of existing Ids
+    $targetExistingIds = array();
+    while ($dao->fetch()) {
+      // Each $dao->contact_id is a contact that is already a target contact so remove it from array
+      $targetExistingIds[] = $dao->contact_id;
+    }
+    // Diff arrays to get list of target Ids that are not already existing
+    $missingTargetIds = array_diff($targetIds, $targetExistingIds);
+    return $missingTargetIds;
+  }
+
+  /**
    * Wrapper for ajax activity selector.
    *
    * @param array $params
@@ -323,7 +423,7 @@ GROUP BY activity.id
     }
     elseif ($contactCount < 0) {
       // We didn't count so display a spinner until we load the data
-        $result .= '<div style="text-align: center"><i class="crm-i fa-spinner fa-spin fa-2x fa-fw"></i>
+      $result .= '<div style="text-align: center"><i class="crm-i fa-spinner fa-spin fa-2x fa-fw"></i>
 <span class="sr-only">(Loading...)</span></div>';
     }
     return $result;
