@@ -103,6 +103,11 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
         'label' => ts('Added By'),
         'required' => FALSE,
       ),
+      'target_contact_count' => array(
+        'type' => 'hidden',
+        'label' => ts('target_contact_count'),
+        'required' => FALSE,
+      ),
       'target_contact_id' => array(
         'type' => 'entityRef',
         'label' => ts('With Contacts'),
@@ -244,12 +249,20 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     $this->setActivityHeader();
     $this->setActivityTitle();
 
-    $this->_values = $this->get('values');
-    if (!is_array($this->_values)) {
+    if (!empty($this->_submitValues)) {
+      $this->_values = $this->_submitValues;
+      if (isset($this->_submitValues['target_contact_count'])) {
+        $this->_activityTargetCount = $this->_submitValues['target_contact_count'];
+        $this->assign('activityTargetCount', $this->_activityTargetCount);
+      }
+    }
+    elseif (!empty($this->_values)) {
+      // Do nothing
+    }
+    else {
       $this->_values = array();
       if (isset($this->_activityId) && $this->_activityId) {
         $params = array('id' => $this->_activityId);
-        //CRM_Activity_BAO_Activity::retrieve($params, $this->_values);
         try {
           $activityRecord = civicrm_api3('Activity', 'getsingle', array(
             'sequential' => 1,
@@ -281,7 +294,6 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
               // Only assign count if > MAX_TARGETCONTACTS so we can use this in smarty template to decide what to display
               $this->assign('activityTargetCount', $this->_activityTargetCount);
             }
-            $this->add('hidden', 'activityTargetCount', $this->_activityTargetCount);
             if ($targetContactCount <= $this::MAX_TARGETCONTACTS) {
               // Retrieve all the target contacts
               $targetContacts = civicrm_api3('ActivityContact', 'get', array(
@@ -304,7 +316,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
           return;
         }
       }
-      $this->set('values', $this->_values);
+      //$this->set('values', $this->_values);
     }
 
     $this->setFields();
@@ -677,7 +689,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     }
 
     // Don't pass in target_contact_id array if > MAX_TARGETCONTACTS as it will be empty and we don't want to clear association
-    if (!empty($params['activityTargetCount']) && $params['activityTargetCount'] > $this::MAX_TARGETCONTACTS) {
+    if (!empty($params['target_contact_count']) && $params['target_contact_count'] > $this::MAX_TARGETCONTACTS) {
       unset($params['target_contact_id']);
     }
 
@@ -857,7 +869,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
         list($defaults['repetition_start_date'], $defaults['repetition_start_date_time']) = CRM_Utils_Date::setDateDefaults($defaults['activity_date_time'], 'activityDateTime');
       }
 
-      $defaults['activityTargetCount'] = $this->_activityTargetCount;
+      $defaults['target_contact_count'] = $this->_activityTargetCount;
 
       // set default tags if exists
       $defaults['tag'] = CRM_Core_BAO_EntityTag::getTag($this->_activityId, 'civicrm_activity');
