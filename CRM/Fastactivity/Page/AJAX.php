@@ -24,7 +24,6 @@
 class CRM_Fastactivity_Page_AJAX {
 
   public static function getContactActivity() {
-    $starttime = microtime(true);//DEBUG
     $contactID = CRM_Utils_Type::escape($_POST['contact_id'], 'Integer');
     $context = CRM_Utils_Type::escape(CRM_Utils_Array::value('context', $_GET), 'String');
 
@@ -115,9 +114,6 @@ class CRM_Fastactivity_Page_AJAX {
       'links',
       'class',
     );
-
-    $time_elapsed_secs = microtime(true) - $starttime; //DEBUG
-    CRM_Core_Error::debug_log_message('Fastactivity AJAX getContactActivity exec time: '.$time_elapsed_secs); //DEBUG
 
     header('Content-Type: application/json');
     echo CRM_Utils_JSON::encodeDataTableSelector($activities, $sEcho, $iTotal, $iFilteredTotal, $selectorElements);

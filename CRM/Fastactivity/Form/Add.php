@@ -533,8 +533,6 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
   public function postProcess($params = NULL) {
     // store the submitted values in an array
     if (!$params) {
-      // TODO: What is the difference between exportValues and submitValues, submitValues has all the info we need, exportValues is missing some (eg. activityContactCount)
-      //$params = $this->controller->exportValues($this->_name);
       $params = $this->_submitValues;
     }
 
