@@ -231,10 +231,6 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     $this->assign('customDataType', 'Activity');
     $this->assign('customDataSubType', $this->_activityTypeId);
 
-    // Get custom fields
-    $this->_groupTree = CRM_Core_BAO_CustomGroup::getTree('Activity', $this,
-      $this->_activityId, 0, $this->_activityTypeId);
-
     $this->setActivityHeader();
     $this->setActivityTitle();
 
@@ -320,6 +316,10 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
       CRM_Custom_Form_CustomData::buildQuickForm($this);
       CRM_Custom_Form_CustomData::setDefaultValues($this);
     }
+
+    // Get custom fields
+    $this->_groupTree = CRM_Core_BAO_CustomGroup::getTree('Activity', $this,
+      $this->_activityId, 0, $this->_activityTypeId);
   }
 
   public function buildQuickForm() {
