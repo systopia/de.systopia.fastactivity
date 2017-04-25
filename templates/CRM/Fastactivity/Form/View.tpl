@@ -25,31 +25,29 @@
     </h3>
     <tr class="crm-activity-form-block-activity_type">
       <td class="label">Type</td>
-      <td class="view-value">{$activityTypeName}</td>
+      <td class="view-value">{$activity.typeName}</td>
     </tr>
-    {if $activitySubject}
-      <tr class="crm-activity-form-block-activity_subject">
-        <td class="label">Subject</td>
-        <td class="view-value">{$activitySubject}</td>
-      </tr>
-    {/if}
+    <tr class="crm-activity-form-block-activity_subject">
+      <td class="label">Subject</td>
+      <td class="view-value">{$activity.subject}</td>
+    </tr>
     <tr class="crm-activity-form-block-activity_date_time">
       <td class="label">
         <i class="crm-i fa-calendar" aria-hidden="true"></i>
         Date
       </td>
-      <td class="view-value">{$activityDateTime|crmDate}</td>
+      <td class="view-value">{$activity.dateTime|crmDate}</td>
     </tr>
     <tr class="crm-activity-form-block-activity_status">
       <td class="label">Status</td>
-      <td class="view-value">{$activityStatus}</td>
+      <td class="view-value">{$activity.status}</td>
     </tr>
   </table>
 {else}
   <table class="crm-info-panel">
     <h3>{$activityHeader}</h3>
-    {if $activityTypeDescription }
-      <div class="help">Description: {$activityTypeDescription}</div>
+    {if $activity.typeDescription}
+      <div class="help">Description: {$activity.typeDescription}</div>
     {/if}
     <tr class="crm-activity-form-block-source_contact_id">
       <td class="label">
@@ -58,7 +56,7 @@
       </td>
       <td class="view-value">
         {counter start=1 assign=count}
-        {foreach from=$activitySourceContacts item=contact}
+        {foreach from=$activity.sourceContacts item=contact}
           {if $contact.id}
             {assign var=contactId value=$contact.id}
             {capture assign=contactViewURL}{crmURL p='civicrm/contact/view' q="reset=1&cid=$contactId"}{/capture}
@@ -75,11 +73,11 @@
       </td>
       <td class="view-value">
         {counter start=1 assign=count}
-        {foreach from=$activityAssigneeContacts item=contact}
+        {foreach from=$activity.assigneeContacts item=contact}
           {if $contact.id}
             {assign var=contactId value=$contact.id}
             {capture assign=contactViewURL}{crmURL p='civicrm/contact/view' q="reset=1&cid=$contactId"}{/capture}
-            <a href="{$contactViewURL}">{$contact.name}</a>{if $count lt $activityAssigneeContacts.count},{/if}
+            <a href="{$contactViewURL}">{$contact.name}</a>{if $count lt $activity.assigneeContacts.count},{/if}
           {/if}
           {counter}
         {/foreach}
@@ -91,15 +89,15 @@
         With
       </td>
       <td class="view-value">
-        {if $activityTargetContacts|@count lt $activityTargetContacts.count}
-          {$activityTargetContacts.count} contacts
+        {if $activity.targetContacts|@count lt $activity.targetContacts.count}
+          {$activity.targetContacts.count} contacts
         {else}
           {counter start=1 assign=count}
-          {foreach from=$activityTargetContacts item=contact}
+          {foreach from=$activity.targetContacts item=contact}
             {if $contact.id}
               {assign var=contactId value=$contact.id}
               {capture assign=contactViewURL}{crmURL p='civicrm/contact/view' q="reset=1&cid=$contactId"}{/capture}
-              <a href="{$contactViewURL}">{$contact.name}</a>{if $count lt $activityTargetContacts.count},{/if}
+              <a href="{$contactViewURL}">{$contact.name}</a>{if $count lt $activity.targetContacts.count},{/if}
             {/if}
             {counter}
           {/foreach}
@@ -111,39 +109,51 @@
         <i class="crm-i fa-calendar" aria-hidden="true"></i>
         Date
       </td>
-      <td class="view-value">{$activityDateTime|crmDate}</td>
+      <td class="view-value">{$activity.dateTime|crmDate}</td>
     </tr>
     <tr class="crm-activity-form-block-activity_status">
       <td class="label">Status</td>
-      <td class="view-value">{$activityStatus}</td>
+      <td class="view-value">{$activity.status}</td>
     </tr>
-    {if $activityPriority}
-      <tr class="crm-activity-form-block-activity_priority">
-        <td class="label">Priority</td>
-        <td class="view-value">{$activityPriority}</td>
-      </tr>
-    {/if}
-    {if $activityMedium}
-      <tr class="crm-activity-form-block-activity_medium">
-        <td class="label">Medium</td>
-        <td class="view-value">{$mediumId}</td>
-      </tr>
-    {/if}
-    {if $activitySubject}
-      <tr class="crm-activity-form-block-activity_subject">
-        <td class="label">Subject</td>
-        <td class="view-value">{$activitySubject}</td>
-      </tr>
-    {/if}
-    {if $activityDetails}
-      <tr class="crm-activity-form-block-activity_details">
-        <td class="label">
-          <i class="crm-i fa-info" aria-hidden="true"></i>
-          Details
-        </td>
-        <td class="view-value">{$activityDetails}</td>
-      </tr>
-    {/if}
+    <tr class="crm-activity-form-block-activity_priority">
+      <td class="label">Priority</td>
+      <td class="view-value">{$activity.priority}</td>
+    </tr>
+    <tr class="crm-activity-form-block-activity_medium">
+      <td class="label">Medium</td>
+      <td class="view-value">{if $medium}{$medium}{else}{/if}</td>
+    </tr>
+    <tr class="crm-activity-form-block-activity_medium">
+      <td class="label">Campaign</td>
+      <td class="view-value">
+        {if $activity.campaignId}
+          {assign var=campaignId value=$activity.campaignId}
+          {capture assign=campaignViewURL}{crmURL p="civicrm/a/#/campaign/$campaignId/view" q="reset=1"}{/capture}
+          <a href="{$campaignViewURL}" target="_blank" class="action-item crm-hover-button no-popup">{$activity.campaign}</a>
+        {/if}
+      </td>
+    </tr>
+    <tr class="crm-activity-form-block-activity_medium">
+      <td class="label">Engagement Level</td>
+      <td class="view-value">
+        {if $activity.engagementLevelStars}
+          {$activity.engagementLevelStars}
+        {else}
+          {$activity.engagementLevel}
+        {/if}
+      </td>
+    </tr>
+    <tr class="crm-activity-form-block-activity_subject">
+      <td class="label">Subject</td>
+      <td class="view-value">{$activity.subject}</td>
+    </tr>
+    <tr class="crm-activity-form-block-activity_details">
+      <td class="label">
+        <i class="crm-i fa-info" aria-hidden="true"></i>
+        Details
+      </td>
+      <td class="view-value">{$activity.details}</td>
+    </tr>
     {foreach from=$viewCustomData item=customGroup}
       <tr class="crm-activity-form-block-custom_data">
         <td colspan="2">

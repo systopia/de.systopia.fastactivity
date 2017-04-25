@@ -38,12 +38,15 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
 
   public function preProcess()
   {
+    // Array to hold details of activity for template
+    $activityDetails = array();
+
     // Get currently viewed contact ID
     $this->_currentlyViewedContactId = $this->get('contactId');
     if (!$this->_currentlyViewedContactId) {
       $this->_currentlyViewedContactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this);
     }
-    $this->assign('contactId', $this->_currentlyViewedContactId);
+    $activityDetails['contactId'] = $this->_currentlyViewedContactId;
 
     // Get action
     $this->_action = CRM_Utils_Request::retrieve('action', 'String', $this);
@@ -55,7 +58,8 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
         CRM_Core_Error::statusBounce('No activity ID');
       }
     }
-    $this->assign('activityId', $this->_activityId);
+
+    $activityDetails['activityId'] = $this->_activityId;
 
     // Check if user has edit and/or view permissions for this activity
     if ($this->_activityId && in_array($this->_action, array(
@@ -82,21 +86,21 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
     // Get Activity Status
     $activityStatus = CRM_Activity_BAO_Activity::buildOptions('activity_status_id', 'validate');
     $this->_activityStatusId = $activityRecord['status_id'];
-    $this->assign('activityStatusId', $this->_activityStatusId);
-    $this->assign('activityStatus', $activityStatus[$this->_activityStatusId]);
+    $activityDetails['statusId'] = $this->_activityStatusId;
+    $activityDetails['status'] = $activityStatus[$this->_activityStatusId];
     // Get Activity Date/Time
-    $this->assign('activityDateTime', $activityRecord['activity_date_time']);
+    $activityDetails['dateTime'] = $activityRecord['activity_date_time'];
     // Get Activity Type Name
     $this->_activityTypeId = $activityRecord['activity_type_id'];
     if ($this->_activityTypeId) {
       //set activity type name and description to template
       list($this->_activityTypeName, $activityTypeDescription) = CRM_Core_BAO_OptionValue::getActivityTypeDetails($this->_activityTypeId);
-      $this->assign('activityTypeName', $this->_activityTypeName);
-      $this->assign('activityTypeDescription', $activityTypeDescription);
+      $activityDetails['typeName'] = $this->_activityTypeName;
+      $activityDetails['typeDescription'] = $activityTypeDescription;
     }
     // Get activity subject
     $this->_activitySubject = isset($activityRecord['subject']) ? $activityRecord['subject'] : null;
-    $this->assign('activitySubject', $this->_activitySubject);
+    $activityDetails['subject'] = $this->_activitySubject;
 
     if ($this->_action & CRM_Core_Action::DELETE) {
       // Don't need to load any more info about the activity
@@ -106,22 +110,26 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
     }
     else {
       $priorities = CRM_Core_PseudoConstant::get('CRM_Activity_DAO_Activity', 'priority_id');
-      $this->assign('activityDetails', isset($activityRecord['details']) ? $activityRecord['details'] : null);
+      $activityDetails['activityDetails'] = isset($activityRecord['details']) ? $activityRecord['details'] : null;
 
       $this->_activitySourceContacts = self::getSourceContacts($this->_activityId);
       $this->_activityAssigneeContacts = self::getAssigneeContacts($this->_activityId);
       $this->_activityTargetContacts = self::getTargetContacts($this->_activityId);
 
-      $this->assign('activitySourceContacts', $this->_activitySourceContacts);
-      $this->assign('activityAssigneeContacts', $this->_activityAssigneeContacts);
-      $this->assign('activityTargetContacts', $this->_activityTargetContacts);
+      $activityDetails['sourceContacts'] = $this->_activitySourceContacts;
+      $activityDetails['assigneeContacts'] = $this->_activityAssigneeContacts;
+      $activityDetails['targetContacts'] = $this->_activityTargetContacts;
 
-      $this->assign('activityPriority', isset($activityRecord['priority_id']) ? $priorities[$activityRecord['priority_id']] : null);
+      $activityDetails['priority'] = isset($activityRecord['priority_id']) ? $priorities[$activityRecord['priority_id']] : null;
 
       if (isset($activityRecord['medium_id'])) {
         $activityMedium = CRM_Activity_BAO_Activity::buildOptions('medium_id', 'validate');
-        $this->assign('mediumId', $activityMedium[$activityRecord['medium_id']]);
+        $activityDetails['medium'] = $activityMedium[$activityRecord['medium_id']];
       }
+
+      // Add campaign details
+      $activityDetails = self::addCampaignDetails($activityRecord, $activityDetails);
+
       $this->assign('customDataType', 'Activity');
       $this->assign('customDataSubType', $this->_activityTypeId);
 
@@ -145,6 +153,7 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
         CRM_Custom_Form_CustomData::setDefaultValues($this);
       }
     }
+    $this->assign('activity', $activityDetails);
     $this->setActivityTitle();
   }
 
@@ -283,5 +292,34 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
       $contacts['count'] = 0;
       return $contacts;
     }
+  }
+
+  public function addCampaignDetails($activityRecord, $activityDetails) {
+    if (isset($activityRecord['campaign_id'])) {
+      $activityDetails['campaignId'] = $activityRecord['campaign_id'];
+      // Get campaign title
+      try {
+        $campaignRecord = civicrm_api3('Campaign', 'getsingle', array(
+          'return' => "title",
+          'id' => $activityRecord['campaign_id'],
+        ));
+      }
+      catch (Exception $e) {
+        // Campaign not found
+        $campaignRecord['title'] = "Unknown";
+      }
+      $activityDetails['campaign'] = $campaignRecord['title'];
+    }
+    // Add "stars" for engagement level
+    $activityDetails['engagementLevelStars'] = '';
+    if (isset($activityRecord['engagement_level'])) {
+      $activityDetails['engagementLevel'] = $activityRecord['engagement_level'];
+      for ($i=0; $i < $activityRecord['engagement_level']; $i++) {
+        // We could do this in smarty but civicrm doesn't support smarty "for"
+        $activityDetails['engagementLevelStars'] .= '<i class="crm-i fa-star"></i>';
+      }
+    }
+
+    return $activityDetails;
   }
 }
