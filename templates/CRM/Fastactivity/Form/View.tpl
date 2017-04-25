@@ -60,7 +60,7 @@
           {if $contact.id}
             {assign var=contactId value=$contact.id}
             {capture assign=contactViewURL}{crmURL p='civicrm/contact/view' q="reset=1&cid=$contactId"}{/capture}
-            <a href="{$contactViewURL}">{$contact.name}</a>{if $count lt $activitySourceContacts.count},{/if}
+            <a href="{$contactViewURL}" class="action-item crm-hover-button no-popup">{$contact.name}</a>{if $count lt $activitySourceContacts.count},{/if}
           {/if}
           {counter}
         {/foreach}
@@ -77,7 +77,7 @@
           {if $contact.id}
             {assign var=contactId value=$contact.id}
             {capture assign=contactViewURL}{crmURL p='civicrm/contact/view' q="reset=1&cid=$contactId"}{/capture}
-            <a href="{$contactViewURL}">{$contact.name}</a>{if $count lt $activity.assigneeContacts.count},{/if}
+            <a href="{$contactViewURL}" class="action-item crm-hover-button no-popup">{$contact.name}</a>{if $count lt $activity.assigneeContacts.count},{/if}
           {/if}
           {counter}
         {/foreach}
@@ -97,7 +97,7 @@
             {if $contact.id}
               {assign var=contactId value=$contact.id}
               {capture assign=contactViewURL}{crmURL p='civicrm/contact/view' q="reset=1&cid=$contactId"}{/capture}
-              <a href="{$contactViewURL}">{$contact.name}</a>{if $count lt $activity.targetContacts.count},{/if}
+              <a href="{$contactViewURL}" class="action-item crm-hover-button no-popup">{$contact.name}</a>{if $count lt $activity.targetContacts.count},{/if}
             {/if}
             {counter}
           {/foreach}
