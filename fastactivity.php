@@ -147,7 +147,7 @@ function fastactivity_civicrm_tabs ( &$tabs, $contactID ) {
   $tabId = 0;
   foreach ($tabs as $tab) {
     if (!empty($tab['title']) && $tab['title'] == 'Activities') {
-      $tabs[$tabId]['url'] = '/civicrm/contact/view/fastactivity?reset=1&cid='.$contactID;
+      $tabs[$tabId]['url'] = CRM_Utils_System::url('civicrm/contact/view/fastactivity', "?reset=1&cid={$contactID}");
       $tabs[$tabId]['count'] = CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($params);
       break;
     }
