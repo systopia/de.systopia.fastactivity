@@ -235,17 +235,6 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     $this->_groupTree = CRM_Core_BAO_CustomGroup::getTree('Activity', $this,
       $this->_activityId, 0, $this->_activityTypeId);
 
-    if (!empty($_POST['hidden_custom'])) {
-      // This ensures we don't lose custom data values on page reload (eg. if formrule fails)
-      //need to assign custom data subtype to the template
-      $this->set('type', 'Activity');
-      $this->set('subType', $this->_activityTypeId);
-      $this->set('entityId', $this->_activityId);
-      CRM_Custom_Form_CustomData::preProcess($this, NULL, $this->_activityTypeId, 1, 'Activity', $this->_activityId);
-      CRM_Custom_Form_CustomData::buildQuickForm($this);
-      CRM_Custom_Form_CustomData::setDefaultValues($this);
-    }
-
     $this->setActivityHeader();
     $this->setActivityTitle();
 
@@ -320,6 +309,17 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     }
 
     $this->setFields();
+
+    if (!empty($_POST['hidden_custom'])) {
+      // This ensures we don't lose custom data values on page reload (eg. if formrule fails)
+      //need to assign custom data subtype to the template
+      $this->set('type', 'Activity');
+      $this->set('subType', $this->_activityTypeId);
+      $this->set('entityId', $this->_activityId);
+      CRM_Custom_Form_CustomData::preProcess($this, NULL, $this->_activityTypeId, 1, 'Activity', $this->_activityId);
+      CRM_Custom_Form_CustomData::buildQuickForm($this);
+      CRM_Custom_Form_CustomData::setDefaultValues($this);
+    }
   }
 
   public function buildQuickForm() {
