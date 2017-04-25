@@ -49,7 +49,6 @@
       {if $activityTargetCount}
         <td class="label">{$form.target_contact_id.label}</td>
         <td class="view-value">
-          {$form.activityTargetCount.html}
           {$activityTargetCount} contacts
           {if $action eq 1 or $single eq false}
             <div class="crm-is-multi-activity-wrapper">

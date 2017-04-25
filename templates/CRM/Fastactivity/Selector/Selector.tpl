@@ -39,7 +39,7 @@
       <th class='crm-contact-activity_subject'>{ts}Subject{/ts}</th>
       <th class='crm-contact-activity-activity_campaign'>{ts}Campaign{/ts}</th>
       <th class='crm-contact-activity-source_contact'>{ts}Added By{/ts}</th>
-      <th class='crm-contact-activity-target_contact nosort'>{ts}With{/ts}</th>
+      <!-- <th class='crm-contact-activity-target_contact nosort'>{ts}With{/ts}</th> we are not showing target contact column -->
       <th class='crm-contact-activity-assignee_contact'>{ts}Assigned{/ts}</th>
       <th class='crm-contact-activity-activity_date'>{ts}Date{/ts}</th>
       <th class='crm-contact-activity-activity_status'>{ts}Status{/ts}</th>
@@ -91,7 +91,7 @@ CRM.$(function($) {
         {sClass:'crm-contact-activity_subject'},
         {sClass:'crm-contact-activity-activity_campaign'},
         {sClass:'crm-contact-activity-source_contact'},
-        {sClass:'crm-contact-activity-target_contact', bSortable:false},
+        <!-- {sClass:'crm-contact-activity-target_contact', bSortable:false}, we are not showing target contact column -->
         {sClass:'crm-contact-activity-assignee_contact'},
         {sClass:'crm-contact-activity-activity_date'},
         {sClass:'crm-contact-activity-activity_status'},
