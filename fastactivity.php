@@ -16,6 +16,8 @@
 
 require_once 'fastactivity.civix.php';
 
+define('FASTACTIVITY_REPLACES_ACTIVITY', TRUE);
+
 /**
  * Implements hook_civicrm_config().
  *
@@ -140,26 +142,38 @@ _fastactivity_civix_civicrm_angularModules($angularModules);
  * @param $contactID
  */
 function fastactivity_civicrm_tabs ( &$tabs, $contactID ) {
-  $params = array('contact_id' => $contactID);
-  /*
-   * FIXME: Uncomment this to replace "Activities" tab
-  $tabId = 0;
-  foreach ($tabs as $tab) {
-    if (!empty($tab['title']) && $tab['title'] == 'Activities') {
-      $tabs[$tabId]['url'] = CRM_Utils_System::url('civicrm/contact/view/fastactivity', "?reset=1&cid={$contactID}");
-      $tabs[$tabId]['count'] = CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($params);
+
+  // first: try to find the old tab
+  $reuse_tab_data = NULL;
+  foreach ($tabs as $index => $tab) {
+    if (!empty($tab['id']) && $tab['id'] == 'activity') {
+      // copy old tab data
+      $reuse_tab_data = $tab;
+      if (FASTACTIVITY_REPLACES_ACTIVITY) {
+        // remove tab
+        unset($tabs[$index]);
+      }
       break;
     }
-    $tabId++;
   }
-  */
-  //FIXME remove this when we replace "Activities" tab (commented) above
-  $tabs[] = array('title' => 'FastActivities',
-                  'class' => 'livePage',
-                  'id' => 'fastactivity',
-                  'url' => CRM_Utils_System::url('civicrm/contact/view/fastactivity', "reset=1&cid={$contactID}"),
-                  'weight' => 50,
-                  'count' => CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($params),
+
+  if (!$reuse_tab_data) {
+    // if 'weight' and 'coun't can't be copied from the original tab, look it up
+    $params = array('contact_id' => $contactID);
+    $reuse_tab_data = array(
+      'title'  => ts('Fast Activities'),
+      'weight' => 50,
+      'count'  => CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($params),
+      );
+  }
+
+  // ADD the fast activity tab as a separate tab
+  $tabs[] = array('title'  => $reuse_tab_data['title'],
+                  'class'  => 'livePage',
+                  'id'     => 'fastactivity',
+                  'url'    => CRM_Utils_System::url('civicrm/contact/view/fastactivity', "reset=1&cid={$contactID}"),
+                  'weight' => $reuse_tab_data['weight'],
+                  'count'  => $reuse_tab_data['count'],
                  );
 }
 
