@@ -453,6 +453,12 @@ GROUP BY activity.id
     $showDelete = TRUE; //FIXME: May want to limit what types of activity can be deleted
     $showUpdate = TRUE;
     $qsUpdate = NULL;
+    $actionLinks = array();
+
+    if (empty($activityTypeId)) {
+      // this case caused crashes
+      return $actionLinks;
+    }
 
     list($activityTypeName, $activityTypeDescription) = CRM_Core_BAO_OptionValue::getActivityTypeDetails($activityTypeId);
 
@@ -460,7 +466,6 @@ GROUP BY activity.id
     $qsView = "action=view{$qs}";
     $qsUpdate = "action=update{$qs}";
     $qsDelete = "action=delete{$qs}";
-    $actionLinks = array();
 
     $url = 'civicrm/fastactivity/view';
 
