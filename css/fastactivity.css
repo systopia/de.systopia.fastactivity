@@ -2,7 +2,6 @@
 | SYSTOPIA - Performance Boost for Activities            |
 | Copyright (C) 2017 SYSTOPIA                            |
 | Author: M. Wire (mjw@mjwconsult.co.uk)                 |
-|         B. Endres (endres@systopia.de)                 |
 | http://www.systopia.de/                                |
 +--------------------------------------------------------+
 | This program is released as free software under the    |
@@ -15,8 +14,8 @@
 +--------------------------------------------------------*/
 
 /*
-   de.systopia.fastactivity styles file
-*/
+ * de.systopia.fastactivity styles file
+ */
 
 .crm-container .fullwidth {
     width: 100% !important;
