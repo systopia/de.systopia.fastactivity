@@ -74,7 +74,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     // We can't do anything with targets (like see if our contact is listed) as it slows down the query too much on large datasets
     $query = "
 SELECT
-  activity.id AS activity_id,
+  activity.id                                                                        AS activity_id,
   activity.activity_type_id                                                          AS activity_type_id,
   activity.subject                                                                   AS activity_subject,
   activity.activity_date_time                                                        AS activity_date_time,
@@ -104,7 +104,7 @@ GROUP BY activity.id
     $dao = CRM_Core_DAO::executeQuery($query, $params);
 
     //get all activity types
-    $activityTypes = CRM_Activity_BAO_Activity::buildOptions('activity_type_id', 'validate');
+    $activityTypes = self::getActivityLabels();
 
     //get all campaigns.
     $allCampaigns = CRM_Campaign_BAO_Campaign::getCampaigns(NULL, NULL, FALSE, FALSE, FALSE, TRUE);
@@ -186,6 +186,17 @@ GROUP BY activity.id
     $query .= " WHERE {$whereClause}";
 
     return CRM_Core_DAO::singleValueQuery($query, $params);
+  }
+
+  /**
+   * get a activity_type id => label mapping
+   */
+  public static function getActivityLabels() {
+    CRM_Core_OptionValue::getValues(array('name' => 'activity_type'), $all_types);
+    foreach ($all_types as $activity_type_id => $activity_type) {
+      $labels[$activity_type['value']] = $activity_type['label'];
+    }
+    return $labels;
   }
 
   /**
