@@ -193,6 +193,6 @@ function fastactivity_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
  * @param string $region
  */
 function fastactivity_civicrm_coreResourceList(&$list, $region) {
-  Civi::resources()
+  CRM_Core_Resources::singleton()
     ->addStyleFile('de.systopia.fastactivity', 'css/fastactivity.css', 0, 'page-header');
 }
