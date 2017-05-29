@@ -190,9 +190,12 @@ GROUP BY activity.id
 
   /**
    * get a activity_type id => label mapping
+   *
+   * @param string $optionValueName
+   * @return array of labels
    */
-  public static function getActivityLabels() {
-    CRM_Core_OptionValue::getValues(array('name' => 'activity_type'), $all_types);
+  public static function getActivityLabels($optionValueName = 'activity_type') {
+    CRM_Core_OptionValue::getValues(array('name' => $optionValueName), $all_types);
     foreach ($all_types as $activity_type_id => $activity_type) {
       $labels[$activity_type['value']] = $activity_type['label'];
     }

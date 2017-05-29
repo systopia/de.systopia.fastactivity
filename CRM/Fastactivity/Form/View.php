@@ -121,8 +121,8 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
       $activityDetails['priority'] = isset($activityRecord['priority_id']) ? $priorities[$activityRecord['priority_id']] : null;
 
       if (isset($activityRecord['medium_id'])) {
-        $activityMedium = CRM_Activity_BAO_Activity::buildOptions('medium_id', 'validate');
-        $activityDetails['medium'] = $activityMedium[$activityRecord['medium_id']];
+        $activityLabels = CRM_Fastactivity_BAO_Activity::getActivityLabels('encounter_medium');
+        $activityDetails['medium'] = $activityLabels[$activityRecord['medium_id']];
       }
 
       // Add campaign details
