@@ -62,6 +62,14 @@ function fastactivity_civicrm_uninstall() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_enable
  */
 function fastactivity_civicrm_enable() {
+  if (version_compare(CRM_Utils_System::version(), '4.7', '<')) {
+    // hook_civicrm_check not available before 4.7
+    fastactivity_civicrm_check($messages);
+    foreach ($messages as $message) {
+      CRM_Core_Session::setStatus($message->getMessage(), $message->getTitle());
+    }
+  }
+
   _fastactivity_civix_civicrm_enable();
 }
 
@@ -195,4 +203,31 @@ function fastactivity_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
 function fastactivity_civicrm_coreResourceList(&$list, $region) {
   CRM_Core_Resources::singleton()
     ->addStyleFile('de.systopia.fastactivity', 'css/fastactivity.css', 0, 'page-header');
+}
+
+/**
+ * Implements hook_civicrm_check().
+ * Not implemented in Civi 4.6
+ */
+function fastactivity_civicrm_check(&$messages) {
+  // Make sure campaign extension is loaded
+  if (!CRM_Extension_System::singleton()->getMapper()->isActiveModule('campaign')) {
+    $messages[] = new CRM_Utils_Check_Message(
+      'fastactivity_campaign',
+      ts('FastActivity uses campaigntree API. Please install the extension "de.systopia.campaign".'),
+      ts('CampaignTree API Required'),
+      \Psr\Log\LogLevel::CRITICAL
+    );
+  }
+
+  // Make sure fontawesome extension is loaded
+  if (!CRM_Extension_System::singleton()->getMapper()->isActiveModule('fontawesome')
+    && version_compare(CRM_Utils_System::version(), '4.7', '<')) {
+    $messages[] = new CRM_Utils_Check_Message(
+      'fastactivity_fontawesome',
+      ts('FastActivity uses FontAwesome extension to display icons. Please install the extension "uk.co.mjwconsult.fontawesome".'),
+      ts('FontAwesome extension required'),
+      \Psr\Log\LogLevel::WARNING
+    );
+  }
 }

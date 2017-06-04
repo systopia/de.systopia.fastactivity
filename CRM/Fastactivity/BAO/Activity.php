@@ -151,6 +151,33 @@ GROUP BY activity.id
       $clauses[] = "activity.activity_type_id IN ( " . $activity_type_id . " ) ";
     }
 
+    // campaign ID clause. Match on campaign and all sub-campaigns.
+    $activity_campaign_id = CRM_Utils_Array::value('activity_campaign_id', $params);
+    if (!empty($activity_campaign_id)) {
+      // Make campaign IDs into array
+      $searchCampaignIds = explode(',', $activity_campaign_id);
+      if (CRM_Extension_System::singleton()->getMapper()->isActiveModule('campaign')) {
+        foreach ($searchCampaignIds as $campaignId) {
+          // Get all child campaigns for selected campaign
+          // NOTE: This adds a dependency on de.systopia.campaign
+          $childCampaignIDs = civicrm_api3('CampaignTree', 'getids', [
+            'sequential' => 1,
+            'id' => $campaignId,
+            'depth' => 3,
+          ]);
+          if (isset($childCampaignIDs['children'])) {
+            foreach ($childCampaignIDs['children'] as $key => $value) {
+              // Add all child campaign IDs to search
+              $searchCampaignIds[] = $key;
+            }
+          }
+        }
+      }
+      // Convert to string for query
+      $activity_campaign_id = implode(',', $searchCampaignIds);
+      $clauses[] = "activity.campaign_id IN ( " . $activity_campaign_id . " ) ";
+    }
+
     // contact_id
     $contact_id = CRM_Utils_Array::value('contact_id', $params);
     if ($contact_id) {

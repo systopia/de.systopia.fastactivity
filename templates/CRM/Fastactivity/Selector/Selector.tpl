@@ -69,7 +69,11 @@ CRM.$(function($) {
     buildContactActivities{/literal}{$context}{literal}( true );
   });
 
-  function buildContactActivities{/literal}{$context}{literal}( filterSearch ) {
+  $('.crm-activity-selector-'+ context +' #campaigns').change( function( ) {
+    buildContactActivities{/literal}{$context}{literal}( true );
+  });
+
+    function buildContactActivities{/literal}{$context}{literal}( filterSearch ) {
     if ( filterSearch && {/literal}{$context}{literal}oTable ) {
       {/literal}{$context}{literal}oTable.fnDestroy();
     }
@@ -132,7 +136,8 @@ CRM.$(function($) {
 
         if ( filterSearch ) {
           aoData.push(
-            {name:'activity_type_id', value: $('.crm-activity-selector-'+ context +' select#activity_type_id').val()}
+            {name:'activity_type_id', value: $('.crm-activity-selector-'+ context +' select#activity_type_id').val()},
+            {name:'activity_campaign_id', value: $('.crm-activity-selector-'+ context +' select#campaigns').val()}
           );
         }
         $.ajax( {
