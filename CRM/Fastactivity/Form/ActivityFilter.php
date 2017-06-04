@@ -27,6 +27,7 @@ class CRM_Fastactivity_Form_ActivityFilter extends CRM_Core_Form {
     $this->addSelect('activity_type_id',
       array('entity' => 'activity', 'label' => 'Activity Type(s)', 'multiple' => 'multiple', 'option_url' => NULL, 'placeholder' => ts('- any -'))
     );
+    CRM_Campaign_BAO_Campaign::addCampaignInComponentSearch($this, 'activity_campaign_id');
   }
 
   /**

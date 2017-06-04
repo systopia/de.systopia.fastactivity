@@ -22,9 +22,14 @@
       <div class="no-border form-layout-compressed" id="searchOptions">
         <div class="crm-contact-form-block-activity_type_id">
           <div class="crm-block crm-form-block crm-activity-search-form-block">
-          <table class="form-layout"><tr>
+          <table class="form-layout">
+            <tr>
               <td class="label">{$form.activity_type_id.label}</td>
               <td class="view-value">{$form.activity_type_id.html|crmAddClass:fullwidth}</td>
+            </tr>
+            <tr>
+              <td class="label">{$form.activity_campaign_id.label}</td>
+              <td class="view-value">{$form.activity_campaign_id.html|crmAddClass:fullwidth}</td>
             </tr>
           </table>
           </div>
