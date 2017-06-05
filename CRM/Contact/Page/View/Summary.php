@@ -1,4 +1,8 @@
 <?php
+/* Overridden for fastactivities to completely disable original activities tab for performance (line 338)
+ *  Otherwise, original count function is still executed and long delays occur for contacts with many activities
+ */
+
 /*
  +--------------------------------------------------------------------+
  | CiviCRM version 4.6                                                |
@@ -334,10 +338,10 @@ class CRM_Contact_Page_View_Summary extends CRM_Contact_Page_View {
     }
 
     $rest = array(
-      'activity' => array(
+      /*'activity' => array(
         'title' => ts('Activities'),
         'class' => 'livePage',
-      ),
+      ),*/
       'rel' => array(
         'title' => ts('Relationships'),
         'class' => 'livePage',
