@@ -108,7 +108,7 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
     }
     else {
       $priorities = CRM_Core_PseudoConstant::get('CRM_Activity_DAO_Activity', 'priority_id');
-      $activityDetails['activityDetails'] = isset($activityRecord['details']) ? $activityRecord['details'] : null;
+      $activityDetails['details'] = isset($activityRecord['details']) ? $activityRecord['details'] : null;
 
       $this->_activitySourceContacts = self::getSourceContacts($this->_activityId);
       $this->_activityAssigneeContacts = self::getAssigneeContacts($this->_activityId);
