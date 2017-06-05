@@ -169,7 +169,7 @@ function fastactivity_civicrm_tabs ( &$tabs, $contactID ) {
     // if 'weight' and 'coun't can't be copied from the original tab, look it up
     $params = array('contact_id' => $contactID);
     $reuse_tab_data = array(
-      'title'  => ts('Fast Activities'),
+      'title'  => ts('Activities'),
       'weight' => 50,
       'count'  => CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($params),
       );
