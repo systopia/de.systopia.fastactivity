@@ -1,0 +1,29 @@
+diff --git a/CRM/Contact/Page/View/Summary.php b/CRM/Contact/Page/View/Summary.php
+index 9e511e8..23a5259 100644
+--- a/CRM/Contact/Page/View/Summary.php
++++ b/CRM/Contact/Page/View/Summary.php
+@@ -334,10 +334,6 @@ class CRM_Contact_Page_View_Summary extends CRM_Contact_Page_View {
+     }
+ 
+     $rest = array(
+-      'activity' => array(
+-        'title' => ts('Activities'),
+-        'class' => 'livePage',
+-      ),
+       'rel' => array(
+         'title' => ts('Relationships'),
+         'class' => 'livePage',
+@@ -357,6 +353,13 @@ class CRM_Contact_Page_View_Summary extends CRM_Contact_Page_View {
+         'title' => ts('Change Log'),
+       ),
+     );
++    // Disable generating Activities tab for performance reasons if we have the fastactivity extension enabled
++    if (!CRM_Extension_System::singleton()->getMapper()->isActiveModule('fastactivity')) {
++      $rest['activity'] = array(
++        'title' => ts('Activities'),
++        'class' => 'livePage',
++      );
++    }
+ 
+     foreach ($rest as $k => $v) {
+       if ($accessCiviCRM && !empty($this->_viewOptions[$k])) {
