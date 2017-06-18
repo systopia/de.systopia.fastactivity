@@ -30,9 +30,6 @@
 
   <table class="form-layout">
 
-    <tr class="crm-activity-form-block-activity_type_id">
-      <td class="label">{$form.activity_type_id.label}</td><td class="view-value">{$form.activity_type_id.html}</td>
-    </tr>
     {if $surveyActivity}
       <tr class="crm-activity-form-block-survey">
         <td class="label">{ts}Survey Title{/ts}</td><td class="view-value">{$surveyTitle}</td>
