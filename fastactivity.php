@@ -165,6 +165,7 @@ function fastactivity_civicrm_tabs ( &$tabs, $contactID ) {
   // We disable the built-in Activities tab under "Display Preferences" automatically when extension is enabled.
   // It is not enough to just hide it as the built-in count functions will still be executed and this causes a performance issue on large databases.
   // ADD the fast activity tab as a new tab
+  $params = array('contact_id' => $contactID);
   $tabs[] = array('title'  => ts('Activities'),
                   'class'  => 'livePage',
                   'id'     => 'fastactivity',
