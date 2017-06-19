@@ -91,6 +91,19 @@ function fastactivity_civicrm_enable() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_disable
  */
 function fastactivity_civicrm_disable() {
+  // Enable built-in Activities tab
+  $viewOptions = CRM_Core_BAO_Setting::valueOptions(
+    CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
+    'contact_view_options',
+    TRUE
+  );
+  if (empty($viewOptions['activity'])) {
+    $viewOptions['activity'] = 1;
+    CRM_Core_BAO_Setting::setValueOption(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'contact_view_options', $viewOptions);
+    CRM_Core_Session::setStatus(ts('We have re-enabled the built-in Activities tab for the Contact Summary screens
+        now that the one from the de.systopia.fastactivity extension is not enabled.'), ts('Saved'), 'success');
+  }
+
   _fastactivity_civix_civicrm_disable();
 }
 
