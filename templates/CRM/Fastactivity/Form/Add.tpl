@@ -49,7 +49,7 @@
           <strong>{$activityTargetCount} {ts}contacts{/ts}</strong><br />
           {ts}Add{/ts}: {$form.target_contact_add_id.html}&nbsp;
           {ts}Remove{/ts}: {$form.target_contact_remove_id.html}
-          {if $action eq 1 or $single eq false}
+          {if $action eq 1}
             <div class="crm-is-multi-activity-wrapper">
               {$form.is_multi_activity.html}&nbsp;{$form.is_multi_activity.label}
             </div>
@@ -59,7 +59,7 @@
         <td class="label">{$form.target_contact_id.label}</td>
         <td class="view-value">
           {$form.target_contact_id.html}
-          {if $action eq 1 or $single eq false}
+          {if $action eq 1}
             <div class="crm-is-multi-activity-wrapper">
               {$form.is_multi_activity.html}&nbsp;{$form.is_multi_activity.label}
             </div>
