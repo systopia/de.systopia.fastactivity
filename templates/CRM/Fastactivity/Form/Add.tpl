@@ -29,7 +29,7 @@
   <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="top"}</div>
 
   <table class="form-layout">
-
+    <div style="display:none">{$form.activity_type_id.html}</div>
     {if $surveyActivity}
       <tr class="crm-activity-form-block-survey">
         <td class="label">{ts}Survey Title{/ts}</td><td class="view-value">{$surveyTitle}</td>
