@@ -318,6 +318,11 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     // Get custom fields
     $this->_groupTree = CRM_Core_BAO_CustomGroup::getTree('Activity', $this,
       $this->_activityId, 0, $this->_activityTypeId);
+
+    $session = CRM_Core_Session::singleton();
+    $this->context = CRM_Utils_System::url('civicrm/contact/view', "reset=1&selectedChild=fastactivity&cid={$this->_currentlyViewedContactId}");
+    $session->pushUserContext($this->context);
+    $this->controller->_destination = $this->context;
   }
 
   public function buildQuickForm() {

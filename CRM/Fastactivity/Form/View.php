@@ -153,6 +153,11 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
     }
     $this->assign('activity', $activityDetails);
     $this->setActivityTitle();
+
+    $session = CRM_Core_Session::singleton();
+    $this->context = CRM_Utils_System::url('civicrm/contact/view', "reset=1&selectedChild=fastactivity&cid={$this->_currentlyViewedContactId}");
+    $session->pushUserContext($this->context);
+    $this->controller->_destination = $this->context;
   }
 
   public function buildQuickForm() {
