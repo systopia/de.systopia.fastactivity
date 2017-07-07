@@ -44,6 +44,9 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
     if (!$this->_currentlyViewedContactId) {
       $this->_currentlyViewedContactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this);
     }
+    if (empty($this->_currentlyViewedContactId)) {
+      CRM_Core_Error::statusBounce(ts('You must specify a contact ID'));
+    }
     $activityDetails['contactId'] = $this->_currentlyViewedContactId;
 
     // Get action
@@ -161,7 +164,7 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
   }
 
   public function buildQuickForm() {
-    $actionLinks = CRM_Fastactivity_BAO_Activity::actionLinks($this->_activityTypeId, $this->_activityId);
+    $actionLinks = CRM_Fastactivity_BAO_Activity::actionLinks($this->_activityTypeId, $this->_activityId, $this->_currentlyViewedContactId);
     if (isset($actionLinks[$this->_action])) {
       unset ($actionLinks[$this->_action]);
     }

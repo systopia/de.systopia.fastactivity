@@ -186,6 +186,10 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     if (!$this->_currentlyViewedContactId) {
       $this->_currentlyViewedContactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this);
     }
+    if (empty($this->_currentlyViewedContactId)) {
+      CRM_Core_Error::statusBounce(ts('You must specify a contact ID'));
+    }
+
     $this->assign('contactId', $this->_currentlyViewedContactId);
 
     // Get action
