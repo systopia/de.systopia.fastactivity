@@ -524,10 +524,6 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
       return TRUE;
     }
     $errors = array();
-    if (array_key_exists('activity_type_id', $fields) && empty($fields['activity_type_id'])) {
-      $errors['activity_type_id'] = ts('Activity Type is a required field');
-    }
-
     if (CRM_Utils_Array::value('activity_type_id', $fields) == 3 &&
       CRM_Utils_Array::value('status_id', $fields) == 1
     ) {
