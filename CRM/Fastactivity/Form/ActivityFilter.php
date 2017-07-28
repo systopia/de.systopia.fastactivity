@@ -24,10 +24,20 @@
 class CRM_Fastactivity_Form_ActivityFilter extends CRM_Core_Form {
   public function buildQuickForm() {
     // add activity search filter
-    $this->addSelect('activity_type_id',
-      array('entity' => 'activity', 'label' => 'Activity Type(s)', 'multiple' => 'multiple', 'option_url' => NULL, 'placeholder' => ts('- any -'))
+    $this->addSelect(
+      'activity_type_id',
+      array('entity' => 'Activity', 'label' => 'Activity Type(s)', 'multiple' => 'multiple', 'option_url' => NULL, 'placeholder' => ts('- any -'))
     );
-    CRM_Campaign_BAO_Campaign::addCampaignInComponentSearch($this, 'activity_campaign_id');
+
+    $this->add(
+      'select',
+      'activity_campaign_id',
+      ts('Campaigns'),
+      $this->getFilterCampaigns(),
+      FALSE,
+      array('id' => 'campaigns', 'multiple' => 'multiple', 'class' => 'crm-select2')
+    );
+    // will always show ALL campaigns: CRM_Campaign_BAO_Campaign::addCampaignInComponentSearch($this, 'activity_campaign_id');
   }
 
   /**
@@ -47,5 +57,22 @@ class CRM_Fastactivity_Form_ActivityFilter extends CRM_Core_Form {
       );
     }
     return $defaults;
+  }
+
+  /**
+   * get the list of campaigns to be offered for the filter
+   */
+  public function getFilterCampaigns() {
+    $campaign_list = array();
+    $campaign_query = civicrm_api3('Campaign', 'get', array(
+      'sequential'   => 1,
+      'is_active'    => 1,
+      'option.limit' => 0,
+      'return'       => 'id,title'
+      ));
+    foreach ($campaign_query['values'] as $campaign) {
+      $campaign_list[$campaign['id']] = $campaign['title'];
+    }
+    return $campaign_list;
   }
 }
