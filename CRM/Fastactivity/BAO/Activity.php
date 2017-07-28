@@ -40,21 +40,6 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
    *   Relevant data object values of open activities
    */
   public static function getContactActivities(&$params) {
-    //Get bulk email activity type (used to modify activity display for bulk email)
-    $bulkActivityTypeID = CRM_Core_OptionGroup::getValue(
-      'activity_type',
-      'Bulk Email',
-      'name'
-    );
-
-    //CRM-3553, need to check user has access to target groups.
-    $mailingIDs = CRM_Mailing_BAO_Mailing::mailingACLIDs();
-    $accessCiviMail = (
-      (CRM_Core_Permission::check('access CiviMail')) ||
-      (CRM_Mailing_Info::workflowEnabled() &&
-        CRM_Core_Permission::check('create mailings'))
-    );
-
     $whereClause = self::whereClause($params,FALSE);
 
     // Add limit clause
@@ -86,16 +71,16 @@ SELECT
   COALESCE(source_contact_me.display_name, source_contact_random.display_name)       AS source_display_name,
   COUNT(DISTINCT(assignees.contact_id))                                              AS assignee_count,
   COALESCE(assignee_contact_me.id, assignee_contact_random.id)                       AS assignee_contact_id,
-  COALESCE(assignee_contact_me.display_name, assignee_contact_random.display_name)   AS assignee_display_name 
-FROM civicrm_activity_contact acon 
-LEFT JOIN civicrm_activity activity                ON acon.activity_id = activity.id 
-LEFT JOIN civicrm_activity_contact sources         ON (activity.id = sources.activity_id AND sources.record_type_id = 2) 
-LEFT JOIN civicrm_contact source_contact_random    ON (sources.contact_id = source_contact_random.id AND source_contact_random.is_deleted = 0) 
-LEFT JOIN civicrm_contact source_contact_me        ON (sources.contact_id = source_contact_me.id AND source_contact_me.id = %1) 
-LEFT JOIN civicrm_activity_contact assignees       ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1) 
-LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0) 
-LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = %1) 
-LEFT JOIN civicrm_campaign campaign                ON (activity.campaign_id = campaign.id) 
+  COALESCE(assignee_contact_me.display_name, assignee_contact_random.display_name)   AS assignee_display_name
+FROM civicrm_activity_contact acon
+LEFT JOIN civicrm_activity activity                ON acon.activity_id = activity.id
+LEFT JOIN civicrm_activity_contact sources         ON (activity.id = sources.activity_id AND sources.record_type_id = 2)
+LEFT JOIN civicrm_contact source_contact_random    ON (sources.contact_id = source_contact_random.id AND source_contact_random.is_deleted = 0)
+LEFT JOIN civicrm_contact source_contact_me        ON (sources.contact_id = source_contact_me.id AND source_contact_me.id = %1)
+LEFT JOIN civicrm_activity_contact assignees       ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1)
+LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0)
+LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = %1)
+LEFT JOIN civicrm_campaign campaign                ON (activity.campaign_id = campaign.id)
 WHERE {$whereClause}
 GROUP BY activity.id
 {$orderBy}
@@ -106,8 +91,6 @@ GROUP BY activity.id
     //get all activity types
     $activityTypes = self::getActivityLabels();
 
-    //get all campaigns.
-    $allCampaigns = CRM_Campaign_BAO_Campaign::getCampaigns(NULL, NULL, FALSE, FALSE, FALSE, TRUE);
     $values = array();
     while ($dao->fetch()) {
       $activityID = $dao->activity_id;
