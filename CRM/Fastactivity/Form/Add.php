@@ -85,7 +85,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
         'label' => ts('Activity Type'),
         'required' => TRUE,
         'onchange' => "CRM.buildCustomData( 'Activity', this.value );",
-        'attributes' => array('' => '- ' . ts('select activity') . ' -') + CRM_Core_PseudoConstant::ActivityType(FALSE),
+        'attributes' => array('' => '- ' . ts('select activity') . ' -') + CRM_Activity_BAO_Activity::buildOptions('activity_type_id', 'get'),
         'extra' => array('class' => 'crm-select2'),
       ),
       'priority_id' => array(
