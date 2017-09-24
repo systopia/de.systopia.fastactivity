@@ -67,24 +67,8 @@ class CRM_Fastactivity_Page_AJAX {
     }
 
     // store the activity filter preference CRM-11761
-    $session = CRM_Core_Session::singleton();
-    $userID = $session->get('userID');
+    $userID = CRM_Core_Session::getLoggedInContactID();
     if ($userID) {
-      //flush cache before setting filter to account for global cache (memcache)
-      $domainID = CRM_Core_Config::domainID();
-      $cacheKey = CRM_Core_BAO_Setting::inCache(
-        CRM_Core_BAO_Setting::PERSONAL_PREFERENCES_NAME,
-        'activity_tab_filter',
-        NULL,
-        $userID,
-        TRUE,
-        $domainID,
-        TRUE
-      );
-      if ($cacheKey) {
-        CRM_Core_BAO_Setting::flushCache($cacheKey);
-      }
-
       $activityFilter = array(
         'activity_type_id' => empty($params['activity_type_id']) ? '' : CRM_Utils_Type::escape($params['activity_type_id'], 'String'),
         'activity_type_exclude_filter_id' => empty($params['activity_type_exclude_id']) ? '' : CRM_Utils_Type::escape($params['activity_type_exclude_id'], 'String'),
