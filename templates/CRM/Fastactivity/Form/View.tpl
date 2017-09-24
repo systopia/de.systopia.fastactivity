@@ -122,6 +122,7 @@
       <td class="label">Medium</td>
       <td class="view-value">{if $activity.medium}{$activity.medium}{else}{/if}</td>
     </tr>
+    {if $campaignEnabled}
     <tr class="crm-activity-form-block-activity_campaign">
       <td class="label">Campaign</td>
       <td class="view-value">
@@ -132,6 +133,7 @@
         {/if}
       </td>
     </tr>
+    {/if}
     <tr class="crm-activity-form-block-activity_engagementlevel">
       <td class="label">Engagement Index</td>
       <td class="view-value">

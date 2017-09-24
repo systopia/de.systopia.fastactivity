@@ -26,17 +26,30 @@ class CRM_Fastactivity_Page_AJAX {
     $contactID = CRM_Utils_Type::escape($_POST['contact_id'], 'Integer');
     $context = CRM_Utils_Type::escape(CRM_Utils_Array::value('context', $_GET), 'String');
 
+    $params = $_POST;
+
+    // Load settings
+    $params['optionalCols']['campaign_title'] = (bool) CRM_Fastactivity_Settings::getValue('tab_col_campaign_title');
+    $params['optionalCols']['duration'] = (bool) CRM_Fastactivity_Settings::getValue('tab_col_duration');
+    $params['optionalCols']['target_contact'] = (bool) CRM_Fastactivity_Settings::getValue('tab_col_target_contact');
+    $params['excludeCaseActivities'] = (bool) CRM_Fastactivity_Settings::getValue('tab_exclude_case_activities');
+
     // Map column Id to the actual SQL query result column we are going to order by
-    $sortMapper = array(
-      0 => 'activity_type_id',
-      1 => 'activity_subject',
-      2 => 'activity_campaign_title',
-      3 => 'source_display_name',
-      // 4 => 'target_display_name', we are not showing target contact column
-      4 => 'assignee_display_name',
-      5 => 'activity_date_time',
-      6 => 'status_id',
-    );
+    $sortMapper[] = 'activity_type_id';
+    $sortMapper[] = 'activity_subject';
+    if ($params['optionalCols']['campaign_title']) {
+      $sortMapper[] = 'activity_campaign_title';
+    }
+    $sortMapper[] = 'source_display_name';
+    if ($params['optionalCols']['target_contact']) {
+      $sortMapper[] = 'target_display_name';
+    }
+    $sortMapper[] = 'assignee_display_name';
+    $sortMapper[] = 'activity_date_time';
+    $sortMapper[] = 'status_id';
+    if ($params['optionalCols']['duration']) {
+      $sortMapper[] = 'activity_duration';
+    }
 
     $sEcho = CRM_Utils_Type::escape($_REQUEST['sEcho'], 'Integer');
     $offset = isset($_REQUEST['iDisplayStart']) ? CRM_Utils_Type::escape($_REQUEST['iDisplayStart'], 'Integer') : 0;
@@ -44,7 +57,6 @@ class CRM_Fastactivity_Page_AJAX {
     $sort = isset($_REQUEST['iSortCol_0']) ? CRM_Utils_Array::value(CRM_Utils_Type::escape($_REQUEST['iSortCol_0'], 'Integer'), $sortMapper) : NULL;
     $sortOrder = isset($_REQUEST['sSortDir_0']) ? CRM_Utils_Type::escape($_REQUEST['sSortDir_0'], 'MysqlOrderByDirection') : 'asc';
 
-    $params = $_POST;
     if ($sort && $sortOrder) {
       $params['sortBy'] = $sort . ' ' . $sortOrder;
     }
@@ -85,18 +97,39 @@ class CRM_Fastactivity_Page_AJAX {
     }
 
     $iFilteredTotal = $iTotal = $params['total'];
-    $selectorElements = array(
-      'activity_type',
-      'subject',
-      'campaign',
-      'source_contact',
-      // 'target_contact', we are not showing target contact column
-      'assignee_contact',
-      'activity_date',
-      'status',
-      'links',
-      'class',
-    );
+    $sortMapper[] = 'activity_type_id';
+    $sortMapper[] = 'activity_subject';
+    if ($params['optionalCols']['campaign_title']) {
+      $sortMapper[] = 'activity_campaign_title';
+    }
+    $sortMapper[] = 'source_display_name';
+    if ($params['optionalCols']['target_contact']) {
+      $sortMapper[] = 'target_display_name';
+    }
+    $sortMapper[] = 'assignee_display_name';
+    $sortMapper[] = 'activity_date_time';
+    $sortMapper[] = 'status_id';
+    if ($params['optionalCols']['duration']) {
+      $sortMapper[] = 'duration';
+    }
+
+    $selectorElements[] = 'activity_type';
+    $selectorElements[] = 'subject';
+    if ($params['optionalCols']['campaign_title']) {
+      $selectorElements[] = 'campaign';
+    }
+    $selectorElements[] = 'source_contact';
+    if ($params['optionalCols']['target_contact']) {
+      $selectorElements[] = 'target_contact';
+    }
+    $selectorElements[] = 'assignee_contact';
+    $selectorElements[] = 'activity_date';
+    $selectorElements[] = 'status';
+    if ($params['optionalCols']['duration']) {
+      $selectorElements[] = 'duration';
+    }
+    $selectorElements[] = 'links';
+    $selectorElements[] = 'class';
 
     header('Content-Type: application/json');
     echo CRM_Utils_JSON::encodeDataTableSelector($activities, $sEcho, $iTotal, $iFilteredTotal, $selectorElements);

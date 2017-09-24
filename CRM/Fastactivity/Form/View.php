@@ -128,8 +128,13 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
         $activityDetails['medium'] = $activityLabels[$activityRecord['medium_id']];
       }
 
-      // Add campaign details
-      $activityDetails = self::addCampaignDetails($activityRecord, $activityDetails);
+      $config = CRM_Core_Config::singleton();
+      $campaignEnabled = in_array("CiviCampaign", $config->enableComponents);
+      if ($campaignEnabled) {
+        // Add campaign details
+        $activityDetails = self::addCampaignDetails($activityRecord, $activityDetails);
+      }
+      $this->assign('campaignEnabled', $campaignEnabled);
 
       $this->assign('customDataType', 'Activity');
       $this->assign('customDataSubType', $this->_activityTypeId);

@@ -27,10 +27,12 @@
               <td class="label">{$form.activity_type_id.label}</td>
               <td class="view-value">{$form.activity_type_id.html|crmAddClass:fullwidth}</td>
             </tr>
+            {if $optionalCols.campaign_title}
             <tr>
               <td class="label">{$form.activity_campaign_id.label}</td>
               <td class="view-value">{$form.activity_campaign_id.html|crmAddClass:fullwidth}</td>
             </tr>
+            {/if}
           </table>
           </div>
         </div>
@@ -41,12 +43,19 @@
     <tr>
       <th class='crm-contact-activity-activity_type'>{ts}Type{/ts}</th>
       <th class='crm-contact-activity_subject'>{ts}Subject{/ts}</th>
-      <th class='crm-contact-activity-activity_campaign'>{ts}Campaign{/ts}</th>
+      {if $optionalCols.campaign_title}
+        <th class='crm-contact-activity-activity_campaign'>{ts}Campaign{/ts}</th>
+      {/if}
       <th class='crm-contact-activity-source_contact'>{ts}Added By{/ts}</th>
-      <!-- <th class='crm-contact-activity-target_contact nosort'>{ts}With{/ts}</th> we are not showing target contact column -->
+      {if $optionalCols.target_contact}
+        <th class='crm-contact-activity-target_contact nosort'>{ts}With{/ts}</th>
+      {/if}
       <th class='crm-contact-activity-assignee_contact'>{ts}Assigned{/ts}</th>
       <th class='crm-contact-activity-activity_date'>{ts}Date{/ts}</th>
       <th class='crm-contact-activity-activity_status'>{ts}Status{/ts}</th>
+      {if $optionalCols.duration}
+        <th class='crm-contact-activity-duration nosort'>{ts}Duration{/ts}</th>
+      {/if}
       <th class='crm-contact-activity-links nosort'>&nbsp;</th>
       <th class='hiddenElement'>&nbsp;</th>
     </tr>
@@ -97,12 +106,19 @@ CRM.$(function($) {
       "aoColumns"  : [
         {sClass:'crm-contact-activity-activity_type'},
         {sClass:'crm-contact-activity_subject'},
-        {sClass:'crm-contact-activity-activity_campaign'},
+        {/literal}{if $optionalCols.campaign_title}{literal}
+          {sClass:'crm-contact-activity-activity_campaign'},
+        {/literal}{/if}{literal}
         {sClass:'crm-contact-activity-source_contact'},
-        <!-- {sClass:'crm-contact-activity-target_contact', bSortable:false}, we are not showing target contact column -->
+        {/literal}{if $optionalCols.target_contact}{literal}
+          {sClass:'crm-contact-activity-target_contact'},
+        {/literal}{/if}{literal}
         {sClass:'crm-contact-activity-assignee_contact'},
         {sClass:'crm-contact-activity-activity_date'},
         {sClass:'crm-contact-activity-activity_status'},
+        {/literal}{if $optionalCols.duration}{literal}
+          {sClass:'crm-contact-activity-duration'},
+        {/literal}{/if}{literal}
         {sClass:'crm-contact-activity-links', bSortable:false},
         {sClass:'hiddenElement', bSortable:false}
       ],
@@ -136,8 +152,10 @@ CRM.$(function($) {
 
         if ( filterSearch ) {
           aoData.push(
-            {name:'activity_type_id', value: $('.crm-activity-selector-'+ context +' select#activity_type_id').val()},
-            {name:'activity_campaign_id', value: $('.crm-activity-selector-'+ context +' select#campaigns').val()}
+            {name:'activity_type_id', value: $('.crm-activity-selector-'+ context +' select#activity_type_id').val()}
+            {/literal}{if $optionalCols.campaign_title}{literal}
+            ,{name:'activity_campaign_id', value: $('.crm-activity-selector-'+ context +' select#campaigns').val()}
+            {/literal}{/if}{literal}
           );
         }
         $.ajax( {
