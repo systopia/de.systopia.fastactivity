@@ -133,7 +133,6 @@
         {/if}
       </td>
     </tr>
-    {/if}
     <tr class="crm-activity-form-block-activity_engagementlevel">
       <td class="label">Engagement Index</td>
       <td class="view-value">
@@ -144,6 +143,7 @@
         {/if}
       </td>
     </tr>
+    {/if}
     <tr class="crm-activity-form-block-activity_subject">
       <td class="label">Subject</td>
       <td class="view-value">{$activity.subject}</td>

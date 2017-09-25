@@ -93,6 +93,7 @@
       <td class="label">{$form.subject.label}</td><td class="view-value">{$form.subject.html|crmAddClass:huge}</td>
     </tr>
 
+    {if $campaignEnabled}
     {* CRM-7362 --add campaign to activities *}
     {include file="CRM/Campaign/Form/addCampaignToComponent.tpl"
     campaignTrClass="crm-activity-form-block-campaign_id"}
@@ -103,6 +104,7 @@
         <td class="label">{$form.engagement_level.label}</td>
         <td class="view-value">{$form.engagement_level.html}</td>
       </tr>
+    {/if}
     {/if}
 
     <tr class="crm-activity-form-block-location">

@@ -370,8 +370,13 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
       }
     }
 
-    // Add campaign elements
-    self::buildFormElementsCampaign();
+    $config = CRM_Core_Config::singleton();
+    $campaignEnabled = in_array("CiviCampaign", $config->enableComponents);
+    if ($campaignEnabled) {
+      // Add campaign elements
+      self::buildFormElementsCampaign();
+    }
+    $this->assign('campaignEnabled', $campaignEnabled);
 
     // this option should be available only during add mode
     if ($this->_action == CRM_Core_Action::ADD) {
