@@ -330,6 +330,8 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
   }
 
   public function buildQuickForm() {
+    $civiVersion = CRM_Core_BAO_Domain::version();
+
     if ($this->_cdType) {
       // AJAX query for custom data is called to civicrm/fastactivity/add
       // This handles that query and returns the edit form block for customData
@@ -352,7 +354,12 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
         $attribute = CRM_Utils_Array::value('attributes', $values);
         $required = !empty($values['required']);
         if ($values['type'] == 'wysiwyg') {
-          $this->add('wysiwyg', $field, $values['label'], $attribute, $required);
+          if (version_compare($civiVersion, '4.7', '<')) {
+            $this->addWysiwyg($field, $values['label'], $attribute, $required);
+          }
+          else {
+            $this->add('wysiwyg', $field, $values['label'], $attribute, $required);
+          }
         }
         elseif ($values['type'] == 'select') {
           if ($field == 'activity_type_id' && ($this->_action == CRM_Core_Action::UPDATE)) {
