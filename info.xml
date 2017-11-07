@@ -9,18 +9,19 @@
     <email>mjw@mjwconsult.co.uk</email>
   </maintainer>
   <urls>
-    <url desc="Main Extension Page">https://github.com/systopia/de.systopia.fastactivity</url>
-    <url desc="Documentation">https://github.com/systopia/de.systopia.fastactivity</url>
-    <url desc="Support">https://github.com/systopia/de.systopia.fastactivity/issues</url>
+    <url desc="Main Extension Page">https://github.com/mattwire/de.systopia.fastactivity</url>
+    <url desc="Documentation">https://github.com/mattwire/de.systopia.fastactivity</url>
+    <url desc="Support">https://github.com/mattwire/de.systopia.fastactivity/issues</url>
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
-  <releaseDate>2017-09-25</releaseDate>
-  <version>1.1.mjwconsult2</version>
+  <releaseDate>2017-11-07</releaseDate>
+  <version>1.2.mjwconsult1</version>
   <develStage>alpha</develStage>
   <compatibility>
     <ver>4.6</ver>
+    <ver>4.7</ver>
   </compatibility>
-  <comments>Developed by Matthew Wire</comments>
+  <comments>Developed by Matthew Wire and Systopia</comments>
   <civix>
     <namespace>CRM/Fastactivity</namespace>
   </civix>
