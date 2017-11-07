@@ -100,7 +100,7 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
       $activityDetails['typeDescription'] = $activityTypeDescription;
     }
     // Get activity subject
-    $this->_activitySubject = isset($activityRecord['subject']) ? $activityRecord['subject'] : null;
+    $this->_activitySubject = isset($activityRecord['subject']) ? $activityRecord['subject'] : NULL;
     $activityDetails['subject'] = $this->_activitySubject;
 
     if ($this->_action & CRM_Core_Action::DELETE) {
@@ -111,7 +111,7 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
     }
     else {
       $priorities = CRM_Core_PseudoConstant::get('CRM_Activity_DAO_Activity', 'priority_id');
-      $activityDetails['details'] = isset($activityRecord['details']) ? $activityRecord['details'] : null;
+      $activityDetails['details'] = isset($activityRecord['details']) ? $activityRecord['details'] : NULL;
 
       $this->_activitySourceContacts = self::getSourceContacts($this->_activityId);
       $this->_activityAssigneeContacts = self::getAssigneeContacts($this->_activityId);
@@ -121,7 +121,8 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
       $activityDetails['assigneeContacts'] = $this->_activityAssigneeContacts;
       $activityDetails['targetContacts'] = $this->_activityTargetContacts;
 
-      $activityDetails['priority'] = isset($activityRecord['priority_id']) ? $priorities[$activityRecord['priority_id']] : null;
+      $activityDetails['priority'] = isset($activityRecord['priority_id']) ? $priorities[$activityRecord['priority_id']] : NULL;
+      $activityDetails['duration'] = isset($activityRecord['duration']) ? $activityRecord['duration'] : NULL;
 
       if (isset($activityRecord['medium_id'])) {
         $activityLabels = CRM_Fastactivity_BAO_Activity::getActivityLabels('encounter_medium');

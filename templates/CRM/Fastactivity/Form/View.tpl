@@ -19,39 +19,36 @@
 
 {if $action eq 8} {* delete activity *}
   <table class="crm-info-panel">
-    <h3><i class="crm-i fa-question-circle" aria-hidden="true"></i>
-      {$activityHeader}
+    <h3><span><i class="crm-i fa-question-circle" aria-hidden="true" /> {$activityHeader}</span>
     </h3>
     <tr class="crm-activity-form-block-activity_type">
-      <td class="label">Type</td>
-      <td class="view-value">{$activity.typeName}</td>
+      <td class="label">{ts}Type{/ts}</td>
+      <td class="view-value">{$activity.typeName}&nbsp;</td>
     </tr>
     <tr class="crm-activity-form-block-activity_subject">
-      <td class="label">Subject</td>
-      <td class="view-value">{$activity.subject}</td>
+      <td class="label">{ts}Subject{/ts}</td>
+      <td class="view-value">{$activity.subject}&nbsp;</td>
     </tr>
     <tr class="crm-activity-form-block-activity_date_time">
       <td class="label">
-        <i class="crm-i fa-calendar" aria-hidden="true"></i>
-        Date
+        <span><i class="crm-i fa-calendar" aria-hidden="true" /> {ts}Date{/ts}</span>
       </td>
-      <td class="view-value">{$activity.dateTime|crmDate}</td>
+      <td class="view-value">{$activity.dateTime|crmDate}&nbsp;</td>
     </tr>
     <tr class="crm-activity-form-block-activity_status">
-      <td class="label">Status</td>
-      <td class="view-value">{$activity.status}</td>
+      <td class="label">{ts}Status{/ts}</td>
+      <td class="view-value">{$activity.status}&nbsp;</td>
     </tr>
   </table>
 {else}
   <table class="crm-info-panel">
     <h3>{$activityHeader}</h3>
     {if $activity.typeDescription}
-      <div class="help">Description: {$activity.typeDescription}</div>
+      <div class="help">{ts}Description{/ts}: {$activity.typeDescription}</div>
     {/if}
     <tr class="crm-activity-form-block-source_contact_id">
       <td class="label">
-        <i class="crm-i fa-user" aria-hidden="true"></i>
-        Added By
+        <span><i class="crm-i fa-user" aria-hidden="true" /> {ts}Added By{/ts}</span>
       </td>
       <td class="view-value">
         {counter start=1 assign=count}
@@ -63,12 +60,12 @@
           {/if}
           {counter}
         {/foreach}
+        &nbsp;
       </td>
     </tr>
     <tr class="crm-activity-form-block-assignee_contact_id">
       <td class="label">
-        <i class="crm-i fa-user" aria-hidden="true"></i>
-        Assigned To
+        <span><i class="crm-i fa-user" aria-hidden="true" /> {ts}Assigned To{/ts}</span>
       </td>
       <td class="view-value">
         {counter start=1 assign=count}
@@ -80,16 +77,16 @@
           {/if}
           {counter}
         {/foreach}
+        &nbsp;
       </td>
     </tr>
     <tr class="crm-activity-form-block-target_contact_id">
       <td class="label">
-        <i class="crm-i fa-users" aria-hidden="true"></i>
-        With
+        <span><i class="crm-i fa-users" aria-hidden="true" /> {ts}With{/ts}</span>
       </td>
       <td class="view-value">
         {if $activity.targetContacts|@count lt $activity.targetContacts.count}
-          {$activity.targetContacts.count} contacts
+          {$activity.targetContacts.count} {ts}contacts{/ts}
         {else}
           {counter start=1 assign=count}
           {foreach from=$activity.targetContacts item=contact}
@@ -100,60 +97,67 @@
             {/if}
             {counter}
           {/foreach}
+          &nbsp;
         {/if}
       </td>
     </tr>
     <tr class="crm-activity-form-block-activity_date_time">
       <td class="label">
-        <i class="crm-i fa-calendar" aria-hidden="true"></i>
-        Date
+        <span><i class="crm-i fa-calendar" aria-hidden="true" /> {ts}Date{/ts}</span>
       </td>
-      <td class="view-value">{$activity.dateTime|crmDate}</td>
+      <td class="view-value">{$activity.dateTime|crmDate}&nbsp;</td>
+    </tr>
+    <tr class="crm-activity-form-block-activity_duration">
+      <td class="label">
+        <span><i class="crm-i fa-calendar" aria-hidden="true" /> {ts}Duration{/ts}</span>
+      </td>
+      <td class="view-value">{$activity.duration}&nbsp;</td>
     </tr>
     <tr class="crm-activity-form-block-activity_status">
-      <td class="label">Status</td>
-      <td class="view-value">{$activity.status}</td>
+      <td class="label">{ts}Status{/ts}</td>
+      <td class="view-value">{$activity.status}&nbsp;</td>
     </tr>
     <tr class="crm-activity-form-block-activity_priority">
-      <td class="label">Priority</td>
-      <td class="view-value">{$activity.priority}</td>
+      <td class="label">{ts}Priority{/ts}</td>
+      <td class="view-value">{$activity.priority}&nbsp;</td>
     </tr>
     <tr class="crm-activity-form-block-activity_medium">
-      <td class="label">Medium</td>
-      <td class="view-value">{if $activity.medium}{$activity.medium}{else}{/if}</td>
+      <td class="label">{ts}Medium{/ts}</td>
+      <td class="view-value">{if $activity.medium}{$activity.medium}{else}&nbsp;{/if}</td>
     </tr>
     {if $campaignEnabled}
     <tr class="crm-activity-form-block-activity_campaign">
-      <td class="label">Campaign</td>
+      <td class="label">{ts}Campaign{/ts}</td>
       <td class="view-value">
         {if $activity.campaignId}
           {assign var=campaignId value=$activity.campaignId}
           {capture assign=campaignViewURL}{crmURL p="civicrm/a/#/campaign/$campaignId/view" q="reset=1"}{/capture}
           <a href="{$campaignViewURL}" target="_blank" class="action-item crm-hover-button no-popup">{$activity.campaign}</a>
         {/if}
+        &nbsp;
       </td>
     </tr>
     <tr class="crm-activity-form-block-activity_engagementlevel">
-      <td class="label">Engagement Index</td>
+      <td class="label">{ts}Engagement Index{/ts}</td>
       <td class="view-value">
         {if $activity.engagementLevelStars}
           {$activity.engagementLevelStars}
         {else}
           {$activity.engagementLevel}
         {/if}
+        &nbsp;
       </td>
     </tr>
     {/if}
     <tr class="crm-activity-form-block-activity_subject">
-      <td class="label">Subject</td>
-      <td class="view-value">{$activity.subject}</td>
+      <td class="label">{ts}Subject{/ts}</td>
+      <td class="view-value">{$activity.subject}&nbsp;</td>
     </tr>
     <tr class="crm-activity-form-block-activity_details">
       <td class="label">
-        <i class="crm-i fa-info" aria-hidden="true"></i>
-        Details
+        <label><span><i class="crm-i fa-info" aria-hidden="true" /> {ts}Details{/ts}</span></label>
       </td>
-      <td class="view-value">{$activity.details}</td>
+      <td class="view-value">{$activity.details}&nbsp;</td>
     </tr>
     {foreach from=$viewCustomData item=customGroup}
       <tr class="crm-activity-form-block-custom_data">
@@ -167,7 +171,7 @@
                   {foreach from=$customFields.fields item=fields}
                     <tr>
                       <td class="label">{$fields.field_title}</td>
-                      <td class="view-value">{$fields.field_value}</td>
+                      <td class="view-value">{$fields.field_value}&nbsp;</td>
                     </tr>
                   {/foreach}
                 </table>

@@ -71,4 +71,13 @@ abstract class CRM_Fastactivity_Form_Base extends CRM_Core_Form {
     $this->assign('activityHeader', $header);
   }
 
+  /**
+   * Explicitly declare the entity api name.
+   *
+   * @return string
+   */
+  public function getDefaultEntity() {
+    return 'Activity';
+  }
+
 }
