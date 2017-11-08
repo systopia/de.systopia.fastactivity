@@ -370,6 +370,9 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
             $this->addElement('select', $field, $values['label'], $attribute);
           }
           else {
+            if (version_compare($civiVersion, '4.7', '<')) {
+              $attribute['entity'] = 'Activity';
+            }
             $this->addSelect($field, $attribute, $required, CRM_Utils_Array::value('extra', $values));
           }
         }
