@@ -127,7 +127,7 @@ class CRM_Fastactivity_Form_Settings extends CRM_Core_Form {
     $settings = $this->getFormSettings(FALSE);
     $defaults = array();
 
-    $existing = CRM_Fastactivity_Settings::get($settings);
+    $existing = CRM_Fastactivity_Settings::get(array_keys($settings));
     if ($existing) {
       foreach ($existing as $name => $value) {
         $defaults[$name] = $value;

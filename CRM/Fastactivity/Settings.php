@@ -67,10 +67,10 @@ class CRM_Fastactivity_Settings {
   public static function get($settings) {
     $domainID = CRM_Core_Config::domainID();
 
-    foreach ($settings as $name => $value) {
-      $prefixedSettings[self::getName($name, TRUE)] = $value;
+    foreach ($settings as $name) {
+      $prefixedSettings[] = self::getName($name, TRUE);
     }
-    $settingsResult = civicrm_api3('setting', 'get', array('return' => array_keys($prefixedSettings)));
+    $settingsResult = civicrm_api3('setting', 'get', array('return' => $prefixedSettings));
     if (isset($settingsResult['values'][$domainID])) {
       foreach ($settingsResult['values'][$domainID] as $name => $value) {
         $unprefixedSettings[self::getName($name)] = $value;
