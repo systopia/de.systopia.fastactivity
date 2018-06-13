@@ -41,8 +41,18 @@
     </tr>
   </table>
 {else}
+  <h2>{$activityHeader}</h2>
   <table class="crm-info-panel">
-    <h3>{$activityHeader}</h3>
+    {if $activity.case_id gt 0}
+    <h3>
+      {ts}Filed on Case:{/ts}
+      {assign var=contactId value=$activity.contactId}
+      {assign var=caseId value=$activity.case_id}
+      {capture assign=caseViewURL}{crmURL p='civicrm/contact/view/case' q="reset=1&id=$caseId&cid=$contactId&action=view&context=case"}{/capture}
+      <a href="{$caseViewURL}" class="action-item crm-hover-button no-popup" target="_blank">{$activity.case_subject} ({$activity.case_type})</a>
+    </h3>
+    {/if}
+
     {if $activity.typeDescription}
       <div class="help">{ts}Description{/ts}: {$activity.typeDescription}</div>
     {/if}

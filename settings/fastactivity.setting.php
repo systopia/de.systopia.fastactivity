@@ -67,6 +67,20 @@ return array(
     'html_attributes' => array(),
   ),
 
+  'fastactivity_tab_col_case' => array(
+    'group_name' => 'FastActivity Settings',
+    'group' => 'fastactivity',
+    'name' => 'fastactivity_tab_col_case',
+    'type' => 'Boolean',
+    'html_type' => 'Checkbox',
+    'default' => 0,
+    'add' => '4.6',
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => 'Display Case column in contact tab',
+    'html_attributes' => array(),
+  ),
+
   'fastactivity_tab_exclude_case_activities' => array(
     'group_name' => 'FastActivity Settings',
     'group' => 'fastactivity',

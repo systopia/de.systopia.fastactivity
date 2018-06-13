@@ -56,6 +56,9 @@
       {if $optionalCols.duration}
         <th class='crm-contact-activity-duration nosort'>{ts}Duration{/ts}</th>
       {/if}
+      {if $optionalCols.case}
+        <th class='crm-contact-activity-case nosort'>{ts}Case{/ts}</th>
+      {/if}
       <th class='crm-contact-activity-links nosort'>&nbsp;</th>
       <th class='hiddenElement'>&nbsp;</th>
     </tr>
@@ -118,6 +121,9 @@ CRM.$(function($) {
         {sClass:'crm-contact-activity-activity_status'},
         {/literal}{if $optionalCols.duration}{literal}
           {sClass:'crm-contact-activity-duration'},
+        {/literal}{/if}{literal}
+        {/literal}{if $optionalCols.case}{literal}
+          {sClass:'crm-contact-activity-case'},
         {/literal}{/if}{literal}
         {sClass:'crm-contact-activity-links', bSortable:false},
         {sClass:'hiddenElement', bSortable:false}

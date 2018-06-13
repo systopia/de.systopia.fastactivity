@@ -80,8 +80,8 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
 
     // Get activity record
     $activityRecord = civicrm_api3('Activity', 'getsingle', array(
-      'sequential' => 1,
       'id' => $this->_activityId,
+      'return' => ["case_id", "status_id", "activity_date_time", "activity_type_id", "subject", "details", "priority_id", "duration", "medium_id", "campaign_id", "engagement_level"],
     ));
 
     // Get Activity Status
@@ -102,6 +102,17 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
     // Get activity subject
     $this->_activitySubject = isset($activityRecord['subject']) ? $activityRecord['subject'] : NULL;
     $activityDetails['subject'] = $this->_activitySubject;
+
+    // Case ID
+    if (isset($activityRecord['case_id'])) {
+      $caseDetail = civicrm_api3('Case', 'getsingle', array(
+        'id' => CRM_Utils_Array::first($activityRecord['case_id']),
+        'return' => ["subject", "case_type_id"],
+      ));
+      $activityDetails['case_id'] = CRM_Utils_Array::first($activityRecord['case_id']);
+      $activityDetails['case_type'] = CRM_Core_PseudoConstant::getLabel('CRM_Case_BAO_Case', 'case_type_id', $caseDetail['case_type_id']);
+      $activityDetails['case_subject'] = $caseDetail['subject'];
+    }
 
     if ($this->_action & CRM_Core_Action::DELETE) {
       // Don't need to load any more info about the activity

@@ -31,6 +31,7 @@ class CRM_Fastactivity_Page_AJAX {
     // Load settings
     $params['optionalCols']['campaign_title'] = (bool) CRM_Fastactivity_Settings::getValue('tab_col_campaign_title');
     $params['optionalCols']['duration'] = (bool) CRM_Fastactivity_Settings::getValue('tab_col_duration');
+    $params['optionalCols']['case'] = (bool) CRM_Fastactivity_Settings::getValue('tab_col_case');
     $params['optionalCols']['target_contact'] = (bool) CRM_Fastactivity_Settings::getValue('tab_col_target_contact');
     $params['excludeCaseActivities'] = (bool) CRM_Fastactivity_Settings::getValue('tab_exclude_case_activities');
 
@@ -49,6 +50,9 @@ class CRM_Fastactivity_Page_AJAX {
     $sortMapper[] = 'status_id';
     if ($params['optionalCols']['duration']) {
       $sortMapper[] = 'activity_duration';
+    }
+    if ($params['optionalCols']['case']) {
+      $sortMapper[] = 'activity_case_id';
     }
 
     $sEcho = CRM_Utils_Type::escape($_REQUEST['sEcho'], 'Integer');
@@ -127,6 +131,9 @@ class CRM_Fastactivity_Page_AJAX {
     $selectorElements[] = 'status';
     if ($params['optionalCols']['duration']) {
       $selectorElements[] = 'duration';
+    }
+    if ($params['optionalCols']['case']) {
+      $selectorElements[] = 'activity_case_id';
     }
     $selectorElements[] = 'links';
     $selectorElements[] = 'class';

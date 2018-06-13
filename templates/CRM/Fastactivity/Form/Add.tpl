@@ -18,8 +18,8 @@
 {if $cdType }
   {include file="CRM/Custom/Form/CustomData.tpl"}
 {else}
-  <h3>{$activityHeader}</h3>
-  {if $activityTypeDescription }
+  <h2>{$activityHeader}</h2>
+  {if $activityTypeDescription}
     <div class="help">Description: {$activityTypeDescription}</div>
   {/if}
   <div class="crm-block crm-form-block crm-activity-form-block">

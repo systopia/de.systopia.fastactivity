@@ -34,6 +34,7 @@ class CRM_Fastactivity_Page_Tab extends CRM_Core_Page {
     // Load settings
     $params['optionalCols']['campaign_title'] = (bool) CRM_Fastactivity_Settings::getValue('tab_col_campaign_title');
     $params['optionalCols']['duration'] = (bool) CRM_Fastactivity_Settings::getValue('tab_col_duration');
+    $params['optionalCols']['case'] = (bool) CRM_Fastactivity_Settings::getValue('tab_col_case');
     $params['optionalCols']['target_contact'] = (bool) CRM_Fastactivity_Settings::getValue('tab_col_target_contact');
     $this->assign('optionalCols', $params['optionalCols']);
 

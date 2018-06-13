@@ -83,6 +83,9 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       if ($params['optionalCols']['duration']) {
         $values[$activityID]['duration'] = $dao->activity_duration;
       }
+      if ($params['optionalCols']['case']) {
+        $values[$activityID]['activity_case_id'] = $dao->activity_case_id;
+      }
       $values[$activityID]['subject'] = $dao->activity_subject;
       if ($params['optionalCols']['campaign_title']) {
         $values[$activityID]['campaign_id'] = $dao->activity_campaign_id;
@@ -124,6 +127,10 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     if ($params['optionalCols']['duration']) {
       $select[] = 'activity.duration                                                                 AS activity_duration';
       $groupBy[] = 'activity.duration';
+    }
+    if ($params['optionalCols']['case']) {
+      $select[] = 'case_activity.case_id                                                                   AS activity_case_id';
+      $groupBy[] = 'case_activity.case_id';
     }
     if ($params['optionalCols']['campaign_title']) {
       $select[] = 'activity.campaign_id                                                               AS activity_campaign_id';
@@ -168,7 +175,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       $join[] = 'LEFT JOIN civicrm_contact target_contact_me      ON (targets.contact_id = target_contact_me.id AND target_contact_me.id = %1)';
     }
 
-    if ($params['excludeCaseActivities']) {
+    if ($params['excludeCaseActivities'] || $params['optionalCols']['case']) {
       $join[] = 'LEFT JOIN civicrm_case_activity case_activity ON (activity.id = case_activity.activity_id)';
     }
 
@@ -359,7 +366,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     }
   }
 
-  public static function isNotTargetContact($activityId, $targetIds) {
+  private static function isNotTargetContact($activityId, $targetIds) {
     if (empty($targetIds) || empty($activityId)) {
       return array();
     }
@@ -448,6 +455,10 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
           $contactActivities[$activityId]['duration'] = $values['duration'];
         }
 
+        if ($params['optionalCols']['case']) {
+          $contactActivities[$activityId]['activity_case_id'] = self::formatCaseLink($params['contact_id'], $values['activity_case_id']);
+        }
+
         if ($params['optionalCols']['campaign_title']) {
           $contactActivities[$activityId]['campaign'] = $values['campaign'];
         }
@@ -498,13 +509,27 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
   }
 
   /**
+   * Format an html "Manage" case link for the activities tab
+   * @param int $contactId
+   * @param int $caseId
+   *
+   * @return string
+   */
+  private static function formatCaseLink($contactId, $caseId) {
+    if (empty($caseId)) return '';
+
+    $url = CRM_Utils_System::url('civicrm/contact/view/case', "reset=1&id={$caseId}&cid={$contactId}&action=view");
+    $html = "<a href='$url' class='action-item crm-hover-button no-popup' target='_blank'>Manage</a>";
+    return $html;
+  }
+  /**
    * Format contact names for display in assignee, source, target activity views
    *
    * @param $contacts
    * @param $contactCount
    * @return string
    */
-  public static function formatContactNames($contacts, $contactCount) {
+  private static function formatContactNames($contacts, $contactCount) {
     // Clear out any empty array values
     $contacts = array_filter($contacts);
     // if $contactCount > 4 we only show the current contact ID if found
@@ -537,6 +562,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     }
     return $result;
   }
+
 
   /**
    * This method returns the action links that are given for each search row.
