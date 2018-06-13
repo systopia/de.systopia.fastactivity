@@ -1,5 +1,7 @@
 <?php
 
+use CRM_Fastactivity_ExtensionUtil as E;
+
 class CRM_Fastactivity_Settings {
 
   CONST TITLE = 'FastActivity';
@@ -24,6 +26,7 @@ class CRM_Fastactivity_Settings {
    * Get name of setting
    * @param: setting name
    * @prefix: Boolean
+   * @return: string
    */
   public static function getName($name, $prefix = false) {
     $ret = str_replace(self::getPrefix(),'',$name);
@@ -35,7 +38,7 @@ class CRM_Fastactivity_Settings {
 
   /**
    * Save settings. Accepts an array of name=>value pairs.  Name can be with or without prefix (it will be added if missing).
-   * @param array $values Array of settings and values with or without prefix (eg. array(fastactivity_username => 'test')) to save
+   * @param array $values Array of settings and values with or without prefix (eg. array(smartdebit_username => 'test')) to save
    */
   public static function save($settings) {
     foreach ($settings as $name => $value) {
@@ -50,10 +53,11 @@ class CRM_Fastactivity_Settings {
    * @return mixed
    */
   public static function getValue($name) {
-    $settings = civicrm_api3('setting', 'get', array('return' => CRM_Fastactivity_Settings::getName($name,true)));
+    $className = E::CLASS_PREFIX . '_Settings';
+    $settings = civicrm_api3('setting', 'get', array('return' => $className::getName($name,true)));
     $domainID = CRM_Core_Config::domainID();
-    if (isset($settings['values'][$domainID][CRM_Fastactivity_Settings::getName($name,true)])) {
-      return $settings['values'][$domainID][CRM_Fastactivity_Settings::getName($name, true)];
+    if (isset($settings['values'][$domainID][$className::getName($name,true)])) {
+      return $settings['values'][$domainID][$className::getName($name, true)];
     }
     return '';
   }
@@ -65,6 +69,10 @@ class CRM_Fastactivity_Settings {
    * @return array
    */
   public static function get($settings) {
+    if ((!is_array($settings) || empty($settings))) {
+      return array();
+    }
+
     $domainID = CRM_Core_Config::domainID();
 
     foreach ($settings as $name) {
