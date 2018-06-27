@@ -206,6 +206,9 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     if (!empty($activity_type_id)) {
       $clauses[] = "activity.activity_type_id IN ( " . $activity_type_id . " ) ";
     }
+    $clauses[] = "activity.is_current_revision != 0";
+    $clauses[] = "activity.is_deleted = 0";
+
     if ($excludeCaseActivities) {
       $clauses[] = "case_activity.case_id IS NULL";
     }
