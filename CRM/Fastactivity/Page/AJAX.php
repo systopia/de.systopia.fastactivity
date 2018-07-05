@@ -35,7 +35,7 @@ class CRM_Fastactivity_Page_AJAX {
       // 4 => 'target_display_name', we are not showing target contact column
       4 => 'assignee_display_name',
       5 => 'activity_date_time',
-      6 => 'status_id',
+      6 => 'activity.status_id',
     );
 
     $sEcho = CRM_Utils_Type::escape($_REQUEST['sEcho'], 'Integer');
