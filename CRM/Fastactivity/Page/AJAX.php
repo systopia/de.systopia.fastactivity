@@ -47,7 +47,7 @@ class CRM_Fastactivity_Page_AJAX {
     }
     $sortMapper[] = 'assignee_display_name';
     $sortMapper[] = 'activity_date_time';
-    $sortMapper[] = 'status_id';
+    $sortMapper[] = 'activity.status_id';
     if ($params['optionalCols']['duration']) {
       $sortMapper[] = 'activity_duration';
     }
