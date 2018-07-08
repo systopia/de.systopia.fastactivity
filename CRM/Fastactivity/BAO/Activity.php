@@ -521,8 +521,33 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
   private static function formatCaseLink($contactId, $caseId) {
     if (empty($caseId)) return '';
 
+    $caseContacts = civicrm_api3('Case', 'getvalue', array(
+      'return' => "contact_id",
+      'id' => $caseId,
+    ));
+
+    foreach ($caseContacts as $caseContactId) {
+      if (!isset($firstCaseContactId)) {
+        $firstCaseContactId = $caseContactId;
+      }
+      if ($contactId == $caseContactId) {
+        $isClientOfCase = TRUE;
+        break;
+      }
+    }
+
+    if ($isClientOfCase) {
+      $label = "ID: {$caseId}";
+    }
+    else {
+      $contactName = civicrm_api3('Contact', 'getvalue', array(
+        'return' => "display_name",
+        'id' => $firstCaseContactId,
+      ));
+      $label = "ID: {$caseId}<br />({$contactName})";
+    }
     $url = CRM_Utils_System::url('civicrm/contact/view/case', "reset=1&id={$caseId}&cid={$contactId}&action=view");
-    $html = "<a href='$url' class='action-item crm-hover-button no-popup' target='_blank'>Case {$caseId}</a>";
+    $html = "<a href='$url' class='action-item crm-hover-button no-popup' target='_blank'>{$label}</a>";
     return $html;
   }
   /**
