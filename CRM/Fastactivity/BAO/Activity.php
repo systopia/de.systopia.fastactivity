@@ -170,7 +170,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       $select[] = 'COALESCE(target_contact_me.display_name, target_contact_random.display_name)   AS target_display_name';
       $groupBy[] = 'target_contact_me.display_name';
       $groupBy[] = 'target_contact_random.display_name';
-      $join[] = 'LEFT JOIN civicrm_activity_contact targets       ON (activity.id = targets.activity_id AND targets.record_type_id = 1)';
+      $join[] = 'LEFT JOIN civicrm_activity_contact targets       ON (activity.id = targets.activity_id AND targets.record_type_id = 3)';
       $join[] = 'LEFT JOIN civicrm_contact target_contact_random  ON (targets.contact_id = target_contact_random.id AND target_contact_random.is_deleted = 0)';
       $join[] = 'LEFT JOIN civicrm_contact target_contact_me      ON (targets.contact_id = target_contact_me.id AND target_contact_me.id = %1)';
     }
