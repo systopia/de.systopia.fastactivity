@@ -659,6 +659,21 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       }
     }
 
+    if (
+      $activityTypeName &&
+      CRM_Case_BAO_Case::checkPermission($activityId, 'File On Case', $activityTypeId)
+    ) {
+      $actionLinks += array(
+        CRM_Core_Action::
+        ADD => array(
+          'name' => ts('File on Case'),
+          'url' => '#',
+          'extra' => 'onclick="javascript:fileOnCase( \'file\', ' . $activityId . ', null, this ); return false;"',
+          'title' => ts('File on Case'),
+        ),
+      );
+    }
+
     if (CRM_Core_Permission::check('delete activities')) {
       if ($showDelete) {
         $actionLinks += array(
