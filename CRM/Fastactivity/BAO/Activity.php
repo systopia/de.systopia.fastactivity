@@ -59,13 +59,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     // We can't do anything with targets (like see if our contact is listed) as it slows down the query too much on large datasets
     list($selectClause, $groupByClause) = self::selectClause($params);
 
-    $query = "{$selectClause}
- WHERE {$whereClause}
- {$groupByClause}
- {$orderBy}
-{$limit}";
-
-
+    $query = "{$selectClause} WHERE {$whereClause} {$groupByClause} {$orderBy} {$limit}";
     $dao = CRM_Core_DAO::executeQuery($query, $params);
 
     //get all activity types
@@ -91,7 +85,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
         $values[$activityID]['campaign_id'] = $dao->activity_campaign_id;
         $values[$activityID]['campaign'] = $dao->activity_campaign_title;
       }
-      $values[$activityID]['is_recurring_activity'] = $dao->is_recurring_activity;
+      $values[$activityID]['activity_parent_id'] = $dao->activity_parent_id;
 
       // Assign contact counts / names
       $values[$activityID]['assignee_contact_count'] = $dao->assignee_count;
@@ -124,6 +118,8 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     $groupBy[] = 'activity.activity_date_time';
     $select[] = 'activity.status_id                                                                 AS activity_status_id';
     $groupBy[] = 'activity.status_id';
+    $select[] = 'recurring_entity.parent_id AS activity_parent_id';
+    $groupBy[] = 'recurring_entity.parent_id';
     if ($params['optionalCols']['duration']) {
       $select[] = 'activity.duration                                                                 AS activity_duration';
       $groupBy[] = 'activity.duration';
@@ -161,6 +157,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     $join[] = 'LEFT JOIN civicrm_activity_contact assignees       ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1)';
     $join[] = 'LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0)';
     $join[] = 'LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = %1)';
+    $join[] = 'LEFT JOIN civicrm_recurring_entity recurring_entity ON activity.id = recurring_entity.entity_id';
 
     if ($params['optionalCols']['target_contact']) {
       $select[] = 'COUNT(DISTINCT(targets.contact_id))                                              AS target_count';
@@ -502,7 +499,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
           $values['activity_id']
         );
 
-        if ($values['is_recurring_activity']) {
+        if ($values['activity_parent_id']) {
           $contactActivities[$activityId]['is_recurring_activity'] = CRM_Core_BAO_RecurringEntity::getPositionAndCount($values['activity_id'], 'civicrm_activity');
         }
       }
