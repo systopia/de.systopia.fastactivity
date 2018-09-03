@@ -259,7 +259,6 @@ CRM.$(function($) {
 {/literal}
   </div>{* end of form block*}
 {/if}
-{include file="CRM/Event/Form/ManageEvent/ConfirmRepeatMode.tpl" entityID=$activityId entityTable="civicrm_activity"}
 
 {if $actionLinks}
   <div class="actionlinks">
@@ -270,3 +269,45 @@ CRM.$(function($) {
     {/foreach}
   </div>
 {/if}
+
+{literal}
+<script type="text/javascript">
+  CRM.$(function($) {
+    var $form = $('form.{/literal}{$form.formClass}{literal}');
+
+    function validate() {
+      var valid = $(':input', '#recurring-entity-block').valid(),
+        modified = CRM.utils.initialValueChanged('#recurring-entity-block');
+      $('#allowRepeatConfigToSubmit', $form).val(valid && modified ? '1' : '0');
+      return valid;
+    }
+
+    // Dialog for preview repeat Configuration dates
+    function previewDialog() {
+      // Set default value for start date on activity forms before generating preview
+      if (!$('#repetition_start_date', $form).val() && $('#activity_date_time', $form).val()) {
+        $('#repetition_start_date', $form)
+          .val($('#activity_date_time', $form).val())
+          .next().val($('#activity_date_time', $form).next().val())
+          .siblings('.hasTimeEntry').val($('#activity_date_time', $form).siblings('.hasTimeEntry').val());
+      }
+      var payload = $form.serialize() + '{/literal}&entity_table={$entityTable}&entity_id={$currentEntityId}{literal}';
+      CRM.confirm({
+        width: '50%',
+        url: CRM.url("civicrm/recurringentity/preview", payload)
+      }).on('crmConfirm:yes', function() {
+        $form.submit();
+      });
+    }
+
+    $('#_qf_Add_upload-top, #_qf_Add_upload-bottom').click(function (e) {
+      if (CRM.utils.initialValueChanged('#recurring-entity-block')) {
+        e.preventDefault();
+        if (validate()) {
+          previewDialog();
+        }
+      }
+    });
+  });
+</script>
+{/literal}

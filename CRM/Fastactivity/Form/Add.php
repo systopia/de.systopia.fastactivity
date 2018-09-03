@@ -149,7 +149,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
         'attributes' => array('' => '- ' . ts('select activity') . ' -') + $activityTypes,
         'extra' => array('class' => 'crm-select2'),
       ),
-      // Add optional 'Subject' field for the Follow-up Activiity, CRM-4491
+      // Add optional 'Subject' field for the Follow-up Activity, CRM-4491
       'followup_activity_subject' => array(
         'type' => 'text',
         'label' => ts('Subject'),
@@ -160,8 +160,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     );
   }
 
-  public function preProcess()
-  {
+  public function preProcess() {
     // AJAX query for custom data is called to civicrm/fastactivity/add
     // This handles that query and returns the edit form block for customData
     $this->_cdType = CRM_Utils_Array::value('type', $_GET);
@@ -170,6 +169,8 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
       $this->assign('cdType', TRUE);
       return CRM_Custom_Form_CustomData::preProcess($this);
     }
+
+    CRM_Core_Form_RecurringEntity::preProcess('civicrm_activity');
 
     // Check if we should be accessing this page
     $allowedActions = array(CRM_Core_Action::ADD, CRM_Core_Action::UPDATE);
