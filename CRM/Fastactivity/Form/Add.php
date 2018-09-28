@@ -238,7 +238,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
 
     if (!empty($this->_submitValues)) {
       $this->_values = $this->_submitValues;
-      if (isset($this->_submitValues['target_contact_count'])) {
+      if (isset($this->_submitValues['target_contact_count']) && $this->_submitValues['target_contact_count'] > $this::MAX_TARGETCONTACTS) {
         $this->_activityTargetCount = $this->_submitValues['target_contact_count'];
         $this->assign('activityTargetCount', $this->_activityTargetCount);
       }
