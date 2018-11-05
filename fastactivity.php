@@ -15,6 +15,7 @@
 +--------------------------------------------------------*/
 
 require_once 'fastactivity.civix.php';
+use CRM_Fastactivity_ExtensionUtil as E;
 
 /**
  * Implements hook_civicrm_config().
@@ -181,7 +182,9 @@ function fastactivity_civicrm_tabs ( &$tabs, $contactID ) {
   //  reversing and adjusting https://github.com/systopia/de.systopia.fastactivity/commit/aea4a43a22d4b89590bf953447dbfc1f3fb0e762
 
   // ADD the fast activity tab as a new tab
-  $params = array('contact_id' => $contactID);
+  $params['contact_id'] = $contactID;
+  $params['excludeCaseActivities'] = (bool) CRM_Fastactivity_Settings::getValue('tab_exclude_case_activities');
+
   $tabs[] = array('title'  => ts('Activities'),
                   'class'  => 'livePage',
                   'id'     => 'fastactivity',
@@ -216,14 +219,19 @@ function fastactivity_civicrm_coreResourceList(&$list, $region) {
  * Not implemented in Civi 4.6
  */
 function fastactivity_civicrm_check(&$messages) {
-  // Make sure campaign extension is loaded
-  if (!CRM_Extension_System::singleton()->getMapper()->isActiveModule('campaign')) {
-    $messages[] = new CRM_Utils_Check_Message(
-      'fastactivity_campaign',
-      ts('FastActivity uses campaigntree API. Please install the extension "de.systopia.campaign".'),
-      ts('CampaignTree API Required'),
-      \Psr\Log\LogLevel::CRITICAL
-    );
+  require_once(E::path() . '/CRM/Fastactivity/Settings.php');
+  if ((bool) CRM_Fastactivity_Settings::getValue('tab_col_campaign_title')) {
+    // Make sure campaign extension is loaded
+    if (!CRM_Extension_System::singleton()
+      ->getMapper()
+      ->isActiveModule('campaign')) {
+      $messages[] = new CRM_Utils_Check_Message(
+        'fastactivity_campaign',
+        ts('FastActivity uses campaigntree API. Please install the extension "de.systopia.campaign".'),
+        ts('CampaignTree API Required'),
+        \Psr\Log\LogLevel::CRITICAL
+      );
+    }
   }
 
   // Make sure fontawesome extension is loaded
@@ -236,4 +244,21 @@ function fastactivity_civicrm_check(&$messages) {
       \Psr\Log\LogLevel::WARNING
     );
   }
+}
+
+/**
+ * Implements hook_civicrm_navigationMenu().
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
+ *
+ */
+function fastactivity_civicrm_navigationMenu(&$menu) {
+  $item[] =  array (
+    'name'       => 'Fast Activities Tab',
+    'url'        => 'civicrm/admin/fastactivity',
+    'permission' => 'administer CiviCRM',
+    'operator'   => NULL,
+    'separator'  => NULL,
+  );
+  _fastactivity_civix_insert_navigation_menu($menu, 'Administer/Customize Data and Screens', $item[0]);
 }

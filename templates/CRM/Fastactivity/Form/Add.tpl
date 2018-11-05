@@ -18,8 +18,8 @@
 {if $cdType }
   {include file="CRM/Custom/Form/CustomData.tpl"}
 {else}
-  <h3>{$activityHeader}</h3>
-  {if $activityTypeDescription }
+  <h2>{$activityHeader}</h2>
+  {if $activityTypeDescription}
     <div class="help">Description: {$activityTypeDescription}</div>
   {/if}
   <div class="crm-block crm-form-block crm-activity-form-block">
@@ -29,7 +29,7 @@
   <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="top"}</div>
 
   <table class="form-layout">
-    <div style="display:none">{$form.activity_type_id.html}</div>
+    <div>{$form.activity_type_id.html}</div>
     {if $surveyActivity}
       <tr class="crm-activity-form-block-survey">
         <td class="label">{ts}Survey Title{/ts}</td><td class="view-value">{$surveyTitle}</td>
@@ -93,6 +93,7 @@
       <td class="label">{$form.subject.label}</td><td class="view-value">{$form.subject.html|crmAddClass:huge}</td>
     </tr>
 
+    {if $campaignEnabled}
     {* CRM-7362 --add campaign to activities *}
     {include file="CRM/Campaign/Form/addCampaignToComponent.tpl"
     campaignTrClass="crm-activity-form-block-campaign_id"}
@@ -103,6 +104,7 @@
         <td class="label">{$form.engagement_level.label}</td>
         <td class="view-value">{$form.engagement_level.html}</td>
       </tr>
+    {/if}
     {/if}
 
     <tr class="crm-activity-form-block-location">
@@ -257,7 +259,6 @@ CRM.$(function($) {
 {/literal}
   </div>{* end of form block*}
 {/if}
-{include file="CRM/Event/Form/ManageEvent/ConfirmRepeatMode.tpl" entityID=$activityId entityTable="civicrm_activity"}
 
 {if $actionLinks}
   <div class="actionlinks">
@@ -268,3 +269,45 @@ CRM.$(function($) {
     {/foreach}
   </div>
 {/if}
+
+{literal}
+<script type="text/javascript">
+  CRM.$(function($) {
+    var $form = $('form.{/literal}{$form.formClass}{literal}');
+
+    function validate() {
+      var valid = $(':input', '#recurring-entity-block').valid(),
+        modified = CRM.utils.initialValueChanged('#recurring-entity-block');
+      $('#allowRepeatConfigToSubmit', $form).val(valid && modified ? '1' : '0');
+      return valid;
+    }
+
+    // Dialog for preview repeat Configuration dates
+    function previewDialog() {
+      // Set default value for start date on activity forms before generating preview
+      if (!$('#repetition_start_date', $form).val() && $('#activity_date_time', $form).val()) {
+        $('#repetition_start_date', $form)
+          .val($('#activity_date_time', $form).val())
+          .next().val($('#activity_date_time', $form).next().val())
+          .siblings('.hasTimeEntry').val($('#activity_date_time', $form).siblings('.hasTimeEntry').val());
+      }
+      var payload = $form.serialize() + '{/literal}&entity_table={$entityTable}&entity_id={$currentEntityId}{literal}';
+      CRM.confirm({
+        width: '50%',
+        url: CRM.url("civicrm/recurringentity/preview", payload)
+      }).on('crmConfirm:yes', function() {
+        $form.submit();
+      });
+    }
+
+    $('#_qf_Add_upload-top, #_qf_Add_upload-bottom').click(function (e) {
+      if (CRM.utils.initialValueChanged('#recurring-entity-block')) {
+        e.preventDefault();
+        if (validate()) {
+          previewDialog();
+        }
+      }
+    });
+  });
+</script>
+{/literal}

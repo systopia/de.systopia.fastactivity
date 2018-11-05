@@ -31,6 +31,13 @@ class CRM_Fastactivity_Page_Tab extends CRM_Core_Page {
     $this->assign('admin', FALSE);
     $this->assign('context', 'activity');
 
+    // Load settings
+    $params['optionalCols']['campaign_title'] = (bool) CRM_Fastactivity_Settings::getValue('tab_col_campaign_title');
+    $params['optionalCols']['duration'] = (bool) CRM_Fastactivity_Settings::getValue('tab_col_duration');
+    $params['optionalCols']['case'] = (bool) CRM_Fastactivity_Settings::getValue('tab_col_case');
+    $params['optionalCols']['target_contact'] = (bool) CRM_Fastactivity_Settings::getValue('tab_col_target_contact');
+    $this->assign('optionalCols', $params['optionalCols']);
+
     // Create controller for the activity filter
     // This is a multi-select dropdown which allows to filter on multiple activity types
     $controller = new CRM_Core_Controller_Simple(

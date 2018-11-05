@@ -49,6 +49,10 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
    * form fields based on their requirement
    */
   public function setFields() {
+    // Remove print document activity type
+    $unwanted = CRM_Core_OptionGroup::values('activity_type', FALSE, FALSE, FALSE, "AND v.name = 'Print PDF Letter'");
+    $activityTypes = array_diff_key(CRM_Core_PseudoConstant::ActivityType(FALSE), $unwanted);
+
     $this->_fields = array(
       'subject' => array(
         'type' => 'text',
@@ -85,7 +89,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
         'label' => ts('Activity Type'),
         'required' => TRUE,
         'onchange' => "CRM.buildCustomData( 'Activity', this.value );",
-        'attributes' => array('' => '- ' . ts('select activity') . ' -') + CRM_Core_PseudoConstant::ActivityType(FALSE),
+        'attributes' => array('' => '- ' . ts('select activity') . ' -') + $activityTypes,
         'extra' => array('class' => 'crm-select2'),
       ),
       'priority_id' => array(
@@ -142,10 +146,10 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
       'followup_activity_type_id' => array(
         'type' => 'select',
         'label' => ts('Followup Activity'),
-        'attributes' => array('' => '- ' . ts('select activity') . ' -') + CRM_Core_PseudoConstant::ActivityType(FALSE),
+        'attributes' => array('' => '- ' . ts('select activity') . ' -') + $activityTypes,
         'extra' => array('class' => 'crm-select2'),
       ),
-      // Add optional 'Subject' field for the Follow-up Activiity, CRM-4491
+      // Add optional 'Subject' field for the Follow-up Activity, CRM-4491
       'followup_activity_subject' => array(
         'type' => 'text',
         'label' => ts('Subject'),
@@ -154,14 +158,9 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
         ),
       ),
     );
-
-    if ($printPDF = CRM_Utils_Array::key('Print PDF Letter', $this->_fields['followup_activity_type_id']['attributes'])) {
-      unset($this->_fields['followup_activity_type_id']['attributes'][$printPDF]);
-    }
   }
 
-  public function preProcess()
-  {
+  public function preProcess() {
     // AJAX query for custom data is called to civicrm/fastactivity/add
     // This handles that query and returns the edit form block for customData
     $this->_cdType = CRM_Utils_Array::value('type', $_GET);
@@ -170,6 +169,8 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
       $this->assign('cdType', TRUE);
       return CRM_Custom_Form_CustomData::preProcess($this);
     }
+
+    CRM_Core_Form_RecurringEntity::preProcess('civicrm_activity');
 
     // Check if we should be accessing this page
     $allowedActions = array(CRM_Core_Action::ADD, CRM_Core_Action::UPDATE);
@@ -330,6 +331,8 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
   }
 
   public function buildQuickForm() {
+    $civiVersion = CRM_Core_BAO_Domain::version();
+
     if ($this->_cdType) {
       // AJAX query for custom data is called to civicrm/fastactivity/add
       // This handles that query and returns the edit form block for customData
@@ -352,26 +355,44 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
         $attribute = CRM_Utils_Array::value('attributes', $values);
         $required = !empty($values['required']);
         if ($values['type'] == 'wysiwyg') {
-          $element = $this->addWysiwyg($field, $values['label'], $attribute, $required);
+          if (version_compare($civiVersion, '4.7', '<')) {
+            $this->addWysiwyg($field, $values['label'], $attribute, $required);
+          }
+          else {
+            $this->add('wysiwyg', $field, $values['label'], $attribute, $required);
+          }
         }
-        elseif ($values['type'] == 'select' && empty($attribute)) {
-          $element = $this->addSelect($field, array('entity' => 'activity'), $required);
+        elseif ($values['type'] == 'select') {
+          if ($field == 'activity_type_id' && ($this->_action == CRM_Core_Action::UPDATE)) {
+            // Don't allow changing activity type in edit mode
+            $this->add('hidden', $field, $values['label']);
+          }
+          elseif ($field == 'followup_activity_type_id') {
+            $this->addElement('select', $field, $values['label'], $attribute);
+          }
+          else {
+            if (version_compare($civiVersion, '4.7', '<')) {
+              $attribute['entity'] = 'Activity';
+            }
+            $this->addSelect($field, $attribute, $required, CRM_Utils_Array::value('extra', $values));
+          }
         }
         elseif ($values['type'] == 'entityRef') {
-          $element = $this->addEntityRef($field, $values['label'], $attribute, $required);
+          $this->addEntityRef($field, $values['label'], $attribute, $required);
         }
         else {
-          $element = $this->add($values['type'], $field, $values['label'], $attribute, $required, CRM_Utils_Array::value('extra', $values));
-        }
-        if ($field == 'activity_type_id' && ($this->_action == CRM_Core_Action::UPDATE)) {
-          // Don't allow changing activity type in edit mode
-          $element->freeze();
+          $this->add($values['type'], $field, $values['label'], $attribute, $required, CRM_Utils_Array::value('extra', $values));
         }
       }
     }
 
-    // Add campaign elements
-    self::buildFormElementsCampaign();
+    $config = CRM_Core_Config::singleton();
+    $campaignEnabled = in_array("CiviCampaign", $config->enableComponents);
+    if ($campaignEnabled) {
+      // Add campaign elements
+      self::buildFormElementsCampaign();
+    }
+    $this->assign('campaignEnabled', $campaignEnabled);
 
     // this option should be available only during add mode
     if ($this->_action == CRM_Core_Action::ADD) {

@@ -57,35 +57,9 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
 
     // The main query.  This gets all the information (except target counts) for the tabbed activity display
     // We can't do anything with targets (like see if our contact is listed) as it slows down the query too much on large datasets
-    $query = "
-SELECT
-  activity.id                                                                        AS activity_id,
-  activity.activity_type_id                                                          AS activity_type_id,
-  activity.subject                                                                   AS activity_subject,
-  activity.activity_date_time                                                        AS activity_date_time,
-  activity.status_id                                                                 AS activity_status_id,
-  activity.campaign_id                                                               AS activity_campaign_id,
-  campaign.title                                                                     AS activity_campaign_title,
-  COUNT(DISTINCT(sources.contact_id))                                                AS source_count,
-  COALESCE(source_contact_me.id, source_contact_random.id)                           AS source_contact_id,
-  COALESCE(source_contact_me.display_name, source_contact_random.display_name)       AS source_display_name,
-  COUNT(DISTINCT(assignees.contact_id))                                              AS assignee_count,
-  COALESCE(assignee_contact_me.id, assignee_contact_random.id)                       AS assignee_contact_id,
-  COALESCE(assignee_contact_me.display_name, assignee_contact_random.display_name)   AS assignee_display_name
-FROM civicrm_activity_contact acon
-LEFT JOIN civicrm_activity activity                ON acon.activity_id = activity.id
-LEFT JOIN civicrm_activity_contact sources         ON (activity.id = sources.activity_id AND sources.record_type_id = 2)
-LEFT JOIN civicrm_contact source_contact_random    ON (sources.contact_id = source_contact_random.id AND source_contact_random.is_deleted = 0)
-LEFT JOIN civicrm_contact source_contact_me        ON (sources.contact_id = source_contact_me.id AND source_contact_me.id = %1)
-LEFT JOIN civicrm_activity_contact assignees       ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1)
-LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0)
-LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = %1)
-LEFT JOIN civicrm_campaign campaign                ON (activity.campaign_id = campaign.id)
-WHERE {$whereClause}
-GROUP BY activity.id
-{$orderBy}
-{$limit}";
+    list($selectClause, $groupByClause) = self::selectClause($params);
 
+    $query = "{$selectClause} WHERE {$whereClause} {$groupByClause} {$orderBy} {$limit}";
     $dao = CRM_Core_DAO::executeQuery($query, $params);
 
     //get all activity types
@@ -100,23 +74,117 @@ GROUP BY activity.id
       $values[$activityID]['activity_type'] = $activityTypes[$dao->activity_type_id];
       $values[$activityID]['activity_date_time'] = $dao->activity_date_time;
       $values[$activityID]['status_id'] = $dao->activity_status_id;
+      if ($params['optionalCols']['duration']) {
+        $values[$activityID]['duration'] = $dao->activity_duration;
+      }
+      if ($params['optionalCols']['case']) {
+        $values[$activityID]['activity_case_id'] = $dao->activity_case_id;
+      }
       $values[$activityID]['subject'] = $dao->activity_subject;
-      $values[$activityID]['campaign_id'] = $dao->activity_campaign_id;
-      $values[$activityID]['campaign'] = $dao->activity_campaign_title;
-      $values[$activityID]['is_recurring_activity'] = $dao->is_recurring_activity;
+      if ($params['optionalCols']['campaign_title']) {
+        $values[$activityID]['campaign_id'] = $dao->activity_campaign_id;
+        $values[$activityID]['campaign'] = $dao->activity_campaign_title;
+      }
+      $values[$activityID]['activity_parent_id'] = $dao->activity_parent_id;
 
       // Assign contact counts / names
       $values[$activityID]['assignee_contact_count'] = $dao->assignee_count;
       $values[$activityID]['source_contact_count'] = $dao->source_count;
-      $values[$activityID]['target_contact_count'] = -1; // -1 means we didn't count at all
+      if ($params['optionalCols']['target_contact']) {
+        $values[$activityID]['target_contact_count'] = $dao->target_count;
+        $values[$activityID]['target_contact_id'] = $dao->target_contact_id;
+        $values[$activityID]['target_contact_name'][$dao->target_contact_id] = $dao->target_display_name;
+      }
+      else {
+        $values[$activityID]['target_contact_count'] = -1; // -1 means we didn't count at all
+      }
       $values[$activityID]['assignee_contact_name'][$dao->assignee_contact_id] = $dao->assignee_display_name;
       $values[$activityID]['source_contact_name'][$dao->source_contact_id] = $dao->source_display_name;
-      $values[$activityID]['target_contact_name'][$dao->target_contact_id] = $dao->target_display_name;
       $values[$activityID]['assignee_contact_id'] = $dao->assignee_contact_id;
       $values[$activityID]['source_contact_id'] = $dao->source_contact_id;
     }
 
     return $values;
+  }
+
+  public static function selectClause($params) {
+    $select[] = 'activity.id                                                                        AS activity_id';
+    $groupBy[] = 'activity.id';
+    $select[] = 'activity.activity_type_id                                                          AS activity_type_id';
+    $groupBy[] = 'activity.activity_type_id';
+    $select[] = 'activity.subject                                                                   AS activity_subject';
+    $groupBy[] = 'activity.subject';
+    $select[] = 'activity.activity_date_time                                                        AS activity_date_time';
+    $groupBy[] = 'activity.activity_date_time';
+    $select[] = 'activity.status_id                                                                 AS activity_status_id';
+    $groupBy[] = 'activity.status_id';
+    $select[] = 'recurring_entity.parent_id AS activity_parent_id';
+    $groupBy[] = 'recurring_entity.parent_id';
+    if ($params['optionalCols']['duration']) {
+      $select[] = 'activity.duration                                                                 AS activity_duration';
+      $groupBy[] = 'activity.duration';
+    }
+    if ($params['optionalCols']['case']) {
+      $select[] = 'case_activity.case_id                                                                   AS activity_case_id';
+      $groupBy[] = 'case_activity.case_id';
+    }
+    if ($params['optionalCols']['campaign_title']) {
+      $select[] = 'activity.campaign_id                                                               AS activity_campaign_id';
+      $groupBy[] = 'activity.campaign_id';
+      $select[] = 'campaign.title                                                                     AS activity_campaign_title';
+      $groupBy[] = 'campaign.title';
+      $join[] = 'LEFT JOIN civicrm_campaign campaign                ON (activity.campaign_id = campaign.id)';
+    }
+    $select[] = 'COUNT(DISTINCT(sources.contact_id))                                                AS source_count';
+    $select[] = 'COALESCE(source_contact_me.id, source_contact_random.id)                           AS source_contact_id';
+    $groupBy[] = 'source_contact_me.id';
+    $groupBy[] = 'source_contact_random.id';
+    $select[] = 'COALESCE(source_contact_me.display_name, source_contact_random.display_name)       AS source_display_name';
+    $groupBy[] = 'source_contact_me.display_name';
+    $groupBy[] = 'source_contact_random.display_name';
+    $select[] = 'COUNT(DISTINCT(assignees.contact_id))                                              AS assignee_count';
+    $select[] = 'COALESCE(assignee_contact_me.id, assignee_contact_random.id)                       AS assignee_contact_id';
+    $groupBy[] = 'assignee_contact_me.id';
+    $groupBy[] = 'assignee_contact_random.id';
+    $select[] = 'COALESCE(assignee_contact_me.display_name, assignee_contact_random.display_name)   AS assignee_display_name';
+    $groupBy[] = 'assignee_contact_me.display_name';
+    $groupBy[] = 'assignee_contact_random.display_name';
+
+    $join[] = 'LEFT JOIN civicrm_activity activity                ON acon.activity_id = activity.id';
+    $join[] = 'LEFT JOIN civicrm_activity_contact sources         ON (activity.id = sources.activity_id AND sources.record_type_id = 2)';
+    $join[] = 'LEFT JOIN civicrm_contact source_contact_random    ON (sources.contact_id = source_contact_random.id AND source_contact_random.is_deleted = 0)';
+    $join[] = 'LEFT JOIN civicrm_contact source_contact_me        ON (sources.contact_id = source_contact_me.id AND source_contact_me.id = %1)';
+    $join[] = 'LEFT JOIN civicrm_activity_contact assignees       ON (activity.id = assignees.activity_id AND assignees.record_type_id = 1)';
+    $join[] = 'LEFT JOIN civicrm_contact assignee_contact_random  ON (assignees.contact_id = assignee_contact_random.id AND assignee_contact_random.is_deleted = 0)';
+    $join[] = 'LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = %1)';
+    $join[] = 'LEFT JOIN civicrm_recurring_entity recurring_entity ON activity.id = recurring_entity.entity_id';
+
+    if ($params['optionalCols']['target_contact']) {
+      $select[] = 'COUNT(DISTINCT(targets.contact_id))                                              AS target_count';
+      $select[] = 'COALESCE(target_contact_me.id, target_contact_random.id)                       AS target_contact_id';
+      $groupBy[] = 'target_contact_me.id';
+      $groupBy[] = 'target_contact_random.id';
+      $select[] = 'COALESCE(target_contact_me.display_name, target_contact_random.display_name)   AS target_display_name';
+      $groupBy[] = 'target_contact_me.display_name';
+      $groupBy[] = 'target_contact_random.display_name';
+      $join[] = 'LEFT JOIN civicrm_activity_contact targets       ON (activity.id = targets.activity_id AND targets.record_type_id = 3)';
+      $join[] = 'LEFT JOIN civicrm_contact target_contact_random  ON (targets.contact_id = target_contact_random.id AND target_contact_random.is_deleted = 0)';
+      $join[] = 'LEFT JOIN civicrm_contact target_contact_me      ON (targets.contact_id = target_contact_me.id AND target_contact_me.id = %1)';
+    }
+
+    if ($params['excludeCaseActivities'] || $params['optionalCols']['case']) {
+      $join[] = 'LEFT JOIN civicrm_case_activity case_activity ON (activity.id = case_activity.activity_id)';
+    }
+
+    // Assemble SELECT clause
+    $selectQuery = 'SELECT ';
+    $selectQuery .= implode(',', $select);
+    $selectQuery .= ' FROM civicrm_activity_contact acon ';
+    $selectQuery .= implode(' ', $join);
+    // Assemble GROUP BY clause
+    $groupByQuery = 'GROUP BY ';
+    $groupByQuery .= implode(',', $groupBy);
+    return array($selectQuery, $groupByQuery);
   }
 
   /**
@@ -130,35 +198,49 @@ GROUP BY activity.id
   public static function whereClause(&$params, $sortBy = TRUE, $excludeHidden = TRUE) {
     // activity type ID clause
     $activity_type_id = CRM_Utils_Array::value('activity_type_id', $params);
+    $excludeCaseActivities = CRM_Utils_Array::value('excludeCaseActivities', $params, TRUE);
+
     if (!empty($activity_type_id)) {
       $clauses[] = "activity.activity_type_id IN ( " . $activity_type_id . " ) ";
     }
+    $clauses[] = "activity.is_current_revision != 0";
+    $clauses[] = "activity.is_deleted = 0";
 
-    // campaign ID clause. Match on campaign and all sub-campaigns.
-    $activity_campaign_id = CRM_Utils_Array::value('activity_campaign_id', $params);
-    if (!empty($activity_campaign_id)) {
-      // Make campaign IDs into array
-      $searchCampaignIds = explode(',', $activity_campaign_id);
-      if (CRM_Extension_System::singleton()->getMapper()->isActiveModule('campaign')) {
-        foreach ($searchCampaignIds as $campaignId) {
-          // Get all child campaigns for selected campaign
-          // NOTE: This adds a dependency on de.systopia.campaign
-          $childCampaignIDs = civicrm_api3('CampaignTree', 'getids', [
-            'sequential' => 1,
-            'id' => $campaignId,
-            'depth' => 3,
-          ]);
-          if (isset($childCampaignIDs['children'])) {
-            foreach ($childCampaignIDs['children'] as $key => $value) {
-              // Add all child campaign IDs to search
-              $searchCampaignIds[] = $key;
+    if ($excludeCaseActivities) {
+      $clauses[] = "case_activity.case_id IS NULL";
+    }
+    if (!empty($params['optionalCols'])) {
+      // optionalCols not set when triggered from fastactivity_civicrm_tabs
+      if ($params['optionalCols']['campaign_title']) {
+        // campaign ID clause. Match on campaign and all sub-campaigns.
+        $activity_campaign_id = CRM_Utils_Array::value('activity_campaign_id', $params);
+        if (!empty($activity_campaign_id)) {
+          // Make campaign IDs into array
+          $searchCampaignIds = explode(',', $activity_campaign_id);
+          if (CRM_Extension_System::singleton()
+            ->getMapper()
+            ->isActiveModule('campaign')) {
+            foreach ($searchCampaignIds as $campaignId) {
+              // Get all child campaigns for selected campaign
+              // NOTE: This adds a dependency on de.systopia.campaign
+              $childCampaignIDs = civicrm_api3('CampaignTree', 'getids', [
+                'sequential' => 1,
+                'id' => $campaignId,
+                'depth' => 3,
+              ]);
+              if (isset($childCampaignIDs['children'])) {
+                foreach ($childCampaignIDs['children'] as $key => $value) {
+                  // Add all child campaign IDs to search
+                  $searchCampaignIds[] = $key;
+                }
+              }
             }
           }
+          // Convert to string for query
+          $activity_campaign_id = implode(',', $searchCampaignIds);
+          $clauses[] = "activity.campaign_id IN ( " . $activity_campaign_id . " ) ";
         }
       }
-      // Convert to string for query
-      $activity_campaign_id = implode(',', $searchCampaignIds);
-      $clauses[] = "activity.campaign_id IN ( " . $activity_campaign_id . " ) ";
     }
 
     // contact_id
@@ -187,12 +269,15 @@ GROUP BY activity.id
    *   count of activities
    */
   public static function getContactActivitiesCount(&$params) {
+
     $whereClause = self::whereClause($params, FALSE);
 
     $query = "SELECT COUNT(DISTINCT acon.activity_id)
               FROM civicrm_activity_contact acon
-              LEFT JOIN civicrm_activity activity
-              ON acon.activity_id = activity.id ";
+              LEFT JOIN civicrm_activity activity ON acon.activity_id = activity.id ";
+    if ($params['excludeCaseActivities']) {
+      $query .= 'LEFT JOIN civicrm_case_activity case_activity ON (activity.id = case_activity.activity_id) ';
+    }
     $query .= " WHERE {$whereClause}";
 
     return CRM_Core_DAO::singleValueQuery($query, $params);
@@ -281,7 +366,7 @@ GROUP BY activity.id
     }
   }
 
-  public static function isNotTargetContact($activityId, $targetIds) {
+  private static function isNotTargetContact($activityId, $targetIds) {
     if (empty($targetIds) || empty($activityId)) {
       return array();
     }
@@ -357,14 +442,26 @@ GROUP BY activity.id
         $contactActivities[$activityId]['subject'] = $values['subject'];
 
         $contactActivities[$activityId]['source_contact'] = self::formatContactNames($values['source_contact_name'], $values['source_contact_count']);
-        //$contactActivities[$activityId]['target_contact'] = '???';
-        $contactActivities[$activityId]['target_contact'] = self::formatContactNames($values['target_contact_name'], $values['target_contact_count']);
         $contactActivities[$activityId]['assignee_contact'] = self::formatContactNames($values['assignee_contact_name'], $values['assignee_contact_count']);
 
         $contactActivities[$activityId]['activity_date'] = CRM_Utils_Date::customFormat($values['activity_date_time']);
         $contactActivities[$activityId]['status'] = $activityStatus[$values['status_id']];
 
-        $contactActivities[$activityId]['campaign'] = $values['campaign'];
+        if ($params['optionalCols']['target_contact']) {
+          $contactActivities[$activityId]['target_contact'] = self::formatContactNames($values['target_contact_name'], $values['target_contact_count']);
+        }
+
+        if ($params['optionalCols']['duration']) {
+          $contactActivities[$activityId]['duration'] = $values['duration'];
+        }
+
+        if ($params['optionalCols']['case']) {
+          $contactActivities[$activityId]['activity_case_id'] = self::formatCaseLink($params['contact_id'], $values['activity_case_id']);
+        }
+
+        if ($params['optionalCols']['campaign_title']) {
+          $contactActivities[$activityId]['campaign'] = $values['campaign'];
+        }
 
         // add class to this row if overdue
         $contactActivities[$activityId]['class'] = '';
@@ -402,7 +499,7 @@ GROUP BY activity.id
           $values['activity_id']
         );
 
-        if ($values['is_recurring_activity']) {
+        if ($values['activity_parent_id']) {
           $contactActivities[$activityId]['is_recurring_activity'] = CRM_Core_BAO_RecurringEntity::getPositionAndCount($values['activity_id'], 'civicrm_activity');
         }
       }
@@ -412,13 +509,52 @@ GROUP BY activity.id
   }
 
   /**
+   * Format an html "Manage" case link for the activities tab
+   * @param int $contactId
+   * @param int $caseId
+   *
+   * @return string
+   */
+  private static function formatCaseLink($contactId, $caseId) {
+    if (empty($caseId)) return '';
+
+    $caseContacts = civicrm_api3('Case', 'getvalue', array(
+      'return' => "contact_id",
+      'id' => $caseId,
+    ));
+
+    foreach ($caseContacts as $caseContactId) {
+      if (!isset($firstCaseContactId)) {
+        $firstCaseContactId = $caseContactId;
+      }
+      if ($contactId == $caseContactId) {
+        $isClientOfCase = TRUE;
+        break;
+      }
+    }
+
+    if ($isClientOfCase) {
+      $label = "ID: {$caseId}";
+    }
+    else {
+      $contactName = civicrm_api3('Contact', 'getvalue', array(
+        'return' => "display_name",
+        'id' => $firstCaseContactId,
+      ));
+      $label = "ID: {$caseId}<br />({$contactName})";
+    }
+    $url = CRM_Utils_System::url('civicrm/contact/view/case', "reset=1&id={$caseId}&cid={$contactId}&action=view");
+    $html = "<a href='$url' class='action-item crm-hover-button no-popup' target='_blank'>{$label}</a>";
+    return $html;
+  }
+  /**
    * Format contact names for display in assignee, source, target activity views
    *
    * @param $contacts
    * @param $contactCount
    * @return string
    */
-  public static function formatContactNames($contacts, $contactCount) {
+  private static function formatContactNames($contacts, $contactCount) {
     // Clear out any empty array values
     $contacts = array_filter($contacts);
     // if $contactCount > 4 we only show the current contact ID if found
@@ -451,6 +587,7 @@ GROUP BY activity.id
     }
     return $result;
   }
+
 
   /**
    * This method returns the action links that are given for each search row.
@@ -517,6 +654,21 @@ GROUP BY activity.id
           ),
         );
       }
+    }
+
+    if (
+      $activityTypeName &&
+      CRM_Case_BAO_Case::checkPermission($activityId, 'File On Case', $activityTypeId)
+    ) {
+      $actionLinks += array(
+        CRM_Core_Action::
+        ADD => array(
+          'name' => ts('File on Case'),
+          'url' => '#',
+          'extra' => 'onclick="javascript:fileOnCase( \'file\', ' . $activityId . ', null, this ); return false;"',
+          'title' => ts('File on Case'),
+        ),
+      );
     }
 
     if (CRM_Core_Permission::check('delete activities')) {

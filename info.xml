@@ -5,13 +5,13 @@
   <description>High Performance Activity Features</description>
   <license>AGPL-3.0</license>
   <maintainer>
-    <author>SYSTOPIA</author>
-    <email>endres@systopia.de</email>
+    <author>Matthew Wire</author>
+    <email>mjw@mjwconsult.co.uk</email>
   </maintainer>
   <urls>
-    <url desc="Main Extension Page">https://github.com/systopia/de.systopia.fastactivity</url>
-    <url desc="Documentation">https://github.com/systopia/de.systopia.fastactivity</url>
-    <url desc="Support">https://github.com/systopia/de.systopia.fastactivity/issues</url>
+    <url desc="Main Extension Page">https://github.com/mattwire/de.systopia.fastactivity</url>
+    <url desc="Documentation">https://github.com/mattwire/de.systopia.fastactivity</url>
+    <url desc="Support">https://github.com/mattwire/de.systopia.fastactivity/issues</url>
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
   <releaseDate>2018-11-05</releaseDate>
@@ -21,7 +21,7 @@
     <ver>4.6</ver>
     <ver>4.7</ver>
   </compatibility>
-  <comments>Developed by Matthew Wire</comments>
+  <comments>Developed by Matthew Wire and Systopia</comments>
   <civix>
     <namespace>CRM/Fastactivity</namespace>
   </civix>

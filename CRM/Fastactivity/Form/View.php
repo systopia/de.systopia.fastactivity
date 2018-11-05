@@ -80,8 +80,8 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
 
     // Get activity record
     $activityRecord = civicrm_api3('Activity', 'getsingle', array(
-      'sequential' => 1,
       'id' => $this->_activityId,
+      'return' => ["case_id", "status_id", "activity_date_time", "activity_type_id", "subject", "details", "priority_id", "duration", "medium_id", "campaign_id", "engagement_level"],
     ));
 
     // Get Activity Status
@@ -100,8 +100,19 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
       $activityDetails['typeDescription'] = $activityTypeDescription;
     }
     // Get activity subject
-    $this->_activitySubject = isset($activityRecord['subject']) ? $activityRecord['subject'] : null;
+    $this->_activitySubject = isset($activityRecord['subject']) ? $activityRecord['subject'] : NULL;
     $activityDetails['subject'] = $this->_activitySubject;
+
+    // Case ID
+    if (isset($activityRecord['case_id'])) {
+      $caseDetail = civicrm_api3('Case', 'getsingle', array(
+        'id' => CRM_Utils_Array::first($activityRecord['case_id']),
+        'return' => ["subject", "case_type_id"],
+      ));
+      $activityDetails['case_id'] = CRM_Utils_Array::first($activityRecord['case_id']);
+      $activityDetails['case_type'] = CRM_Core_PseudoConstant::getLabel('CRM_Case_BAO_Case', 'case_type_id', $caseDetail['case_type_id']);
+      $activityDetails['case_subject'] = $caseDetail['subject'];
+    }
 
     if ($this->_action & CRM_Core_Action::DELETE) {
       // Don't need to load any more info about the activity
@@ -111,7 +122,7 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
     }
     else {
       $priorities = CRM_Core_PseudoConstant::get('CRM_Activity_DAO_Activity', 'priority_id');
-      $activityDetails['details'] = isset($activityRecord['details']) ? $activityRecord['details'] : null;
+      $activityDetails['details'] = isset($activityRecord['details']) ? $activityRecord['details'] : NULL;
 
       $this->_activitySourceContacts = self::getSourceContacts($this->_activityId);
       $this->_activityAssigneeContacts = self::getAssigneeContacts($this->_activityId);
@@ -121,15 +132,21 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
       $activityDetails['assigneeContacts'] = $this->_activityAssigneeContacts;
       $activityDetails['targetContacts'] = $this->_activityTargetContacts;
 
-      $activityDetails['priority'] = isset($activityRecord['priority_id']) ? $priorities[$activityRecord['priority_id']] : null;
+      $activityDetails['priority'] = isset($activityRecord['priority_id']) ? $priorities[$activityRecord['priority_id']] : NULL;
+      $activityDetails['duration'] = isset($activityRecord['duration']) ? $activityRecord['duration'] : NULL;
 
       if (isset($activityRecord['medium_id'])) {
         $activityLabels = CRM_Fastactivity_BAO_Activity::getActivityLabels('encounter_medium');
         $activityDetails['medium'] = $activityLabels[$activityRecord['medium_id']];
       }
 
-      // Add campaign details
-      $activityDetails = self::addCampaignDetails($activityRecord, $activityDetails);
+      $config = CRM_Core_Config::singleton();
+      $campaignEnabled = in_array("CiviCampaign", $config->enableComponents);
+      if ($campaignEnabled) {
+        // Add campaign details
+        $activityDetails = self::addCampaignDetails($activityRecord, $activityDetails);
+      }
+      $this->assign('campaignEnabled', $campaignEnabled);
 
       $this->assign('customDataType', 'Activity');
       $this->assign('customDataSubType', $this->_activityTypeId);
