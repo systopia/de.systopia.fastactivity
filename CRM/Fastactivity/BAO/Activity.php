@@ -69,7 +69,6 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     while ($dao->fetch()) {
       $activityID = $dao->activity_id;
       $values[$activityID]['activity_id'] = $dao->activity_id;
-      $values[$activityID]['source_record_id'] = $dao->source_record_id;
       $values[$activityID]['activity_type_id'] = $dao->activity_type_id;
       $values[$activityID]['activity_type'] = $activityTypes[$dao->activity_type_id];
       $values[$activityID]['activity_date_time'] = $dao->activity_date_time;
