@@ -200,6 +200,13 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     $activity_type_id = CRM_Utils_Array::value('activity_type_id', $params);
     $excludeCaseActivities = CRM_Utils_Array::value('excludeCaseActivities', $params, TRUE);
 
+    // contact_id
+    $contact_id = CRM_Utils_Array::value('contact_id', $params);
+    if ($contact_id) {
+      $clauses[] = "acon.contact_id = %1";
+      $params[1] = array($contact_id, 'Integer');
+    }
+
     if (!empty($activity_type_id)) {
       $clauses[] = "activity.activity_type_id IN ( " . $activity_type_id . " ) ";
     }
@@ -243,13 +250,6 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       }
     }
 
-    // contact_id
-    $contact_id = CRM_Utils_Array::value('contact_id', $params);
-    if ($contact_id) {
-      $clauses[] = "acon.contact_id = %1";
-      $params[1] = array($contact_id, 'Integer');
-    }
-
     return implode(' AND ', $clauses);
   }
 
@@ -269,13 +269,12 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
    *   count of activities
    */
   public static function getContactActivitiesCount(&$params) {
-
     $whereClause = self::whereClause($params, FALSE);
 
     $query = "SELECT COUNT(DISTINCT acon.activity_id)
               FROM civicrm_activity_contact acon
               LEFT JOIN civicrm_activity activity ON acon.activity_id = activity.id ";
-    if ($params['excludeCaseActivities']) {
+    if (!$params['excludeCaseActivities']) {
       $query .= 'LEFT JOIN civicrm_case_activity case_activity ON (activity.id = case_activity.activity_id) ';
     }
     $query .= " WHERE {$whereClause}";

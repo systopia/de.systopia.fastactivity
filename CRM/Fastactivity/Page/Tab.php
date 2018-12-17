@@ -25,7 +25,6 @@ class CRM_Fastactivity_Page_Tab extends CRM_Core_Page {
   /**
    * Browse all activities for a particular contact.
    *
-   * @return void
    */
   public function browse() {
     $this->assign('admin', FALSE);
@@ -49,14 +48,13 @@ class CRM_Fastactivity_Page_Tab extends CRM_Core_Page {
     $controller->set('contactId', $this->_contactId);
     $controller->setEmbedded(TRUE);
     $controller->run();
-    $this->ajaxResponse['tabCount'] = CRM_Contact_BAO_Contact::getCountComponent('activity', $this->_contactId);
   }
 
   /**
    * Heart of the viewing process. The runner gets all the meta data for
    * the contact and calls the appropriate type of page to view.
    *
-   * @return void
+   * @throws \CRM_Core_Exception
    */
   public function preProcess() {
     $this->_contactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this, TRUE);
@@ -84,7 +82,7 @@ class CRM_Fastactivity_Page_Tab extends CRM_Core_Page {
   /**
    * Run the activities "tab" page
    *
-   * @return void
+   * @throws \CRM_Core_Exception
    */
   public function run() {
     $action = CRM_Utils_Request::retrieve('action', 'String', $this);
@@ -104,6 +102,6 @@ class CRM_Fastactivity_Page_Tab extends CRM_Core_Page {
     $this->preProcess();
     $this->browse();
 
-    return parent::run();
+    parent::run();
   }
 }
