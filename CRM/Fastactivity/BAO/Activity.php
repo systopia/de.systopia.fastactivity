@@ -69,7 +69,6 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     while ($dao->fetch()) {
       $activityID = $dao->activity_id;
       $values[$activityID]['activity_id'] = $dao->activity_id;
-      $values[$activityID]['source_record_id'] = $dao->source_record_id;
       $values[$activityID]['activity_type_id'] = $dao->activity_type_id;
       $values[$activityID]['activity_type'] = $activityTypes[$dao->activity_type_id];
       $values[$activityID]['activity_date_time'] = $dao->activity_date_time;
@@ -522,6 +521,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       'id' => $caseId,
     ));
 
+    $isClientOfCase = FALSE;
     foreach ($caseContacts as $caseContactId) {
       if (!isset($firstCaseContactId)) {
         $firstCaseContactId = $caseContactId;
@@ -610,6 +610,17 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     }
 
     list($activityTypeName, $activityTypeDescription) = CRM_Core_BAO_OptionValue::getActivityTypeDetails($activityTypeId);
+    $activityDetails = civicrm_api3('Activity', 'getsingle', [
+      'return' => ["activity_type_id", "case_id"],
+      'id' => $activityId,
+    ]);
+
+    $activityTypeName = CRM_Core_PseudoConstant::getName('CRM_Activity_BAO_Activity', 'activity_type_id', $activityDetails['activity_type_id']);
+    // Don't offer a "File On Case" link if already added to a case.
+    $skipFileOnCase = FALSE;
+    if (!empty($activityDetails['case_id'])) {
+      $skipFileOnCase = TRUE;
+    }
 
     $qs = "&reset=1&id=$activityId&cid=$contactId";
     $qsView = "action=view{$qs}";
@@ -655,10 +666,8 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       }
     }
 
-    if (
-      $activityTypeName &&
-      CRM_Case_BAO_Case::checkPermission($activityId, 'File On Case', $activityTypeId)
-    ) {
+    if (!$skipFileOnCase && $activityTypeName &&
+      CRM_Case_BAO_Case::checkPermission($activityId, 'File On Case', $activityTypeId)) {
       $actionLinks += array(
         CRM_Core_Action::
         ADD => array(
