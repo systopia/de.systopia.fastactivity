@@ -189,7 +189,8 @@ function fastactivity_civicrm_tabs ( &$tabs, $contactID ) {
                   'class'  => 'livePage',
                   'id'     => 'fastactivity',
                   'url'    => CRM_Utils_System::url('civicrm/contact/view/fastactivity', "reset=1&cid={$contactID}"),
-                  'weight' => 50,
+                  'weight' => 70,
+                  'icon' => 'crm-i fa-tasks',
                   'count'  => CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($params),
                  );
 }
