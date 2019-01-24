@@ -252,16 +252,43 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
         $rows[$rowNum]['civicrm_activity_activity_type_id'] = $this->activityTypes[$row['civicrm_activity_activity_type_id']];
       }
 
+      // link to activity
+      if (!empty($row['civicrm_activity_activity_type_id']) || !empty($row['civicrm_activity_activity_subject'])) {
+        // generate activity link
+        $link = NULL;
+        //$base = "civicrm/activity/view"; // todo: allow "civicrm/fastactivity/view"?
+        $base = "civicrm/activity/add";
+        if (!empty($row['target_contact_id'])) {
+          //$link = CRM_Utils_System::url($base, "action=view&reset=1&id={$row['civicrm_activity_id']}&cid={$row['target_contact_id']}", $this->_absoluteUrl);
+          $link = CRM_Utils_System::url($base, "action=update&reset=1&id={$row['civicrm_activity_id']}&cid={$row['target_contact_id']}", $this->_absoluteUrl);
+        } elseif (!empty($row['assignee_contact_id'])) {
+          //$link = CRM_Utils_System::url($base, "action=view&reset=1&id={$row['civicrm_activity_id']}&cid={$row['assignee_contact_id']}", $this->_absoluteUrl);
+          $link = CRM_Utils_System::url($base, "action=update&reset=1&id={$row['civicrm_activity_id']}&cid={$row['assignee_contact_id']}", $this->_absoluteUrl);
+        }
+
+        if ($link) {
+          if (!empty($row['civicrm_activity_activity_type_id'])) {
+            $rows[$rowNum]['civicrm_activity_activity_type_id_link'] = $link;
+          }
+          if (!empty($row['civicrm_activity_activity_subject'])) {
+            $rows[$rowNum]['civicrm_activity_activity_subject_link'] = $link;
+          }
+        }
+      }
+
+      // resolve activity status
       if (!empty($row['civicrm_activity_status_id'])) {
         $rows[$rowNum]['civicrm_activity_status_id'] = $this->activityStatus[$row['civicrm_activity_status_id']];
       }
 
+      // link target contact
       if (!empty($row['target_sort_name']) && !empty($row['target_contact_id'])) {
         $url = CRM_Utils_System::url("civicrm/contact/view", 'reset=1&cid=' . $row['target_contact_id'], $this->_absoluteUrl);
         $rows[$rowNum]['target_sort_name_link'] = $url;
         $rows[$rowNum]['target_sort_name_hover'] = E::ts("View Contact Summary for this Contact.");
       }
-      
+
+      // link assignee contact
       if (!empty($row['assignee_sort_name']) && !empty($row['assignee_contact_id'])) {
         $url = CRM_Utils_System::url("civicrm/contact/view", 'reset=1&cid=' . $row['assignee_contact_id'], $this->_absoluteUrl);
         $rows[$rowNum]['assignee_sort_name_link'] = $url;
