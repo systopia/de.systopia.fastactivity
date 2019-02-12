@@ -119,21 +119,6 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     $groupBy[] = 'activity.status_id';
     $select[] = 'recurring_entity.parent_id AS activity_parent_id';
     $groupBy[] = 'recurring_entity.parent_id';
-    if ($params['optionalCols']['duration']) {
-      $select[] = 'activity.duration                                                                 AS activity_duration';
-      $groupBy[] = 'activity.duration';
-    }
-    if ($params['optionalCols']['case']) {
-      $select[] = 'case_activity.case_id                                                                   AS activity_case_id';
-      $groupBy[] = 'case_activity.case_id';
-    }
-    if ($params['optionalCols']['campaign_title']) {
-      $select[] = 'activity.campaign_id                                                               AS activity_campaign_id';
-      $groupBy[] = 'activity.campaign_id';
-      $select[] = 'campaign.title                                                                     AS activity_campaign_title';
-      $groupBy[] = 'campaign.title';
-      $join[] = 'LEFT JOIN civicrm_campaign campaign                ON (activity.campaign_id = campaign.id)';
-    }
     $select[] = 'COUNT(DISTINCT(sources.contact_id))                                                AS source_count';
     $select[] = 'COALESCE(source_contact_me.id, source_contact_random.id)                           AS source_contact_id';
     $groupBy[] = 'source_contact_me.id';
@@ -158,6 +143,8 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     $join[] = 'LEFT JOIN civicrm_contact assignee_contact_me      ON (assignees.contact_id = assignee_contact_me.id AND assignee_contact_me.id = %1)';
     $join[] = 'LEFT JOIN civicrm_recurring_entity recurring_entity ON activity.id = recurring_entity.entity_id';
 
+    // base query is complete, handle OPTIONAL columns/filters
+
     if ($params['optionalCols']['target_contact']) {
       $select[] = 'COUNT(DISTINCT(targets.contact_id))                                              AS target_count';
       $select[] = 'COALESCE(target_contact_me.id, target_contact_random.id)                       AS target_contact_id';
@@ -173,6 +160,24 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
 
     if ($params['excludeCaseActivities'] || $params['optionalCols']['case']) {
       $join[] = 'LEFT JOIN civicrm_case_activity case_activity ON (activity.id = case_activity.activity_id)';
+    }
+
+    if ($params['optionalCols']['duration']) {
+      $select[] = 'activity.duration                                                                 AS activity_duration';
+      $groupBy[] = 'activity.duration';
+    }
+
+    if ($params['optionalCols']['case']) {
+      $select[] = 'case_activity.case_id                                                                   AS activity_case_id';
+      $groupBy[] = 'case_activity.case_id';
+    }
+
+    if ($params['optionalCols']['campaign_title']) {
+      $select[] = 'activity.campaign_id                                                               AS activity_campaign_id';
+      $groupBy[] = 'activity.campaign_id';
+      $select[] = 'campaign.title                                                                     AS activity_campaign_title';
+      $groupBy[] = 'campaign.title';
+      $join[] = 'LEFT JOIN civicrm_campaign campaign                ON (activity.campaign_id = campaign.id)';
     }
 
     // Assemble SELECT clause
@@ -273,7 +278,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     $query = "SELECT COUNT(DISTINCT acon.activity_id)
               FROM civicrm_activity_contact acon
               LEFT JOIN civicrm_activity activity ON acon.activity_id = activity.id ";
-    if (!$params['excludeCaseActivities']) {
+    if ($params['excludeCaseActivities']) {
       $query .= 'LEFT JOIN civicrm_case_activity case_activity ON (activity.id = case_activity.activity_id) ';
     }
     $query .= " WHERE {$whereClause}";
