@@ -24,8 +24,6 @@
   {/if}
   <div class="crm-block crm-form-block crm-activity-form-block">
 
-  {* added onload javascript for source contact*}
-  {include file="CRM/Activity/Form/ActivityJs.tpl" tokenContext="activity"}
   <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="top"}</div>
 
   <table class="form-layout">
