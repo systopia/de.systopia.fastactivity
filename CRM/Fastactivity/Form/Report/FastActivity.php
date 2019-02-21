@@ -87,6 +87,11 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
                     'default' => TRUE,
                     'type'    => CRM_Utils_Type::T_STRING,
                 ),
+                'actions'   => array(
+                    'title'   => E::ts('Actions'),
+                    'default' => TRUE,
+                    'type'    => CRM_Utils_Type::T_STRING,
+                ),
             ),
             'filters' => array(
                 'activity_date_time' => array(
@@ -209,6 +214,10 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
       $this->_columnHeaders['assignee_contact_id']['no_display'] = TRUE;
       return "fa_assignee_contact.sort_name AS assignee_sort_name, fa_assignee_contact.id AS assignee_contact_id";
 
+    } elseif ($fieldName == 'actions') {
+      $this->_columnHeaders['actions']['title'] = E::ts("Actions");
+      return "NULL AS actions";
+
     } else {
       return parent::selectClause($tableName, $tableKey, $fieldName, $field);
     }
@@ -293,6 +302,15 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
         $url = CRM_Utils_System::url("civicrm/contact/view", 'reset=1&cid=' . $row['assignee_contact_id'], $this->_absoluteUrl);
         $rows[$rowNum]['assignee_sort_name_link'] = $url;
         $rows[$rowNum]['assignee_sort_name_hover'] = E::ts("View Contact Summary for this Contact.");
+      }
+
+      // fill actions
+      if (array_key_exists('actions', $row)) {
+        $view_link = CRM_Utils_System::url("civicrm/activity/view", "action=view&id={$row['civicrm_activity_id']}", $this->_absoluteUrl);
+        $view_name = E::ts("View");
+        $edit_link = CRM_Utils_System::url("civicrm/activity/add", "action=update&reset=1&id={$row['civicrm_activity_id']}", $this->_absoluteUrl);
+        $edit_name = E::ts("Edit");
+        $rows[$rowNum]['actions'] = "<span><a class='crm-popup' href='{$view_link}'>{$view_name}</a> <a class='crm-popup' href='{$edit_link}'>{$edit_name}</a></span>";
       }
     }
   }
