@@ -127,7 +127,7 @@ class CRM_Fastactivity_Form_Settings extends CRM_Core_Form {
     // Make sure we have all settings elements set (boolean settings will be unset by default and wouldn't be saved)
     $settingsToSave = array_merge($settings, array_intersect_key($changed, $settings));
     $className::save($settingsToSave);
-    
+
     // update the tab status
     CRM_Fastactivity_Page_Tab::updateTabStatus();
     //CRM_Core_Invoke::rebuildMenuAndCaches();

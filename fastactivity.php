@@ -61,7 +61,6 @@ function fastactivity_civicrm_uninstall() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_enable
  */
 function fastactivity_civicrm_enable() {
-  CRM_Fastactivity_Page_Tab::updateTabStatus();
   _fastactivity_civix_civicrm_enable();
 }
 
