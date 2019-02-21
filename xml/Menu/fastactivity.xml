@@ -26,7 +26,10 @@
   <item>
     <path>civicrm/admin/fastactivity</path>
     <page_callback>CRM_Fastactivity_Form_Settings</page_callback>
-    <title>Settings</title>
-    <access_arguments>access CiviCRM</access_arguments>
+    <title>FastActivities Configuration</title>
+    <access_arguments>administer CiviCRM</access_arguments>
+    <adminGroup>System Settings</adminGroup>
+    <icon>admin/small/online_contribution_pages.png</icon>
+    <weight>100</weight>
   </item>
 </menu>
