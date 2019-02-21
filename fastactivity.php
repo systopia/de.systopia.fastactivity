@@ -61,28 +61,7 @@ function fastactivity_civicrm_uninstall() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_enable
  */
 function fastactivity_civicrm_enable() {
-  // Disable built-in Activities tab
-  $viewOptions = CRM_Core_BAO_Setting::valueOptions(
-    CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
-    'contact_view_options',
-    TRUE
-  );
-  if (!empty($viewOptions['activity'])) {
-    $viewOptions['activity'] = 0;
-    CRM_Core_BAO_Setting::setValueOption(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'contact_view_options', $viewOptions);
-    CRM_Core_Session::setStatus(ts('We have automatically disabled the built-in Activities tab for the Contact Summary screens
-        so that the one from the de.systopia.fastactivity extension can be used instead.'), ts('Saved'), 'success');
-  }
-
-  if (version_compare(CRM_Utils_System::version(), '4.7', '<')) {
-    // hook_civicrm_check not available before 4.7
-    $messages = array();
-    fastactivity_civicrm_check($messages);
-    foreach ($messages as $message) {
-      CRM_Core_Session::setStatus($message->getMessage(), $message->getTitle());
-    }
-  }
-
+  CRM_Fastactivity_Page_Tab::updateTabStatus();
   _fastactivity_civix_civicrm_enable();
 }
 
@@ -92,19 +71,7 @@ function fastactivity_civicrm_enable() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_disable
  */
 function fastactivity_civicrm_disable() {
-  // Enable built-in Activities tab
-  $viewOptions = CRM_Core_BAO_Setting::valueOptions(
-    CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
-    'contact_view_options',
-    TRUE
-  );
-  if (empty($viewOptions['activity'])) {
-    $viewOptions['activity'] = 1;
-    CRM_Core_BAO_Setting::setValueOption(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'contact_view_options', $viewOptions);
-    CRM_Core_Session::setStatus(ts('We have re-enabled the built-in Activities tab for the Contact Summary screens
-        now that the one from the de.systopia.fastactivity extension is not enabled.'), ts('Saved'), 'success');
-  }
-
+  CRM_Fastactivity_Page_Tab::disable();
   _fastactivity_civix_civicrm_disable();
 }
 
@@ -181,18 +148,21 @@ function fastactivity_civicrm_tabs ( &$tabs, $contactID ) {
   // if you'd like to use the regular and the fast activity tabs side-by-side maybe consider
   //  reversing and adjusting https://github.com/systopia/de.systopia.fastactivity/commit/aea4a43a22d4b89590bf953447dbfc1f3fb0e762
 
-  // ADD the fast activity tab as a new tab
-  $params['contact_id'] = $contactID;
-  $params['excludeCaseActivities'] = (bool) CRM_Fastactivity_Settings::getValue('tab_exclude_case_activities');
+  $is_active = (bool) CRM_Fastactivity_Settings::getValue('fastactivity_replace_tab');
+  if ($is_active) {
+    // ADD the fast activity tab as a new tab
+    $params['contact_id'] = $contactID;
+    $params['excludeCaseActivities'] = (bool) CRM_Fastactivity_Settings::getValue('tab_exclude_case_activities');
 
-  $tabs[] = array('title'  => ts('Activities'),
-                  'class'  => 'livePage',
-                  'id'     => 'fastactivity',
-                  'url'    => CRM_Utils_System::url('civicrm/contact/view/fastactivity', "reset=1&cid={$contactID}"),
-                  'weight' => 70,
-                  'icon' => 'crm-i fa-tasks',
-                  'count'  => CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($params),
-                 );
+    $tabs[] = array('title'  => ts('Activities'),
+                    'class'  => 'livePage',
+                    'id'     => 'fastactivity',
+                    'url'    => CRM_Utils_System::url('civicrm/contact/view/fastactivity', "reset=1&cid={$contactID}"),
+                    'weight' => 70,
+                    'icon' => 'crm-i fa-tasks',
+                    'count'  => CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($params),
+    );
+  }
 }
 
 /**

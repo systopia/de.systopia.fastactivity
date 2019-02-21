@@ -104,4 +104,61 @@ class CRM_Fastactivity_Page_Tab extends CRM_Core_Page {
 
     parent::run();
   }
+
+  /**
+   * Update the tab status
+   */
+  public static function updateTabStatus() {
+    $is_active = (bool) CRM_Fastactivity_Settings::getValue('fastactivity_replace_tab');
+    if ($is_active) {
+      self::enable();
+    } else {
+      self::disable();
+    }
+  }
+
+  /**
+   * Enable tab replacement
+   */
+  public static function enable() {
+    // Disable built-in Activities tab
+    $viewOptions = CRM_Core_BAO_Setting::valueOptions(
+        CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
+        'contact_view_options',
+        TRUE
+    );
+    if (!empty($viewOptions['activity'])) {
+      $viewOptions['activity'] = 0;
+      CRM_Core_BAO_Setting::setValueOption(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'contact_view_options', $viewOptions);
+      CRM_Core_Session::setStatus(ts('We have automatically disabled the built-in Activities tab for the Contact Summary screens
+        so that the one from the de.systopia.fastactivity extension can be used instead.'), ts('Saved'), 'success');
+    }
+
+    if (version_compare(CRM_Utils_System::version(), '4.7', '<')) {
+      // hook_civicrm_check not available before 4.7
+      $messages = array();
+      fastactivity_civicrm_check($messages);
+      foreach ($messages as $message) {
+        CRM_Core_Session::setStatus($message->getMessage(), $message->getTitle());
+      }
+    }
+  }
+
+  /**
+   * Enable tab replacement
+   */
+  public static function disable() {
+    // Enable built-in Activities tab
+    $viewOptions = CRM_Core_BAO_Setting::valueOptions(
+        CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
+        'contact_view_options',
+        TRUE
+    );
+    if (empty($viewOptions['activity'])) {
+      $viewOptions['activity'] = 1;
+      CRM_Core_BAO_Setting::setValueOption(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'contact_view_options', $viewOptions);
+      CRM_Core_Session::setStatus(ts('We have re-enabled the built-in Activities tab for the Contact Summary screens
+        now that the one from the de.systopia.fastactivity extension is not enabled.'), ts('Saved'), 'success');
+    }
+  }
 }

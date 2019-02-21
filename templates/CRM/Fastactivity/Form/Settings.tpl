@@ -22,31 +22,24 @@
 | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
 +-------------------------------------------------------------------*}
 
-<div class="crm-block crm-form-block crm-fastactivity-settings-form-block">
-  <div class="crm-submit-buttons">
-    {include file="CRM/common/formButtons.tpl" location="top"}
+
+<h3>FastActivities Configuration</h3>
+</br>
+
+{foreach from=$elementGroups item=elementGroup}
+<div>
+  {foreach from=$elementGroup.elementNames item=elementName}
+  <div class="crm-section">
+    <div class="label">{$form.$elementName.label}</div>
+    <div class="content">{$form.$elementName.html}</div>
+    <div class="clear"></div>
   </div>
-
-  <h2>Configuration</h2>
-
-  {foreach from=$elementGroups item=elementGroup}
-    <div class="clear">
-      <br />
-      <h3>{$elementGroup.title}</h3>
-      <div class="help">{$elementGroup.description}</div>
-      <table class="form-layout-compressed">
-        {foreach from=$elementGroup.elementNames item=elementName}
-          <tr><td>
-              {$form.$elementName.html}
-              <label for="{$elementName}">{$form.$elementName.label} {help id=$elementName title=$form.$elementName.label}</label>
-            </td></tr>
-        {/foreach}
-      </table>
-    </div>
   {/foreach}
-
-  {* FOOTER *}
-  <div class="crm-submit-buttons">
-    {include file="CRM/common/formButtons.tpl" location="bottom"}
-  </div>
 </div>
+{/foreach}
+
+{* FOOTER *}
+<div class="crm-submit-buttons">
+  {include file="CRM/common/formButtons.tpl" location="bottom"}
+</div>
+
