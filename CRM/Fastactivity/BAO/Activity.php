@@ -547,7 +547,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       ));
       $label = "ID: {$caseId}<br />({$contactName})";
     }
-    $url = CRM_Utils_System::url('civicrm/contact/view/case', "reset=1&id={$caseId}&cid={$contactId}&action=view");
+    $url = CRM_Utils_System::url('civicrm/contact/view/case', "reset=1&id={$caseId}&cid={$firstCaseContactId}&action=view");
     $html = "<a href='$url' class='action-item crm-hover-button no-popup' target='_blank'>{$label}</a>";
     return $html;
   }
