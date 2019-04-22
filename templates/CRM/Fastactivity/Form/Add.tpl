@@ -15,7 +15,7 @@
 +-------------------------------------------------------*}
 
 {* this template is used for adding/editing other (custom) activities. *}
-{if $cdType }
+{if $cdType}
   {include file="CRM/Custom/Form/CustomData.tpl"}
 {else}
   <h2>{$activityHeader}</h2>
@@ -161,7 +161,7 @@
 
     <tr class="crm-activity-form-block-custom_data">
       <td colspan="2">
-        <div id="customData"></div>
+        {include file="CRM/common/customDataBlock.tpl"}
       </td>
     </tr>
 
@@ -239,22 +239,6 @@
   </div>
 
   {include file="CRM/Case/Form/ActivityToCase.tpl"}
-
-  {*include custom data js file*}
-  {include file="CRM/common/customData.tpl"}
-{literal}
-  <script type="text/javascript">
-CRM.$(function($) {
-  {/literal}
-  {if $customDataSubType}
-    CRM.buildCustomData( '{$customDataType}', {$customDataSubType} );
-{else}
-    CRM.buildCustomData( '{$customDataType}' );
-  {/if}
-  {literal}
-});
-  </script>
-{/literal}
   </div>{* end of form block*}
 {/if}
 
