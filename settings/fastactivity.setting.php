@@ -38,6 +38,20 @@ return array(
       'html_attributes' => array(),
   ),
 
+  'fastactivity_replace_search' => [
+    'group_name' => 'FastActivity Settings',
+    'group' => 'fastactivity',
+    'name' => 'fastactivity_replace_search',
+    'type' => 'Boolean',
+    'html_type' => 'Checkbox',
+    'default' => 0,
+    'add' => '4.6',
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => 'Replace view/edit links in activity search results',
+    'html_attributes' => [],
+  ],
+
   'fastactivity_tab_col_duration' => array(
     'group_name' => 'FastActivity Settings',
     'group' => 'fastactivity',
