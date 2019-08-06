@@ -320,6 +320,9 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
       CRM_Custom_Form_CustomData::setDefaultValues($this);
     }
 
+    // Add attachments
+    CRM_Core_BAO_File::buildAttachment($this, 'civicrm_activity', $this->_activityId, NULL, TRUE);
+
     // Get custom fields
     $this->_groupTree = CRM_Core_BAO_CustomGroup::getTree('Activity', $this,
       $this->_activityId, 0, $this->_activityTypeId);
@@ -569,7 +572,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
   public function postProcess($params = NULL) {
     // store the submitted values in an array
     if (!$params) {
-      $params = $this->_submitValues;
+      $params = $this->controller->exportValues($this->_name);
     }
 
     //set activity type id

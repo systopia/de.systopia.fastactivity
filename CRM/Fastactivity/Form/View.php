@@ -148,6 +148,8 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
       }
       $this->assign('campaignEnabled', $campaignEnabled);
 
+      $activityDetails['attachment'] = CRM_Core_BAO_File::attachmentInfo('civicrm_activity', $this->_activityId);
+
       $this->assign('customDataType', 'Activity');
       $this->assign('customDataSubType', $this->_activityTypeId);
 

@@ -169,6 +169,14 @@
       </td>
       <td class="view-value">{$activity.details}&nbsp;</td>
     </tr>
+    {if $activity.attachment}
+    <tr class="crm-activity-form-block-activity_attachments">
+     <td class="label">
+       <label>{ts}Attachment(s){/ts}</label>
+     </td>
+     <td class="view-value">{$activity.attachment}</td>
+    </tr>
+    {/if}
     {foreach from=$viewCustomData item=customGroup}
       <tr class="crm-activity-form-block-custom_data">
         <td colspan="2">
