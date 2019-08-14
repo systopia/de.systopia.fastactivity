@@ -232,3 +232,27 @@ function fastactivity_civicrm_navigationMenu(&$menu) {
   );
   _fastactivity_civix_insert_navigation_menu($menu, 'Administer/Customize Data and Screens', $item[0]);
 }
+
+/**
+ * Replace activity view and edit links in search results
+ *
+ * @param $op
+ * @param $objectName
+ * @param $objectId
+ * @param $links
+ * @param $mask
+ * @param $values
+ */
+function fastactivity_civicrm_links($op, $objectName, $objectId, &$links, &$mask, &$values) {
+  $replace_search_links = (bool) CRM_Fastactivity_Settings::getValue('fastactivity_replace_search');
+  if ($replace_search_links && $op == 'activity.selector.row') {
+    foreach ($links as &$link) {
+      if ($link['name'] == 'View') {
+        $link['url'] = 'civicrm/fastactivity/view';
+      }
+      elseif ($link['name'] == 'Edit') {
+        $link['url'] = 'civicrm/fastactivity/add';
+      }
+    }
+  }
+}
