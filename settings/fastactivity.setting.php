@@ -38,6 +38,20 @@ return array(
       'html_attributes' => array(),
   ),
 
+  'fastactivity_replace_tab_weight' => [
+      'group_name' => 'FastActivity Settings',
+      'group' => 'fastactivity',
+      'name' => 'fastactivity_replace_tab_weight',
+      'type' => 'Integer',
+      'html_type' => 'Text',
+      'default' => 40,
+      'add' => '4.6',
+      'is_domain' => 1,
+      'is_contact' => 0,
+      'description' => 'Fast Activity Tab Weight',
+      'html_attributes' => array(),
+  ],
+
   'fastactivity_replace_search' => [
     'group_name' => 'FastActivity Settings',
     'group' => 'fastactivity',
