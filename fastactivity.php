@@ -152,13 +152,12 @@ function fastactivity_civicrm_tabs ( &$tabs, $contactID ) {
     // ADD the fast activity tab as a new tab
     $params['contact_id'] = $contactID;
     $params['excludeCaseActivities'] = (bool) CRM_Fastactivity_Settings::getValue('tab_exclude_case_activities');
-    $weight = (int) CRM_Fastactivity_Settings::getValue('fastactivity_replace_tab_weight');
 
     $tabs[] = array('title'  => ts('Activities'),
                     'class'  => 'livePage',
                     'id'     => 'fastactivity',
                     'url'    => CRM_Utils_System::url('civicrm/contact/view/fastactivity', "reset=1&cid={$contactID}"),
-                    'weight' => $weight ? $weight : 40,
+                    'weight' => 70,
                     'icon' => 'crm-i fa-tasks',
                     'count'  => CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($params),
     );
