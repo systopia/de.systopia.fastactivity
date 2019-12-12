@@ -351,7 +351,8 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
         'return'       => 'id,title'
     ]);
     foreach ($campaign_query['values'] as $campaign) {
-      $campaign_list[$campaign['id']] = "{$campaign['title']} [{$campaign['id']}]";
+      $title = empty($campaign['title']) ? "No Title" : $campaign['title'];
+      $campaign_list[$campaign['id']] = "{$title} [{$campaign['id']}]";
     }
     return $campaign_list;
   }
