@@ -72,6 +72,10 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
                     'title'   => E::ts('Subject'),
                     'default' => FALSE,
                 ),
+                'campaign'      => array(
+                    'title'    => E::ts('Campaign'),
+                    'required' => FALSE,
+                ),
                 'activity_date_time' => array(
                     'title'    => E::ts('Activity Date'),
                     'required' => TRUE,
@@ -111,6 +115,12 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
                     'type'         => CRM_Utils_Type::T_STRING,
                     'operatorType' => CRM_Report_Form::OP_MULTISELECT,
                     'options'      => CRM_Core_PseudoConstant::activityStatus(),
+                ),
+                'campaign_id'      => array(
+                    'title'        => E::ts('Campaign(s)'),
+                    'type'         => CRM_Utils_Type::T_INT,
+                    'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+                    'options'      => $this->getAllCampaigns(),
                 ),
                 'assignee_ids' => array(
                     'title'   => E::ts('Assigned To'),
@@ -189,6 +199,10 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
       $this->_from .= " LEFT JOIN civicrm_activity_contact fa_assignee_link ON fa_assignee_link.activity_id = {$this->_aliases['civicrm_activity']}.id AND fa_assignee_link.record_type_id = {$assigneeID}";
       $this->_from .= " LEFT JOIN civicrm_contact fa_assignee_contact ON fa_assignee_contact.id = fa_assignee_link.contact_id";
     }
+
+    if (!empty($this->_formValues['fields']['campaign']) || !empty($this->_formValues['campaign_id_value'])) {
+      $this->_from .= " LEFT JOIN civicrm_campaign campaign ON campaign.id = {$this->_aliases['civicrm_activity']}.campaign_id";
+    }
   }
 
     /**
@@ -213,6 +227,11 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
       $this->_columnHeaders['assignee_sort_name']['type'] = CRM_Utils_Array::value('type', $field);
       $this->_columnHeaders['assignee_contact_id']['no_display'] = TRUE;
       return "fa_assignee_contact.sort_name AS assignee_sort_name, fa_assignee_contact.id AS assignee_contact_id";
+
+    } elseif ($fieldName == 'campaign') {
+      $this->_columnHeaders['campaign']['title'] = CRM_Utils_Array::value('title', $field);
+      //$this->_columnHeaders['campaign']['type'] = CRM_Utils_Array::value('type', $field);
+      return "campaign.title AS campaign";
 
     } elseif ($fieldName == 'actions') {
       $this->_columnHeaders['actions']['title'] = E::ts("Actions");
@@ -246,6 +265,13 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
     } elseif ($field['name'] == 'source_ids') {
       if (!empty($this->_formValues['source_ids_value'])) {
         return "fa_source.contact_id {$this->_formValues['source_ids_op']} ({$this->_formValues['source_ids_value']})";
+      } else {
+        return NULL;
+      }
+    } elseif ($field['name'] == 'campaign_id') {
+      if (!empty($this->_formValues['campaign_id_value'])) {
+        $campaign_ids = implode(',', $this->_formValues['campaign_id_value']);
+        return "campaign.id {$this->_formValues['campaign_id_op']} ({$campaign_ids})";
       } else {
         return NULL;
       }
@@ -313,5 +339,20 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
         $rows[$rowNum]['actions'] = "<span><a class='crm-popup' href='{$view_link}'>{$view_name}</a> <a class='crm-popup' href='{$edit_link}'>{$edit_name}</a></span>";
       }
     }
+  }
+
+  /**
+   * Get a list of ALL campaigns
+   */
+  protected function getAllCampaigns() {
+    $campaign_list = [];
+    $campaign_query = civicrm_api3('Campaign', 'get', [
+        'option.limit' => 0,
+        'return'       => 'id,title'
+    ]);
+    foreach ($campaign_query['values'] as $campaign) {
+      $campaign_list[$campaign['id']] = "{$campaign['title']} [{$campaign['id']}]";
+    }
+    return $campaign_list;
   }
 }
