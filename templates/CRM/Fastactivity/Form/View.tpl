@@ -111,6 +111,14 @@
         {/if}
       </td>
     </tr>
+    <tr class="crm-activity-form-block-activity_subject">
+      <td class="label">{ts}Subject{/ts}</td>
+      <td class="view-value">{$activity.subject}&nbsp;</td>
+    </tr>
+    <tr class="crm-activity-form-block-activity_status">
+      <td class="label">{ts}Status{/ts}</td>
+      <td class="view-value">{$activity.status}&nbsp;</td>
+    </tr>
     <tr class="crm-activity-form-block-activity_date_time">
       <td class="label">
         <span><i class="crm-i fa-calendar" aria-hidden="true" /> {ts}Date{/ts}</span>
@@ -122,10 +130,6 @@
         <span><i class="crm-i fa-calendar" aria-hidden="true" /> {ts}Duration{/ts}</span>
       </td>
       <td class="view-value">{$activity.duration}&nbsp;</td>
-    </tr>
-    <tr class="crm-activity-form-block-activity_status">
-      <td class="label">{ts}Status{/ts}</td>
-      <td class="view-value">{$activity.status}&nbsp;</td>
     </tr>
     <tr class="crm-activity-form-block-activity_priority">
       <td class="label">{ts}Priority{/ts}</td>
@@ -159,10 +163,6 @@
       </td>
     </tr>
     {/if}
-    <tr class="crm-activity-form-block-activity_subject">
-      <td class="label">{ts}Subject{/ts}</td>
-      <td class="view-value">{$activity.subject}&nbsp;</td>
-    </tr>
     <tr class="crm-activity-form-block-activity_details">
       <td class="label">
         <label><span><i class="crm-i fa-info" aria-hidden="true" /> {ts}Details{/ts}</span></label>
