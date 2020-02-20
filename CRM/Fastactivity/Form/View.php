@@ -114,6 +114,10 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
       $activityDetails['case_subject'] = $caseDetail['subject'];
     }
 
+    // Get attachments
+    $attachments = CRM_Core_BAO_File::getEntityFile('civicrm_activity', $this->_activityId);
+    $this->assign('currentAttachmentInfo', $attachments);
+
     if ($this->_action & CRM_Core_Action::DELETE) {
       // Don't need to load any more info about the activity
       // But we still display activity type, status and date for the user to confirm delete.

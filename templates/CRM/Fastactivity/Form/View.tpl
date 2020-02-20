@@ -191,6 +191,11 @@
         </td>
       </tr>
     {/foreach}
+    <tr class="crm-activity-form-block-attachment">
+      <td colspan="2">
+        {include file="CRM/Form/attachment.tpl"}
+      </td>
+    </tr>
   </table>
 {/if}
 
