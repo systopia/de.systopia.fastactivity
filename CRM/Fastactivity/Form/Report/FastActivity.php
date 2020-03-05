@@ -178,12 +178,12 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
 
     $activityContacts = CRM_Activity_BAO_ActivityContact::buildOptions('record_type_id', 'validate');
 
-    if (!empty($this->_formValues['assignee_ids_value'])) {
+    if (!empty($this->_formValues['assignee_ids_value']) || $this->isNullOperator($this->_formValues['assignee_ids_op'])) {
       $assigneeID = CRM_Utils_Array::key('Activity Assignees', $activityContacts);
       $this->_from .= " LEFT JOIN civicrm_activity_contact fa_assignee ON fa_assignee.activity_id = {$this->_aliases['civicrm_activity']}.id AND fa_assignee.record_type_id = {$assigneeID}";
     }
 
-    if (!empty($this->_formValues['source_ids_value'])) {
+    if (!empty($this->_formValues['source_ids_value']) || $this->isNullOperator($this->_formValues['source_ids_op'])) {
       $sourceID = CRM_Utils_Array::key('Activity Source', $activityContacts);
       $this->_from .= " LEFT JOIN civicrm_activity_contact fa_source ON fa_source.activity_id = {$this->_aliases['civicrm_activity']}.id AND fa_source.record_type_id = {$sourceID}";
     }
@@ -200,7 +200,7 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
       $this->_from .= " LEFT JOIN civicrm_contact fa_assignee_contact ON fa_assignee_contact.id = fa_assignee_link.contact_id";
     }
 
-    if (!empty($this->_formValues['fields']['campaign']) || !empty($this->_formValues['campaign_id_value'])) {
+    if (!empty($this->_formValues['fields']['campaign']) || !empty($this->_formValues['campaign_id_value']) || $this->isNullOperator($this->_formValues['campaign_id_op'])) {
       $this->_from .= " LEFT JOIN civicrm_campaign campaign ON campaign.id = {$this->_aliases['civicrm_activity']}.campaign_id";
     }
   }
@@ -257,27 +257,61 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
    */
   public function whereClause(&$field, $op, $value, $min, $max) {
     if ($field['name'] == 'assignee_ids') {
-      if (!empty($this->_formValues['assignee_ids_value'])) {
-        return "fa_assignee.contact_id {$this->_formValues['assignee_ids_op']} ({$this->_formValues['assignee_ids_value']})";
-      } else {
-        return NULL;
-      }
+      return $this->customWhereClause(
+        'fa_assignee.contact_id',
+        $this->_formValues['assignee_ids_op'],
+        $this->_formValues['assignee_ids_value']
+      );
     } elseif ($field['name'] == 'source_ids') {
-      if (!empty($this->_formValues['source_ids_value'])) {
-        return "fa_source.contact_id {$this->_formValues['source_ids_op']} ({$this->_formValues['source_ids_value']})";
-      } else {
-        return NULL;
-      }
+      return $this->customWhereClause(
+        'fa_source.contact_id',
+        $this->_formValues['source_ids_op'],
+        $this->_formValues['source_ids_value']
+      );
     } elseif ($field['name'] == 'campaign_id') {
-      if (!empty($this->_formValues['campaign_id_value'])) {
-        $campaign_ids = implode(',', $this->_formValues['campaign_id_value']);
-        return "campaign.id {$this->_formValues['campaign_id_op']} ({$campaign_ids})";
-      } else {
-        return NULL;
-      }
+      return $this->customWhereClause(
+        'campaign.id',
+        $this->_formValues['campaign_id_op'],
+        $this->_formValues['campaign_id_value']
+      );
     } else {
       return parent::whereClause($field, $op, $value, $min, $max);
     }
+  }
+
+  /**
+   * Generate a custom where clause
+   *
+   * @param $fieldName
+   * @param $operator
+   * @param $value
+   *
+   * @return string|null
+   * @throws \CRM_Core_Exception
+   */
+  protected function customWhereClause($fieldName, $operator, $value) {
+    $whereClause = NULL;
+    if ($this->isNullOperator($operator)) {
+      $whereClause = $fieldName . ' ' . $this->getSQLOperator($operator);
+    }
+    else if (!empty($value)) {
+      if (is_array($value)) {
+        $value = implode(',', $this->_formValues['campaign_id_value']);
+      }
+      $value = CRM_Utils_Type::validate($value, 'CommaSeparatedIntegers');
+      $whereClause = $fieldName . ' ' . $this->getSQLOperator($operator) . ' (' . $value . ')';
+
+      // for NOT IN, users generally assume empty values to be included. this is
+      // consistent with core reports, so we add "OR field IS NULL"
+      if ($operator == 'notin') {
+        $whereClause = '(' . $whereClause . ' OR ' . $fieldName . ' IS NULL)';
+      }
+    }
+    return $whereClause;
+  }
+
+  protected function isNullOperator($operator) {
+    return $operator == 'nll' || $operator == 'nnll';
   }
 
   function alterDisplay(&$rows) {
