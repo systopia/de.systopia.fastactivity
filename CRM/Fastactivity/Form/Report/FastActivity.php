@@ -23,6 +23,9 @@ use CRM_Fastactivity_ExtensionUtil as E;
  */
 class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
 
+  protected $_customGroupExtends = [
+    'Activity',
+  ];
   protected $activityTypes = [];
   protected $activityStatus = [];
 
