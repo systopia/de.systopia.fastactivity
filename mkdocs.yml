@@ -2,7 +2,7 @@ site_name: CiviCRM Fast Activities
 repo_url: https://github.com/systopia/de.systopia.fastactivity
 theme: material
 
-pages:
+nav:
 - Home: index.md
 
 markdown_extensions:
