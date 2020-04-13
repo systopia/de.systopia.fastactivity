@@ -1,6 +1,7 @@
 site_name: CiviCRM Fast Activities
 repo_url: https://github.com/systopia/de.systopia.fastactivity
-theme: material
+theme: 
+  name: material
 
 nav:
 - Home: index.md
