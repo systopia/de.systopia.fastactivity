@@ -28,7 +28,19 @@ class CRM_Fastactivity_Form_ActivityFilter extends CRM_Core_Form {
       'activity_type_id',
       array('entity' => 'Activity', 'label' => 'Activity Type(s)', 'multiple' => 'multiple', 'option_url' => NULL, 'placeholder' => ts('- any -'))
     );
-
+    $this->addSelect(
+      'activity_type_exclude_id',
+      array('entity' => 'Activity', 'field' => 'activity_type_id', 'label' => 'Exclude Activity Type(s)', 'multiple' => 'multiple', 'option_url' => NULL, 'placeholder' => ts('- any -'))
+    );
+    CRM_Core_Form_Date::buildDateRange(
+      $this, 'activity_date', 1,
+      '_low', '_high', ts('From'),
+      FALSE, array(), 'searchDate',
+      FALSE, array('class' => 'crm-select2 medium')
+    );
+    $this->addSelect('activity_status_id',
+      array('entity' => 'activity', 'multiple' => 'multiple', 'option_url' => NULL, 'placeholder' => ts('- any -'))
+    );
     $this->add(
       'select',
       'activity_campaign_id',
@@ -48,14 +60,16 @@ class CRM_Fastactivity_Form_ActivityFilter extends CRM_Core_Form {
     $defaults = array();
     $session = CRM_Core_Session::singleton();
     $userID = $session->get('userID');
-    if ($userID) {
+    if ($userID && Civi::settings()->get('preserve_activity_tab_filter')) {
       $defaults = CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::PERSONAL_PREFERENCES_NAME,
         'activity_tab_filter',
         NULL,
         NULL,
         $userID
       );
+      $this->assign('activity_tab_filter', array_filter($defaults));
     }
+
     return $defaults;
   }
 

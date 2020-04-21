@@ -84,11 +84,28 @@ class CRM_Fastactivity_Page_AJAX {
 
     // store the activity filter preference CRM-11761
     $userID = CRM_Core_Session::getLoggedInContactID();
-    if ($userID) {
+    if (Civi::settings()->get('preserve_activity_tab_filter') && $userID) {
       $activityFilter = array(
         'activity_type_id' => empty($params['activity_type_id']) ? '' : CRM_Utils_Type::escape($params['activity_type_id'], 'String'),
-        'activity_type_exclude_filter_id' => empty($params['activity_type_exclude_id']) ? '' : CRM_Utils_Type::escape($params['activity_type_exclude_id'], 'String'),
+        'activity_type_exclude_id' => empty($params['activity_type_exclude_id']) ? '' : CRM_Utils_Type::escape($params['activity_type_exclude_id'], 'String'),
+        'activity_date_relative' => empty($params['activity_date_relative']) ? '' : CRM_Utils_Type::escape($params['activity_date_relative'], 'String'),
+        'activity_status_id' => empty($params['activity_status_id']) ? '' : CRM_Utils_Type::escape($params['activity_status_id'], 'String'),
+        'activity_campaign_id' => empty($params['activity_campaign_id']) ? '' : CRM_Utils_Type::escape($params['activity_campaign_id'], 'String'),
       );
+      if (empty($params['activity_date_low'])) {
+        $activityFilter['activity_date_low'] = '';
+      }
+      else {
+        $activityFilter['activity_date_relative'] = 0;
+        $activityFilter['activity_date_low'] = CRM_Utils_Type::escape($params['activity_date_low'], 'String');
+      }
+      if (empty($params['activity_date_high'])) {
+        $activityFilter['activity_date_high'] = '';
+      }
+      else {
+        $activityFilter['activity_date_relative'] = 0;
+        $activityFilter['activity_date_high'] = CRM_Utils_Type::escape($params['activity_date_high'], 'String');
+      }
 
       CRM_Core_BAO_Setting::setItem(
         $activityFilter,
