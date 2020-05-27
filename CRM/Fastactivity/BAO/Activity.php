@@ -202,6 +202,11 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
   public static function whereClause(&$params, $sortBy = TRUE, $excludeHidden = TRUE) {
     // activity type ID clause
     $activity_type_id = CRM_Utils_Array::value('activity_type_id', $params);
+    $activity_type_exclude_id = CRM_Utils_Array::value('activity_type_exclude_id', $params);
+    $activity_date_relative = CRM_Utils_Array::value('activity_date_relative', $params);
+    $activity_date_low = CRM_Utils_Array::value('activity_date_low', $params);
+    $activity_date_high = CRM_Utils_Array::value('activity_date_high', $params);
+    $activity_status_id = CRM_Utils_Array::value('activity_status_id', $params);
     $excludeCaseActivities = CRM_Utils_Array::value('excludeCaseActivities', $params, TRUE);
 
     // contact_id
@@ -212,8 +217,36 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     }
 
     if (!empty($activity_type_id)) {
-      $clauses[] = "activity.activity_type_id IN ( " . $activity_type_id . " ) ";
+      $clauses[] = "activity.activity_type_id IN (%2)";
+      $params[2] = [$activity_type_id, 'CommaSeparatedIntegers'];
     }
+    if (!empty($activity_type_exclude_id)) {
+      $clauses[] = "activity.activity_type_id NOT IN (%3)";
+      $params[3] = [$activity_type_exclude_id, 'CommaSeparatedIntegers'];
+    }
+    if (!empty($activity_status_id)) {
+      $clauses[] = "activity.status_id IN (%4)";
+      $params[4] = [$activity_status_id, 'CommaSeparatedIntegers'];
+    }
+    if (!empty($activity_date_relative)) {
+      list($from, $to) = CRM_Utils_Date::getFromTo($activity_date_relative, NULL, NULL);
+      $clauses[] = 'activity.activity_date_time BETWEEN %5 AND %6';
+      $params[5] = [$from, 'String'];
+      $params[6] = [$to, 'String'];
+    }
+    else {
+      if (!empty($activity_date_low)) {
+        $from = CRM_Utils_Date::processDate($activity_date_low);
+        $clauses[] = 'activity.activity_date_time >= %5';
+        $params[5] = [$from, 'String'];
+      }
+      if (!empty($activity_date_high)) {
+        $to = CRM_Utils_Date::processDate($activity_date_high);
+        $clauses[] = 'activity.activity_date_time <= %6';
+        $params[6] = [$to, 'String'];
+      }
+    }
+
     $clauses[] = "activity.is_current_revision != 0";
     $clauses[] = "activity.is_deleted = 0";
 
@@ -249,7 +282,8 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
           }
           // Convert to string for query
           $activity_campaign_id = implode(',', $searchCampaignIds);
-          $clauses[] = "activity.campaign_id IN ( " . $activity_campaign_id . " ) ";
+          $clauses[] = "activity.campaign_id IN (%7)";
+          $params[7] = [$activity_campaign_id, 'CommaSeparatedIntegers'];
         }
       }
     }

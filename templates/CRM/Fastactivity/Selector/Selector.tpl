@@ -14,7 +14,7 @@
 +-------------------------------------------------------*}
 
 <div class="crm-activity-selector-{$context}">
-  <div class="crm-accordion-wrapper crm-search_filters-accordion collapsed">
+  <div class="crm-accordion-wrapper crm-search_filters-accordion {if !$activity_tab_filter}collapsed{/if}">
     <div class="crm-accordion-header">
     {ts}Filter by Activity Type{/ts}</a>
     </div><!-- /.crm-accordion-header -->
@@ -22,17 +22,28 @@
       <div class="no-border form-layout-compressed" id="searchOptions">
         <div class="crm-contact-form-block-activity_type_id">
           <div class="crm-block crm-form-block crm-activity-search-form-block">
-          <table class="form-layout">
+          <table class="form-layout-compressed">
             <tr>
-              <td class="label">{$form.activity_type_id.label}</td>
-              <td class="view-value">{$form.activity_type_id.html|crmAddClass:fullwidth}</td>
+              <td class="{if $form.activity_type_id.value.0 && $activity_tab_filter}value-highlight{/if}">
+                {$form.activity_type_id.label}<br /> {$form.activity_type_id.html|crmAddClass:medium}
+              </td>
+              <td class="{if $form.activity_type_exclude_id.value.0 && $activity_tab_filter}value-highlight{/if}">
+                {$form.activity_type_exclude_id.label}<br /> {$form.activity_type_exclude_id.html|crmAddClass:medium}
+              </td>
+              <td class="{if $activity_tab_filter}{if $form.activity_date_relative.value.0 || $form.activity_date_low.value || $form.activity_date_high.value}value-highlight{/if}{/if}" colspan="2" >
+                <table>
+                  {include file="CRM/Core/DateRange.tpl" fieldName="activity_date" from='_low' to='_high' label='<label>Date</label>'}
+                </table>
+              </td>
+              <td class="{if $form.activity_status_id.value.0 && $activity_tab_filter}value-highlight{/if}">
+                {$form.activity_status_id.label}<br /> {$form.activity_status_id.html|crmAddClass:medium}
+              </td>
+              {if $optionalCols.campaign_title}
+                <td class="{if $form.activity_campaign_id.value.0 && $activity_tab_filter}value-highlight{/if}">
+                  {$form.activity_campaign_id.label}<br /> {$form.activity_campaign_id.html|crmAddClass:medium}
+                </td>
+              {/if}
             </tr>
-            {if $optionalCols.campaign_title}
-            <tr>
-              <td class="label">{$form.activity_campaign_id.label}</td>
-              <td class="view-value">{$form.activity_campaign_id.html|crmAddClass:fullwidth}</td>
-            </tr>
-            {/if}
           </table>
           </div>
         </div>
@@ -66,6 +77,18 @@
   </table>
 </div>
 {include file="CRM/Case/Form/ActivityToCase.tpl" contactID=$contactId}
+{if $activity_tab_filter}
+  {literal}
+  <style>
+    .crm-activity-selector-{/literal}{$context}{literal} .value-highlight .select2-choices,
+    .crm-activity-selector-{/literal}{$context}{literal} .value-highlight .select2-choice,
+    .crm-activity-selector-{/literal}{$context}{literal} .value-highlight .select2-arrow,
+    .crm-activity-selector-{/literal}{$context}{literal} .value-highlight .crm-absolute-date-range input {
+      background-color: #FFF6D8 !important;
+    }
+  </style>
+  {/literal}
+{/if}
 {literal}
 <script type="text/javascript">
 var {/literal}{$context}{literal}oTable;
@@ -77,11 +100,7 @@ CRM.$(function($) {
   }
   buildContactActivities{/literal}{$context}{literal}( filterSearchOnLoad );
 
-  $('.crm-activity-selector-'+ context +' #activity_type_id').change( function( ) {
-    buildContactActivities{/literal}{$context}{literal}( true );
-  });
-
-  $('.crm-activity-selector-'+ context +' #campaigns').change( function( ) {
+  $('.crm-activity-selector-'+ context +' :input').change( function( ) {
     buildContactActivities{/literal}{$context}{literal}( true );
   });
 
@@ -158,7 +177,12 @@ CRM.$(function($) {
 
         if ( filterSearch ) {
           aoData.push(
-            {name:'activity_type_id', value: $('.crm-activity-selector-'+ context +' select#activity_type_id').val()}
+            {name:'activity_type_id', value: $('.crm-activity-selector-'+ context +' select#activity_type_id').val()},
+            {name:'activity_type_exclude_id', value: $('.crm-activity-selector-'+ context +' select#activity_type_exclude_id').val()},
+            {name:'activity_date_relative', value: $('.crm-activity-selector-'+ context +' select#activity_date_relative').val()},
+            {name:'activity_date_low', value: $('.crm-activity-selector-'+ context +' input#activity_date_low').val()},
+            {name:'activity_date_high', value: $('.crm-activity-selector-'+ context +' input#activity_date_high').val()},
+            {name:'activity_status_id', value: $('.crm-activity-selector-'+ context +' select#activity_status_id').val()}
             {/literal}{if $optionalCols.campaign_title}{literal}
             ,{name:'activity_campaign_id', value: $('.crm-activity-selector-'+ context +' select#campaigns').val()}
             {/literal}{/if}{literal}
