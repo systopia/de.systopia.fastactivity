@@ -62,7 +62,7 @@ return array(
     'add' => '4.6',
     'is_domain' => 1,
     'is_contact' => 0,
-    'description' => 'Replace view/edit links in activity search results',
+    'description' => 'Replace view/edit links in search and reports',
     'html_attributes' => [],
   ],
 
