@@ -57,6 +57,12 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
                     'title'      => E::ts('Activity ID'),
                     'required'   => TRUE,
                 ),
+              'contact_source_id' => array(
+                'no_display' => TRUE,
+                'title'   => E::ts('Source Contact ID'),
+                'required' => TRUE,
+                'default'  => TRUE,
+              ),
                 'target_sort_name' => array(
                     'title'   => E::ts('Target Contact'),
                     'default' => TRUE,
@@ -159,6 +165,14 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
                     'dbAlias'        => "activity_date_time",
                 ),
             ),
+        'group_bys' => array(
+          'id' => array(
+            'no_display' => TRUE,
+            'title' => E::ts('Activity ID'),
+            'required' => TRUE,
+            'default' => TRUE,
+          ),
+        ),
             'alias' => 'activity',
         ),
     );
@@ -181,14 +195,12 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
 
     $activityContacts = CRM_Activity_BAO_ActivityContact::buildOptions('record_type_id', 'validate');
 
+    $sourceID = CRM_Utils_Array::key('Activity Source', $activityContacts);
+    $this->_from .= " LEFT JOIN civicrm_activity_contact fa_source ON fa_source.activity_id = {$this->_aliases['civicrm_activity']}.id AND fa_source.record_type_id = {$sourceID}";
+
     if (!empty($this->_formValues['assignee_ids_value']) || $this->isNullOperator($this->_formValues['assignee_ids_op'])) {
       $assigneeID = CRM_Utils_Array::key('Activity Assignees', $activityContacts);
       $this->_from .= " LEFT JOIN civicrm_activity_contact fa_assignee ON fa_assignee.activity_id = {$this->_aliases['civicrm_activity']}.id AND fa_assignee.record_type_id = {$assigneeID}";
-    }
-
-    if (!empty($this->_formValues['source_ids_value']) || $this->isNullOperator($this->_formValues['source_ids_op'])) {
-      $sourceID = CRM_Utils_Array::key('Activity Source', $activityContacts);
-      $this->_from .= " LEFT JOIN civicrm_activity_contact fa_source ON fa_source.activity_id = {$this->_aliases['civicrm_activity']}.id AND fa_source.record_type_id = {$sourceID}";
     }
 
     if (!empty($this->_formValues['fields']['target_sort_name'])) {
@@ -208,7 +220,7 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
     }
   }
 
-    /**
+  /**
    * Add field specific select alterations.
    *
    * @param string $tableName
@@ -219,17 +231,20 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
    * @return string
    */
   function selectClause(&$tableName, $tableKey, &$fieldName, &$field) {
-    if ($fieldName == 'target_sort_name') {
+    if ($fieldName == 'contact_source_id') {
+      $this->_columnHeaders["contact_source_id"]['no_display'] = TRUE;
+      return "fa_source.contact_id as contact_source_id";
+    } elseif ($fieldName == 'target_sort_name') {
       $this->_columnHeaders['target_sort_name']['title']       = CRM_Utils_Array::value('title', $field);
       $this->_columnHeaders['target_sort_name']['type']        = CRM_Utils_Array::value('type', $field);
       $this->_columnHeaders['target_contact_id']['no_display'] = TRUE;
-      return "fa_target_contact.sort_name AS target_sort_name, fa_target_contact.id AS target_contact_id";
+      return "GROUP_CONCAT(DISTINCT fa_target_contact.sort_name SEPARATOR ';') AS target_sort_name, GROUP_CONCAT(DISTINCT fa_target_contact.id SEPARATOR ';') AS target_contact_id";
 
     } elseif ($fieldName == 'assignee_sort_name') {
       $this->_columnHeaders['assignee_sort_name']['title'] = CRM_Utils_Array::value('title', $field);
       $this->_columnHeaders['assignee_sort_name']['type'] = CRM_Utils_Array::value('type', $field);
       $this->_columnHeaders['assignee_contact_id']['no_display'] = TRUE;
-      return "fa_assignee_contact.sort_name AS assignee_sort_name, fa_assignee_contact.id AS assignee_contact_id";
+      return "GROUP_CONCAT(DISTINCT fa_assignee_contact.sort_name SEPARATOR ';') AS assignee_sort_name, GROUP_CONCAT(DISTINCT fa_assignee_contact.id SEPARATOR ';') AS assignee_contact_id";
 
     } elseif ($fieldName == 'campaign') {
       $this->_columnHeaders['campaign']['title'] = CRM_Utils_Array::value('title', $field);
@@ -329,10 +344,15 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
       // prepare cid param for links
       $cid = '';
       if (!empty($row['target_contact_id'])) {
-        $cid = "&cid={$row['target_contact_id']}";
+        $cids = explode(';', $row['target_contact_id']);
+        $cid = "&cid={$cids[0]}";
       }
       elseif (!empty($row['assignee_contact_id'])) {
-        $cid = "&cid={$row['assignee_contact_id']}";
+        $cids = explode(';', $row['assignee_contact_id']);
+        $cid = "&cid={$cids[0]}";
+      }
+      else {
+        $cid = "&cid={$row['contact_source_id']}";
       }
       // generate activity view link
       $view_link = CRM_Utils_System::url($base . '/view', "action=view&reset=1&id={$row['civicrm_activity_id']}{$cid}", $this->_absoluteUrl);
@@ -351,16 +371,30 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
 
       // link target contact
       if (!empty($row['target_sort_name']) && !empty($row['target_contact_id'])) {
-        $url = CRM_Utils_System::url("civicrm/contact/view", 'reset=1&cid=' . $row['target_contact_id'], $this->_absoluteUrl);
-        $rows[$rowNum]['target_sort_name_link'] = $url;
-        $rows[$rowNum]['target_sort_name_hover'] = E::ts("View Contact Summary for this Contact.");
+        $targetNames = explode(';', $row['target_sort_name']);
+        $targetContactIds = explode(';', $row['target_contact_id']);
+        $link = array();
+        foreach ($targetContactIds as $id => $value) {
+          if (isset($value) && isset($targetNames[$id])) {
+            $url = CRM_Utils_System::url("civicrm/contact/view", 'reset=1&cid=' . $value, $this->_absoluteUrl);
+            $link[] = "<a title='" . E::ts("View Contact Summary for this Contact.") . "' href='" . $url . "'>{$targetNames[$id]}</a>";
+          }
+        }
+        $rows[$rowNum]['target_sort_name'] = implode('; ', $link);
       }
 
       // link assignee contact
       if (!empty($row['assignee_sort_name']) && !empty($row['assignee_contact_id'])) {
-        $url = CRM_Utils_System::url("civicrm/contact/view", 'reset=1&cid=' . $row['assignee_contact_id'], $this->_absoluteUrl);
-        $rows[$rowNum]['assignee_sort_name_link'] = $url;
-        $rows[$rowNum]['assignee_sort_name_hover'] = E::ts("View Contact Summary for this Contact.");
+        $assigneeNames = explode(';', $row['assignee_sort_name']);
+        $assigneeContactIds = explode(';', $row['assignee_contact_id']);
+        $link = array();
+        foreach ($assigneeContactIds as $id => $value) {
+          if (isset($value) && isset($assigneeNames[$id])) {
+            $url = CRM_Utils_System::url("civicrm/contact/view", 'reset=1&cid=' . $value, $this->_absoluteUrl);
+            $link[] = "<a title='" . E::ts("View Contact Summary for this Contact.") . "' href='" . $url . "'>{$assigneeNames[$id]}</a>";
+          }
+        }
+        $rows[$rowNum]['assignee_sort_name'] = implode('; ', $link);
       }
 
       // fill actions
