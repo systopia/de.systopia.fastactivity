@@ -463,7 +463,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
         }
 
         if ($params['optionalCols']['campaign_title']) {
-          $contactActivities[$activityId]['campaign'] = $values['campaign'];
+          $contactActivities[$activityId]['campaign'] = CRM_Utils_System::href($values['campaign'], "civicrm/a/#/campaign/{$values['campaign_id']}/view");
         }
 
         // add class to this row if overdue
