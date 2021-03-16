@@ -55,9 +55,11 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       $orderBy = ' ORDER BY ' . CRM_Utils_Type::escape($params['sort'], 'String');
     }
 
-    $outerOrderBy = ' ORDER BY inner_result.activity_date_time DESC';
+    $outerOrderBy = ' ORDER BY inner_result.activity_date_time DESC, inner_result.activity_id DESC';
     if (!empty($params['outerSort'])) {
       $outerOrderBy = ' ORDER BY ' . CRM_Utils_Type::escape($params['outerSort'], 'String');
+      $sortDirection = (strpos(strtolower($outerOrderBy), 'asc') === false) ? 'DESC' : 'ASC';
+      $outerOrderBy .= ', inner_result.activity_id ' . $sortDirection;
     }
 
     // The main query.  This gets all the information (except target counts) for the tabbed activity display
