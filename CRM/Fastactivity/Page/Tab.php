@@ -14,6 +14,7 @@
 | written permission from the original author(s).        |
 +--------------------------------------------------------*/
 
+use CRM_Fastactivity_ExtensionUtil as E;
 
 /**
  * Main page for viewing activities
@@ -92,7 +93,7 @@ class CRM_Fastactivity_Page_Tab extends CRM_Core_Page {
     if ($this->_id &&
       in_array($action, array(CRM_Core_Action::VIEW))
     ) {
-      if (!CRM_Fastactivity_BAO_Activity::checkPermission($this->_id, $action)) {
+      if (!CRM_Activity_BAO_Activity::checkPermission($this->_id, $action)) {
         CRM_Core_Session::singleton()->pushUserContext(CRM_Utils_System::url('civicrm', 'reset=1'));
         CRM_Core_Error::statusBounce(ts('You do not have the necessary permission to access this page.'));
       }
@@ -110,55 +111,41 @@ class CRM_Fastactivity_Page_Tab extends CRM_Core_Page {
    */
   public static function updateTabStatus() {
     $is_active = (bool) CRM_Fastactivity_Settings::getValue('fastactivity_replace_tab');
-    if ($is_active) {
-      self::enable();
-    } else {
-      self::disable();
-    }
+    self::hideNativeActivityTab($is_active);
   }
 
   /**
-   * Enable tab replacement
+   * Will hide (or show) the original activity tab via the contact_view_options settings
+   *
+   * @param boolean $hide
+   *   if true, will the native tab will be turned off, and be turned on otherwise
    */
-  public static function enable() {
-    // Disable built-in Activities tab
-    $viewOptions = CRM_Core_BAO_Setting::valueOptions(
-        CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
-        'contact_view_options',
-        TRUE
-    );
-    if (!empty($viewOptions['activity'])) {
-      $viewOptions['activity'] = 0;
-      CRM_Core_BAO_Setting::setValueOption(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'contact_view_options', $viewOptions);
-      CRM_Core_Session::setStatus(ts('We have automatically disabled the built-in Activities tab for the Contact Summary screens
-        so that the one from the de.systopia.fastactivity extension can be used instead.'), ts('Saved'), 'success');
-    }
+  public static function hideNativeActivityTab($hide) {
+    // get the index for the activity tab
+    $all_view_options = CRM_Core_OptionGroup::values('contact_view_options', TRUE, FALSE, FALSE, NULL, 'name');
+    $activity_tab_value = $all_view_options['activity'];
 
-    if (version_compare(CRM_Utils_System::version(), '4.7', '<')) {
-      // hook_civicrm_check not available before 4.7
-      $messages = array();
-      fastactivity_civicrm_check($messages);
-      foreach ($messages as $message) {
-        CRM_Core_Session::setStatus($message->getMessage(), $message->getTitle());
+    // get the current settings
+    $current_view_options = explode(CRM_Core_DAO::VALUE_SEPARATOR, Civi::settings()->get('contact_view_options'));
+    $current_view_options = array_filter($current_view_options); // get rid of the empty ones at start and end
+    $tab_currently_disabled = !in_array($activity_tab_value, $current_view_options);
+
+    if ($tab_currently_disabled != $hide) {
+      // this is not how we want it, so let's adjust
+      if ($hide) {
+        unset($current_view_options[$activity_tab_value]);
+        CRM_Core_Session::setStatus(E::ts('We have automatically disabled the built-in Activities tab for the Contact Summary screens so that the one from the de.systopia.fastactivity extension can be used instead.'), E::ts('Saved'), 'success');
+      } else {
+        $current_view_options[] = $activity_tab_value;
+        CRM_Core_Session::setStatus(E::ts('We have re-enabled the built-in Activities tab for the Contact Summary screens now that the one from the de.systopia.fastactivity extension is not enabled.'), E::ts('Saved'), 'success');
       }
-    }
-  }
 
-  /**
-   * Enable tab replacement
-   */
-  public static function disable() {
-    // Enable built-in Activities tab
-    $viewOptions = CRM_Core_BAO_Setting::valueOptions(
-        CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
-        'contact_view_options',
-        TRUE
-    );
-    if (empty($viewOptions['activity'])) {
-      $viewOptions['activity'] = 1;
-      CRM_Core_BAO_Setting::setValueOption(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'contact_view_options', $viewOptions);
-      CRM_Core_Session::setStatus(ts('We have re-enabled the built-in Activities tab for the Contact Summary screens
-        now that the one from the de.systopia.fastactivity extension is not enabled.'), ts('Saved'), 'success');
+      // build and set new value
+      sort($current_view_options);
+      Civi::settings()->set('contact_view_options',
+                            CRM_Core_DAO::VALUE_SEPARATOR
+                            .implode(CRM_Core_DAO::VALUE_SEPARATOR, $current_view_options)
+                            .CRM_Core_DAO::VALUE_SEPARATOR);
     }
   }
 }
