@@ -107,14 +107,7 @@ class CRM_Fastactivity_Page_AJAX {
         $activityFilter['activity_date_high'] = CRM_Utils_Type::escape($params['activity_date_high'], 'String');
       }
 
-      CRM_Core_BAO_Setting::setItem(
-        $activityFilter,
-        CRM_Core_BAO_Setting::PERSONAL_PREFERENCES_NAME,
-        'activity_tab_filter',
-        NULL,
-        $userID,
-        $userID
-      );
+      Civi::contactSettings($userID)->set('activity_tab_filter', $activityFilter);
     }
 
     $iFilteredTotal = $iTotal = $params['total'];
