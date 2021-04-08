@@ -131,15 +131,44 @@ function fastactivity_civicrm_angularModules(&$angularModules) {
 _fastactivity_civix_civicrm_angularModules($angularModules);
 }
 
+/**
+ * Implements hook_civicrm_tabset()
+ *
+ * Replace the existing activities tab
+ */
+function fastactivity_civicrm_tabset($tabsetName, &$tabs, $context) {
+  if ($tabsetName == 'civicrm/contact/view' && !empty($context['contact_id'])) {
+    // this is the contact summary view
+    $is_active = (bool) Civi::settings()->get('fastactivity_replace_tab');
+    if ($is_active) {
+      // ..and the tab replacement is active. gather some data:
+      $contactID = (int) $context['contact_id'];
+      $tab_weight = (int) Civi::settings()->get('fastactivity_replace_tab_weight');
+      $count_parameters = [
+        'contact_id'            => $contactID,
+        'excludeCaseActivities' => (bool) Civi::settings()->get('tab_exclude_case_activities')
+      ];
 
-/*function fastactivity_civicrm_tabset($tabsetName, &$tabs, $context) {
-  // FIXME: For CiviCRM 4.7 we can use this hook instead.
-}*/
+      // and inject that tab
+      $tabs[] = [
+          'title'  => E::ts('Activities'),
+          'class'  => 'livePage',
+          'id'     => 'fastactivity',
+          'url'    => CRM_Utils_System::url('civicrm/contact/view/fastactivity', "reset=1&cid={$contactID}"),
+          'weight' => $tab_weight ? $tab_weight : 40,
+          'icon'   => 'crm-i fa-tasks',
+          'count'  => CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($count_parameters),
+      ];
+    }
+  }
+}
 
 /**
  * Replace the existing activities tab
  * @param $tabs
  * @param $contactID
+ *
+ * @deprecated in favour of civicrm_tabset hook
  */
 function fastactivity_civicrm_tabs ( &$tabs, $contactID ) {
   // We disable the built-in Activities tab under "Display Preferences" automatically when extension is enabled.
