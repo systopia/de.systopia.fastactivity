@@ -61,12 +61,7 @@ class CRM_Fastactivity_Form_ActivityFilter extends CRM_Core_Form {
     $session = CRM_Core_Session::singleton();
     $userID = $session->get('userID');
     if ($userID && Civi::settings()->get('preserve_activity_tab_filter')) {
-      $defaults = CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::PERSONAL_PREFERENCES_NAME,
-        'activity_tab_filter',
-        NULL,
-        NULL,
-        $userID
-      );
+      $defaults = Civi::contactSettings($userID)->get('activity_tab_filter');
       $this->assign('activity_tab_filter', array_filter($defaults));
     }
 
