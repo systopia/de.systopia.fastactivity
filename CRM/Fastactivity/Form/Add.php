@@ -463,11 +463,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     );
 
     // Get notification preferences
-    if (CRM_Core_BAO_Setting::getItem(
-      CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
-      'activity_assignee_notification'
-    )
-    ) {
+    if (Civi::settings()->get('activity_assignee_notification')) {
       $this->assign('activityAssigneeNotification', TRUE);
     }
     else {
@@ -773,9 +769,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     // send copy to assignee contacts.CRM-4509
     $mailStatus = '';
 
-    if (CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME,
-      'activity_assignee_notification')
-    ) {
+    if (Civi::settings()->get('activity_assignee_notification')) {
       $activityIDs = array($activity['id']);
       if ($followupActivity) {
         $activityIDs = array_merge($activityIDs, array($followupActivity->id));
