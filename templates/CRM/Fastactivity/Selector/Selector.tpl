@@ -16,7 +16,7 @@
 <div class="crm-activity-selector-{$context}">
   <div class="crm-accordion-wrapper crm-search_filters-accordion {if !$activity_tab_filter}collapsed{/if}">
     <div class="crm-accordion-header">
-    {ts}Filter by Activity Type{/ts}</a>
+    {ts}Filters{/ts}</a>
     </div><!-- /.crm-accordion-header -->
     <div class="crm-accordion-body">
       <div class="no-border form-layout-compressed" id="searchOptions">
