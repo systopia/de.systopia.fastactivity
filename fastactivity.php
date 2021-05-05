@@ -164,37 +164,6 @@ function fastactivity_civicrm_tabset($tabsetName, &$tabs, $context) {
 }
 
 /**
- * Replace the existing activities tab
- * @param $tabs
- * @param $contactID
- *
- * @deprecated in favour of civicrm_tabset hook
- */
-function fastactivity_civicrm_tabs ( &$tabs, $contactID ) {
-  // We disable the built-in Activities tab under "Display Preferences" automatically when extension is enabled.
-  // It is not enough to just hide it as the built-in count functions will still be executed and this causes a performance issue on large databases.
-  // if you'd like to use the regular and the fast activity tabs side-by-side maybe consider
-  //  reversing and adjusting https://github.com/systopia/de.systopia.fastactivity/commit/aea4a43a22d4b89590bf953447dbfc1f3fb0e762
-
-  $is_active = (bool) CRM_Fastactivity_Settings::getValue('fastactivity_replace_tab');
-  if ($is_active) {
-    // ADD the fast activity tab as a new tab
-    $params['contact_id'] = $contactID;
-    $params['excludeCaseActivities'] = (bool) CRM_Fastactivity_Settings::getValue('tab_exclude_case_activities');
-    $weight = (int) CRM_Fastactivity_Settings::getValue('fastactivity_replace_tab_weight');
-
-    $tabs[] = array('title'  => ts('Activities'),
-                    'class'  => 'livePage',
-                    'id'     => 'fastactivity',
-                    'url'    => CRM_Utils_System::url('civicrm/contact/view/fastactivity', "reset=1&cid={$contactID}"),
-                    'weight' => $weight ? $weight : 40,
-                    'icon' => 'crm-i fa-tasks',
-                    'count'  => CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($params),
-    );
-  }
-}
-
-/**
  * Implements hook_civicrm_alterSettingsFolders().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_alterSettingsFolders
