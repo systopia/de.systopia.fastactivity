@@ -37,32 +37,47 @@ class CRM_Fastactivity_Page_AJAX {
 
     // Map column Id to the actual SQL query result column we are going to order by
     $sortMapper[] = 'activity_type_id';
+    $outerSortMapper[] = 'activity_type_id';
     $sortMapper[] = 'activity_subject';
+    $outerSortMapper[] = 'activity_subject';
     if ($params['optionalCols']['campaign_title']) {
       $sortMapper[] = 'activity_campaign_title';
+      $outerSortMapper[] = 'activity_campaign_title';
     }
-    $sortMapper[] = 'source_display_name';
+    $sortMapper[] = '';
+    $outerSortMapper[] = 'source_display_name';
     if ($params['optionalCols']['target_contact']) {
-      $sortMapper[] = 'target_display_name';
+      $sortMapper[] = '';
+      $outerSortMapper[] = 'target_display_name';
     }
-    $sortMapper[] = 'assignee_display_name';
+    $sortMapper[] = '';
+    $outerSortMapper[] = 'assignee_display_name';
     $sortMapper[] = 'activity_date_time';
-    $sortMapper[] = 'activity.status_id';
+    $outerSortMapper[] = 'activity_date_time';
+    $sortMapper[] = 'activity_status_id';
+    $outerSortMapper[] = 'activity_status_id';
     if ($params['optionalCols']['duration']) {
       $sortMapper[] = 'activity_duration';
+      $outerSortMapper[] = 'activity_duration';
     }
     if ($params['optionalCols']['case']) {
       $sortMapper[] = 'activity_case_id';
+      $outerSortMapper[] = 'activity_case_id';
     }
 
     $sEcho = CRM_Utils_Type::escape($_REQUEST['sEcho'], 'Integer');
     $offset = isset($_REQUEST['iDisplayStart']) ? CRM_Utils_Type::escape($_REQUEST['iDisplayStart'], 'Integer') : 0;
     $rowCount = isset($_REQUEST['iDisplayLength']) ? CRM_Utils_Type::escape($_REQUEST['iDisplayLength'], 'Integer') : 25;
     $sort = isset($_REQUEST['iSortCol_0']) ? CRM_Utils_Array::value(CRM_Utils_Type::escape($_REQUEST['iSortCol_0'], 'Integer'), $sortMapper) : NULL;
+    $outerSort = isset($_REQUEST['iSortCol_0']) ? CRM_Utils_Array::value(CRM_Utils_Type::escape($_REQUEST['iSortCol_0'], 'Integer'), $outerSortMapper) : NULL;
     $sortOrder = isset($_REQUEST['sSortDir_0']) ? CRM_Utils_Type::escape($_REQUEST['sSortDir_0'], 'MysqlOrderByDirection') : 'asc';
 
     if ($sort && $sortOrder) {
       $params['sortBy'] = $sort . ' ' . $sortOrder;
+    }
+
+    if ($outerSort && $sortOrder) {
+      $params['outerSortBy'] = $outerSort . ' ' . $sortOrder;
     }
 
     $params['page'] = ($offset / $rowCount) + 1;
