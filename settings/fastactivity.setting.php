@@ -135,4 +135,22 @@ return array(
     'description' => 'Exclude Case Activities from the activity tab',
     'html_attributes' => array(),
   ),
+  'fastactivity_filter_details_activity_types' => array(
+    'group_name' => 'FastActivity Settings',
+    'group' => 'fastactivity',
+    'name' => 'fastactivity_filter_details_activity_types',
+    'type' => 'Integer',
+    'html_type' => 'select',
+    'pseudoconstant' => ['optionGroupName' => 'activity_type'],
+    'default' => NULL,
+    'add' => '5.0',
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'title' => 'Activity types to filter details for',
+    'description' => 'Activity types for which to run the details field contents through a text filter for reducing storage size.',
+    'html_attributes' => [
+      'class' => 'crm-select2',
+      'multiple' => 1,
+    ],
+  ),
 );

@@ -34,3 +34,6 @@
 {htxt id='tab_exclude_case_activities'}
 {ts}Exclude Case Activities from the activities tab (this is the default in the standard activities tab){/ts}
 {/htxt}
+{htxt id='filter_details_activity_types'}
+{ts}Activity types for which to run the details field contents through a text filter for reducing storage size.{/ts}
+{/htxt}
