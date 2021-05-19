@@ -271,3 +271,20 @@ function fastactivity_civicrm_pre($op, $objectName, $id, &$params) {
     }
   }
 }
+
+/**
+ * Implements hook_civicrm_searchTasks().
+ *
+ * @url https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_searchTasks/
+ */
+function fastactivity_civicrm_searchTasks($objectType, &$tasks)
+{
+  // add "Filter activity details" task to activity search result actions.
+  if ($objectType == 'activity') {
+    $tasks[] = [
+      'title' => E::ts('Filter activity details'),
+      'class' => 'CRM_Fastactivity_Form_Task_DetailsFilter',
+      'result' => false,
+    ];
+  }
+}
