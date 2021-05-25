@@ -13,7 +13,7 @@
 | written permission from the original author(s).        |
 +--------------------------------------------------------*/
 
-use CRM_Eventmessages_ExtensionUtil as E;
+use CRM_Fastactivity_ExtensionUtil as E;
 
 /**
  * Filter activity detail field contents
