@@ -13,7 +13,16 @@
 +-------------------------------------------------------*}
 
 {crmScope extensionKey='de.systopia.fastactivity'}
-  <div class="crm-submit-buttons">
-      {include file="CRM/common/formButtons.tpl" location="bottom"}
+  <div class="help">
+    <p>{ts}This task will filter the <em>Details</em>
+        field contents of selected activities, removing all HTML tags,
+        resulting an a plain text version of the field. This action cannot be
+        undone.{/ts}</p>
+  </div>
+
+  <div class="crm-form-block">
+    <div class="crm-submit-buttons">
+        {include file="CRM/common/formButtons.tpl" location="bottom"}
+    </div>
   </div>
 {/crmScope}
