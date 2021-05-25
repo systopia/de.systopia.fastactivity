@@ -18,9 +18,9 @@ use CRM_Fastactivity_ExtensionUtil as E;
 class CRM_Fastactivity_DetailsFilterJob {
 
   /**
-   * @var int $activityId
+   * @var int[] $activityIds
    */
-  protected $activityId;
+  protected $activityIds;
 
   /**
    * @var string $title
@@ -33,11 +33,11 @@ class CRM_Fastactivity_DetailsFilterJob {
    *
    * @param $activity_ids
    */
-  public function __construct($activity_id) {
-    $this->activityId = $activity_id;
+  public function __construct($activity_ids) {
+    $this->activityIds = $activity_ids;
     $this->title = E::ts(
-      'Filtering details for activity %1',
-      [1 => $activity_id]
+      'Filtering details for %1 activities',
+      [1 => count($activity_ids)]
     );
   }
 
@@ -45,20 +45,22 @@ class CRM_Fastactivity_DetailsFilterJob {
    * @throws \CiviCRM_API3_Exception
    */
   public function run() {
-    $activity = civicrm_api3(
-      'Activity',
-      'getsingle',
-      ['id' => $this->activityId],
-      ['return' => 'details']
-    );
-    civicrm_api3(
-      'Activity',
-      'create',
-      [
-        'id' => $this->activityId,
-        'details' => CRM_Utils_String::htmlToText($activity['details']),
-      ]
-    );
+    foreach ($this->activityIds as $activityId) {
+      $activity = civicrm_api3(
+        'Activity',
+        'getsingle',
+        ['id' => $activityId],
+        ['return' => 'details']
+      );
+      civicrm_api3(
+        'Activity',
+        'create',
+        [
+          'id' => $activityId,
+          'details' => CRM_Utils_String::htmlToText($activity['details']),
+        ]
+      );
+    }
 
     return TRUE;
   }

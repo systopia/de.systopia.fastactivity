@@ -19,6 +19,8 @@ use CRM_Eventmessages_ExtensionUtil as E;
  * Filter activity detail field contents
  */
 class CRM_Fastactivity_Form_Task_DetailsFilter extends CRM_Activity_Form_Task {
+
+  const BATCH_SIZE = 25;
   
   function buildQuickForm() {
     CRM_Utils_System::setTitle(E::ts('Filter activity details'));
@@ -37,9 +39,9 @@ class CRM_Fastactivity_Form_Task_DetailsFilter extends CRM_Activity_Form_Task {
     );
 
     // Add items to the queue.
-    foreach ($this->_activityHolderIds as $activity_id) {
+    foreach (array_chunk($this->_activityHolderIds, self::BATCH_SIZE) as $activity_ids) {
       $queue->createItem(
-        new CRM_Fastactivity_DetailsFilterJob($activity_id)
+        new CRM_Fastactivity_DetailsFilterJob($activity_ids)
       );
     }
 
