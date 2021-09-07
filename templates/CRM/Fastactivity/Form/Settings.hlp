@@ -38,6 +38,6 @@
 <p>{ts}Activity types for which to run the <em>Details</em> field contents through a text filter for reducing storage size.{/ts}</p>
 <p>{ts}This will filter the <em>Details</em> field contents of activities with the selected types prior to saving them, removing all HTML tags (including images), resulting in a plain text version of the field.{/ts}</p>
 <p>{ts}This is especially useful for activities created for mailings or letters, where the complete mailing or letter template is being fed into the activity but cannot be rendered correctly anyway when viewing the activity, so selecting those activity types can help keep the activity database table small.{/ts}</p>
-<p>{ts}Keep in mind, though, that there is no way to restore HTML contents once it has been run through the plain text filter.{/ts}</p>
+<p>{ts}Keep in mind, though, that there is no way to restore HTML contents once it has been run through the plain text filter. You will also not be able to regenerate the document from the filtered activity details content.{/ts}</p>
 <p>{ts}There is also an activity search result action for filtering <em>Details</em> field contents of existing activites.{/ts}</p>
 {/htxt}
