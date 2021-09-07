@@ -255,3 +255,36 @@ function fastactivity_civicrm_links($op, $objectName, $objectId, &$links, &$mask
     }
   }
 }
+
+/**
+ * Implements hook_civicrm_pre().
+ *
+ * @url https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_pre/
+ */
+function fastactivity_civicrm_pre($op, $objectName, $id, &$params) {
+  if ($objectName == 'Activity' && $op == 'create') {
+    // Run details field contents for activities of configured types through a
+    // text filter for reducing the record size.
+    $activity_type_ids = Civi::settings()->get('fastactivity_filter_details_activity_types') ?: [];
+    if (in_array($params['activity_type_id'], $activity_type_ids)) {
+      $params['details'] = CRM_Utils_String::htmlToText($params['details']);
+    }
+  }
+}
+
+/**
+ * Implements hook_civicrm_searchTasks().
+ *
+ * @url https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_searchTasks/
+ */
+function fastactivity_civicrm_searchTasks($objectType, &$tasks)
+{
+  // add "Filter activity details" task to activity search result actions.
+  if ($objectType == 'activity') {
+    $tasks[] = [
+      'title' => E::ts('Filter activity details'),
+      'class' => 'CRM_Fastactivity_Form_Task_DetailsFilter',
+      'result' => false,
+    ];
+  }
+}

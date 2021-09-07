@@ -63,17 +63,19 @@ class CRM_Fastactivity_Form_Settings extends CRM_Core_Form {
             }
             $this->add('datepicker', $name, ts($setting['description']), $setting['html_attributes'], FALSE, $setting['html_extra']);
             break;
-          case 'select2':
-            $className = E::CLASS_PREFIX . '_Form_SettingsCustom';
-            if (method_exists($className, 'addSelect2Element')) {
-              $className::addSelect2Element($this, $name, $setting);
-            }
-            break;
           case 'select':
-            $className = E::CLASS_PREFIX . '_Form_SettingsCustom';
-            if (method_exists($className, 'addSelectElement')) {
-              $className::addSelectElement($this, $name, $setting);
+            $optionValues = array();
+            if (!empty($setting['pseudoconstant']) && !empty($setting['pseudoconstant']['optionGroupName'])) {
+              $optionValues = CRM_Core_OptionGroup::values($setting['pseudoconstant']['optionGroupName'], FALSE, FALSE, FALSE, NULL, 'name');
             }
+            $this->add(
+              'select',
+              $name,
+              $setting['title'],
+              $optionValues,
+              FALSE,
+              $setting['html_attributes']
+            );
             break;
           case 'hidden':
             $hidden = TRUE;

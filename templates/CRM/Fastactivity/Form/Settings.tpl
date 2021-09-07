@@ -30,7 +30,7 @@
 <div>
   {foreach from=$elementGroup.elementNames item=elementName}
   <div class="crm-section">
-    <div class="label">{$form.$elementName.label}</div>
+    <div class="label">{$form.$elementName.label} {help id=$elementName file="CRM/Fastactivity/Form/Settings.hlp"}</div>
     <div class="content">{$form.$elementName.html}</div>
     <div class="clear"></div>
   </div>
