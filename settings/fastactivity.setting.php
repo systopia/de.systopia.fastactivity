@@ -66,6 +66,34 @@ return array(
     'html_attributes' => [],
   ],
 
+  'fastactivity_preserve_activity_tab_filter' => [
+    'group_name' => 'FastActivity Settings',
+    'group' => 'fastactivity',
+    'name' => 'fastactivity_preserve_activity_tab_filter',
+    'type' => 'Boolean',
+    'html_type' => 'Checkbox',
+    'default' => 0,
+    'add' => '4.6',
+    'is_domain' => 1,
+    'is_contact' => 1,
+    'description' => 'Preserve individual filter settings in Activity tab',
+    'html_attributes' => [],
+  ],
+
+  'fastactivity_activity_tab_filter_open' => [
+      'group_name' => 'FastActivity Settings',
+      'group' => 'fastactivity',
+      'name' => 'fastactivity_activity_tab_filter_open',
+      'type' => 'Boolean',
+      'html_type' => 'Checkbox',
+      'default' => 0,
+      'add' => '4.6',
+      'is_domain' => 1,
+      'is_contact' => 0,
+      'description' => 'Should the filter tab be open by default?',
+      'html_attributes' => [],
+  ],
+
   'fastactivity_tab_col_duration' => array(
     'group_name' => 'FastActivity Settings',
     'group' => 'fastactivity',
