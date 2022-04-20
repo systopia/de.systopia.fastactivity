@@ -22,22 +22,53 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +-------------------------------------------------------------------*}
 
+
+{crmScope extensionKey='de.systopia.fastactivity'}
+{htxt id='replace_tab'}
+    {ts}Should the FastActivity tab <strong>replace</strong> CiviCRM's default tab?{/ts}
+{/htxt}
+
+{htxt id='replace_tab_weight'}
+    {ts}Weight of the tab, i.e. how far down the list of tabs it should be.{/ts}
+{/htxt}
+
+{htxt id='replace_search'}
+    {ts}Should the activity the links in activity search results and lists be replaced by the FastActivity versions?{/ts}
+{/htxt}
+
 {htxt id='tab_col_duration'}
-{ts}Display the duration of the activity as a column in the activity tab{/ts}
+    {ts}Display the duration of the activity as a column in the activity tab{/ts}
 {/htxt}
+
+{htxt id='preserve_activity_tab_filter'}
+    {ts}Should the filter settings to the activity tab be preserved (per user)?{/ts}
+{/htxt}
+
+{htxt id='activity_tab_filter_open'}
+    {ts}Should the activity tab filter be open by default?{/ts}
+{/htxt}
+
 {htxt id='tab_col_campaign_title'}
-{ts}Display the campaign title associated with the activity as a column in the activity tab. NOTE: REQUIRES extension de.systopia.campaigntree{/ts}
+    {ts}Display the campaign title associated with the activity as a column in the activity tab. NOTE: REQUIRES extension de.systopia.campaigntree{/ts}
 {/htxt}
+
 {htxt id='tab_col_target_contact'}
-{ts}Display the Target "With Contacts" as a column in the activity tab{/ts}
+    {ts}Display the Target "With Contacts" as a column in the activity tab{/ts}
 {/htxt}
+
+{htxt id='tab_col_case'}
+    {ts}Display the case column in the activity tab{/ts}
+{/htxt}
+
 {htxt id='tab_exclude_case_activities'}
-{ts}Exclude Case Activities from the activities tab (this is the default in the standard activities tab){/ts}
+    {ts}Exclude Case Activities from the activities tab (this is the default in the standard activities tab){/ts}
 {/htxt}
+
 {htxt id='filter_details_activity_types'}
-<p>{ts}Activity types for which to run the <em>Details</em> field contents through a text filter for reducing storage size.{/ts}</p>
-<p>{ts}This will filter the <em>Details</em> field contents of activities with the selected types prior to saving them, removing all HTML tags (including images), resulting in a plain text version of the field.{/ts}</p>
-<p>{ts}This is especially useful for activities created for mailings or letters, where the complete mailing or letter template is being fed into the activity but cannot be rendered correctly anyway when viewing the activity, so selecting those activity types can help keep the activity database table small.{/ts}</p>
-<p>{ts}Keep in mind, though, that there is no way to restore HTML contents once it has been run through the plain text filter. You will also not be able to regenerate the document from the filtered activity details content.{/ts}</p>
-<p>{ts}There is also an activity search result action for filtering <em>Details</em> field contents of existing activites.{/ts}</p>
+    <p>{ts}Activity types for which to run the <em>Details</em> field contents through a text filter for reducing storage size.{/ts}</p>
+    <p>{ts}This will filter the <em>Details</em> field contents of activities with the selected types prior to saving them, removing all HTML tags (including images), resulting in a plain text version of the field.{/ts}</p>
+    <p>{ts}This is especially useful for activities created for mailings or letters, where the complete mailing or letter template is being fed into the activity but cannot be rendered correctly anyway when viewing the activity, so selecting those activity types can help keep the activity database table small.{/ts}</p>
+    <p>{ts}Keep in mind, though, that there is no way to restore HTML contents once it has been run through the plain text filter. You will also not be able to regenerate the document from the filtered activity details content.{/ts}</p>
+    <p>{ts}There is also an activity search result action for filtering <em>Details</em> field contents of existing activites.{/ts}</p>
 {/htxt}
+{/crmScope}

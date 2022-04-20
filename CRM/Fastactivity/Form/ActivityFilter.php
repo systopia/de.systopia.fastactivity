@@ -65,6 +65,10 @@ class CRM_Fastactivity_Form_ActivityFilter extends CRM_Core_Form {
       $this->assign('activity_tab_filter', array_filter($defaults));
     }
 
+    // assign fastactivity_activity_tab_filter_open value
+    $filter_should_be_open = (int) Civi::settings()->get('fastactivity_activity_tab_filter_open');
+    $this->assign('activity_tab_filter_open', $filter_should_be_open);
+
     return $defaults;
   }
 

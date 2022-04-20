@@ -14,7 +14,7 @@
 +-------------------------------------------------------*}
 
 <div class="crm-activity-selector-{$context}">
-  <div class="crm-accordion-wrapper crm-search_filters-accordion {if !$activity_tab_filter}collapsed{/if}">
+  <div class="crm-accordion-wrapper crm-search_filters-accordion {if !$activity_tab_filter_open}collapsed{/if}">
     <div class="crm-accordion-header">
     {ts}Filters{/ts}</a>
     </div><!-- /.crm-accordion-header -->
