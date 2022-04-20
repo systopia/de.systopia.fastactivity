@@ -99,7 +99,7 @@ class CRM_Fastactivity_Page_AJAX {
 
     // store the activity filter preference CRM-11761
     $userID = CRM_Core_Session::getLoggedInContactID();
-    if (Civi::settings()->get('preserve_activity_tab_filter') && $userID) {
+    if (Civi::settings()->get('fastactivity_preserve_activity_tab_filter') && $userID) {
       $activityFilter = array(
         'activity_type_id' => empty($params['activity_type_id']) ? '' : CRM_Utils_Type::escape($params['activity_type_id'], 'String'),
         'activity_type_exclude_id' => empty($params['activity_type_exclude_id']) ? '' : CRM_Utils_Type::escape($params['activity_type_exclude_id'], 'String'),

@@ -66,6 +66,20 @@ return array(
     'html_attributes' => [],
   ],
 
+  'fastactivity_preserve_activity_tab_filter' => [
+    'group_name' => 'FastActivity Settings',
+    'group' => 'fastactivity',
+    'name' => 'fastactivity_preserve_activity_tab_filter',
+    'type' => 'Boolean',
+    'html_type' => 'Checkbox',
+    'default' => 0,
+    'add' => '4.6',
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => 'Preserve individual filter settings in Activity tab',
+    'html_attributes' => [],
+  ],
+
   'fastactivity_tab_col_duration' => array(
     'group_name' => 'FastActivity Settings',
     'group' => 'fastactivity',

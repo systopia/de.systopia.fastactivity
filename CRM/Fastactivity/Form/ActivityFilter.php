@@ -60,7 +60,7 @@ class CRM_Fastactivity_Form_ActivityFilter extends CRM_Core_Form {
     $defaults = array();
     $session = CRM_Core_Session::singleton();
     $userID = $session->get('userID');
-    if ($userID && Civi::settings()->get('preserve_activity_tab_filter')) {
+    if ($userID && Civi::settings()->get('fastactivity_preserve_activity_tab_filter')) {
       $defaults = Civi::contactSettings($userID)->get('activity_tab_filter');
       $this->assign('activity_tab_filter', array_filter($defaults));
     }
