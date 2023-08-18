@@ -379,7 +379,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
         $dao = CRM_Core_DAO::executeQuery($query);
       }
       catch (Exception $e) {
-        CRM_Core_Error::debug_log_message('fastactivity addTargetContacts: Error: '.$e->getMessage());
+        Civi::log()->debug('fastactivity addTargetContacts: Error: '.$e->getMessage());
         return array();
       }
 
@@ -416,7 +416,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
         $dao = CRM_Core_DAO::executeQuery($query);
       }
       catch (Exception $e) {
-        CRM_Core_Error::debug_log_message('fastactivity addTargetContacts: Error: '.$e->getMessage());
+        Civi::log()->debug('fastactivity addTargetContacts: Error: '.$e->getMessage());
         return array();
       }
       // Return an array of Ids that we added
@@ -444,7 +444,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       $dao = CRM_Core_DAO::executeQuery($query, $params);
     }
     catch (Exception $e) {
-      CRM_Core_Error::debug_log_message('fastactivity isNotTargetContact: Error: '.$e->getMessage());
+      Civi::log()->debug('fastactivity isNotTargetContact: Error: '.$e->getMessage());
       return array();
     }
 
