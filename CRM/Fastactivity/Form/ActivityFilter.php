@@ -32,7 +32,7 @@ class CRM_Fastactivity_Form_ActivityFilter extends CRM_Core_Form {
       'activity_type_exclude_id',
       array('entity' => 'Activity', 'field' => 'activity_type_id', 'label' => 'Exclude Activity Type(s)', 'multiple' => 'multiple', 'option_url' => NULL, 'placeholder' => ts('- any -'))
     );
-    CRM_Legacycode_Date::buildDateRange(
+      CRM_Fastactivity_Legacycode_Date::buildDateRange(
       $this, 'activity_date', 1,
       '_low', '_high', ts('From'),
       FALSE, array(), 'searchDate',

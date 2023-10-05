@@ -24,11 +24,6 @@ use CRM_Fastactivity_ExtensionUtil as E;
  */
 function fastactivity_civicrm_config(&$config) {
   _fastactivity_civix_civicrm_config($config);
-
-  // check if legacycode is there
-  if (!is_callable('CRM_Legacycode_Date::returnDateRangeSelector')) {
-    Civi::log()->warning("This extension now requires the legacycode extension v1.1+");
-  }
 }
 
 /**
