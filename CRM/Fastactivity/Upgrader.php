@@ -19,7 +19,7 @@ use CRM_Fastactivity_ExtensionUtil as E;
 /**
  * Collection of upgrade steps.
  */
-class CRM_Fastactivity_Upgrader extends CRM_Fastactivity_Upgrader_Base {
+class CRM_Fastactivity_Upgrader extends CRM_Extension_Upgrader_Base {
 
   /**
    * Update the tab status
