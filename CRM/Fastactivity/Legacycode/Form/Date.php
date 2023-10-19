@@ -15,7 +15,7 @@
  * This class offers in-line code replacements for deprecated/dropped functions
  *  of the CRM_Core_OptionGroup class
  */
-class CRM_Fastactivity_Legacycode_Date {
+class CRM_Fastactivity_Legacycode_Form_Date {
 
   /**
    * Remark: copied verbatim from CRM_Core_Form_Date in CiviCRM@v5.60
