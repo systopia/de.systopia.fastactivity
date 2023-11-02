@@ -17,7 +17,6 @@
   <releaseDate></releaseDate>
   <version>1.4-dev</version>
   <develStage>dev</develStage>
-  <requires></requires>
   <compatibility>
     <ver>5.38</ver>
   </compatibility>
