@@ -45,15 +45,6 @@ function fastactivity_civicrm_enable() {
 }
 
 /**
- * Implements hook_civicrm_disable().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_disable
- */
-function fastactivity_civicrm_disable() {
-  CRM_Fastactivity_Page_Tab::disable();
-}
-
-/**
  * Implements hook_civicrm_tabset()
  *
  * Replace the existing activities tab

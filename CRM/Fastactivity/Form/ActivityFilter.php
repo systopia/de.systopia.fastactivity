@@ -62,7 +62,9 @@ class CRM_Fastactivity_Form_ActivityFilter extends CRM_Core_Form {
     $userID = $session->get('userID');
     if ($userID && Civi::settings()->get('fastactivity_preserve_activity_tab_filter')) {
       $defaults = Civi::contactSettings($userID)->get('activity_tab_filter');
-      $this->assign('activity_tab_filter', array_filter($defaults));
+      if (!empty($defaults)) {
+        $this->assign('activity_tab_filter', array_filter($defaults));
+      }
     }
 
     // assign fastactivity_activity_tab_filter_open value
