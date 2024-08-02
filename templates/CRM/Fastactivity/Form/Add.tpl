@@ -289,6 +289,10 @@
           previewDialog();
         }
       }
+      else {
+        // Avoid jquery validation on required fields if they are visible
+        $('#recurring-entity-block :input').removeClass('required');
+      }
     });
   });
 </script>
