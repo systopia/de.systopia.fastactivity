@@ -147,17 +147,17 @@ class CRM_Fastactivity_Legacycode_Form_Date {
                $attributes
     );
 
-    self::addDateRange($form, $fieldName, $from, $to, $fromLabel, $dateFormat, FALSE, $displayTime);
+    self::addDateRange($form, $fieldName, $from, $to, $fromLabel, $dateFormat, $displayTime);
   }
 
   public static function addDateRange($form, $name, $from = '_from', $to = '_to', $label = 'From:', $dateFormat = 'searchDate', $required = FALSE, $displayTime = FALSE) {
     if ($displayTime) {
-      $form->add('datepicker', $name . $from, $label, $required, ['formatType' => $dateFormat]);
-      $form->add('datepicker', $name . $to, ts('To:'), $required, ['formatType' => $dateFormat]);
+      $form->add('datepicker', $name . $from, $label, [], $required, ['time' => true]);
+      $form->add('datepicker', $name . $to, ts('To:'), [], $required, ['time' => true]);
     }
     else {
-      $form->add('datepicker', $name . $from, $label, $required, ['formatType' => $dateFormat]);
-      $form->add('datepicker', $name . $to, ts('To:'), $required, ['formatType' => $dateFormat]);
+      $form->add('datepicker', $name . $from, $label, [], $required, ['time' => false]);
+      $form->add('datepicker', $name . $to, ts('To:'), [], $required, ['time' => false]);
     }
   }
 }
