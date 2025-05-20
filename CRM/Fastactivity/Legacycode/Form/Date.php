@@ -147,6 +147,17 @@ class CRM_Fastactivity_Legacycode_Form_Date {
                $attributes
     );
 
-    $form->addDateRange($fieldName, $from, $to, $fromLabel, $dateFormat, FALSE, $displayTime);
+    self::addDateRange($form, $fieldName, $from, $to, $fromLabel, $dateFormat, FALSE, $displayTime);
+  }
+
+  public static function addDateRange($form, $name, $from = '_from', $to = '_to', $label = 'From:', $dateFormat = 'searchDate', $required = FALSE, $displayTime = FALSE) {
+    if ($displayTime) {
+      $form->add('datepicker', $name . $from, $label, $required, ['formatType' => $dateFormat]);
+      $form->add('datepicker', $name . $to, ts('To:'), $required, ['formatType' => $dateFormat]);
+    }
+    else {
+      $form->add('datepicker', $name . $from, $label, $required, ['formatType' => $dateFormat]);
+      $form->add('datepicker', $name . $to, ts('To:'), $required, ['formatType' => $dateFormat]);
+    }
   }
 }

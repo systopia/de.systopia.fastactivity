@@ -110,7 +110,7 @@
     </tr>
     <tr class="crm-activity-form-block-activity_date_time">
       <td class="label">{$form.activity_date_time.label}</td>
-      <td class="view-value">{include file="CRM/common/jcalendar.tpl" elementName=activity_date_time}</td>
+      <td class="view-value">{$activity_date_time.html}</td>
     </tr>
     <tr class="crm-activity-form-block-duration">
       <td class="label">{$form.duration.label}</td>
@@ -187,7 +187,7 @@
             <table class="form-layout-compressed">
               <tr><td class="label">{ts}Schedule Follow-up Activity{/ts}</td>
                 <td>{$form.followup_activity_type_id.html}&nbsp;&nbsp;{ts}on{/ts}
-                  {include file="CRM/common/jcalendar.tpl" elementName=followup_date}
+                  {$form.followup_date.html}
                 </td>
               </tr>
               <tr>

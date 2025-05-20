@@ -31,9 +31,9 @@
                 {$form.activity_type_exclude_id.label}<br /> {$form.activity_type_exclude_id.html|crmAddClass:medium}
               </td>
               <td class="{if $activity_tab_filter}{if $form.activity_date_relative.value.0 || $form.activity_date_low.value || $form.activity_date_high.value}value-highlight{/if}{/if}" colspan="2" >
-                <table>
-                  {include file="CRM/Core/DateRange.tpl" fieldName="activity_date" from='_low' to='_high' label='<label>Date</label>'}
-                </table>
+
+                  {include file="CRM/Core/DatePickerRangeWrapper.tpl" fieldName="activity_date" from='_low' to='_high' label='<label>Date</label>'}
+
               </td>
               <td class="{if $form.activity_status_id.value.0 && $activity_tab_filter}value-highlight{/if}">
                 {$form.activity_status_id.label}<br /> {$form.activity_status_id.html|crmAddClass:medium}
