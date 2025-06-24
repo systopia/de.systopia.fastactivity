@@ -14,6 +14,8 @@
 | written permission from the original author(s).        |
 +--------------------------------------------------------*/
 
+use CRM_Fastactivity_ExtensionUtil as E;
+
 /**
  * This class generates form components for Activity Filter
  * The activity filter is displayed on the "FastActivities" Tab and allows for selection/removal of multiple
