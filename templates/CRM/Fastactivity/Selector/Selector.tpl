@@ -14,9 +14,9 @@
 +-------------------------------------------------------*}
 
 <div class="crm-activity-selector-{$context}">
-  <div class="crm-accordion-wrapper crm-search_filters-accordion {if !$activity_tab_filter_open}collapsed{/if}">
+  <div class="crm-accordion-wrapper crm-search_filters-accordion {if empty($activity_tab_filter_open)}collapsed{/if}">
     <div class="crm-accordion-header">
-    {ts}Filters{/ts}</a>
+    {ts}Filters{/ts}
     </div><!-- /.crm-accordion-header -->
     <div class="crm-accordion-body">
       <div class="no-border form-layout-compressed" id="searchOptions">
@@ -24,22 +24,22 @@
           <div class="crm-block crm-form-block crm-activity-search-form-block">
           <table class="form-layout-compressed">
             <tr>
-              <td class="{if $form.activity_type_id.value.0 && $activity_tab_filter}value-highlight{/if}">
+              <td class="{if !empty($form.activity_type_id.value.0) && !empty($activity_tab_filter)}value-highlight{/if}">
                 {$form.activity_type_id.label}<br /> {$form.activity_type_id.html|crmAddClass:medium}
               </td>
-              <td class="{if $form.activity_type_exclude_id.value.0 && $activity_tab_filter}value-highlight{/if}">
+              <td class="{if !empty($form.activity_type_exclude_id.value.0) && !empty($activity_tab_filter)}value-highlight{/if}">
                 {$form.activity_type_exclude_id.label}<br /> {$form.activity_type_exclude_id.html|crmAddClass:medium}
               </td>
-              <td class="{if $activity_tab_filter}{if $form.activity_date_relative.value.0 || $form.activity_date_low.value || $form.activity_date_high.value}value-highlight{/if}{/if}" colspan="2" >
+              <td class="{if !empty($activity_tab_filter)}{if !empty($form.activity_date_relative.value.0) || !empty($form.activity_date_low.value) || !empty($form.activity_date_high.value)}value-highlight{/if}{/if}" colspan="2" >
 
-                  {include file="CRM/Core/DatePickerRangeWrapper.tpl" fieldName="activity_date" from='_low' to='_high' label='<label>Date</label>'}
+                  {include file="CRM/Core/DatePickerRangeWrapper.tpl" fieldName="activity_date" from='_low' to='_high' label='<label>Date</label>' hideRelativeLabel=0}
 
               </td>
-              <td class="{if $form.activity_status_id.value.0 && $activity_tab_filter}value-highlight{/if}">
+              <td class="{if !empty($form.activity_status_id.value.0) && !empty($activity_tab_filter)}value-highlight{/if}">
                 {$form.activity_status_id.label}<br /> {$form.activity_status_id.html|crmAddClass:medium}
               </td>
               {if $optionalCols.campaign_title}
-                <td class="{if $form.activity_campaign_id.value.0 && $activity_tab_filter}value-highlight{/if}">
+                <td class="{if !empty($form.activity_campaign_id.value.0) && !empty($activity_tab_filter)}value-highlight{/if}">
                   {$form.activity_campaign_id.label}<br /> {$form.activity_campaign_id.html|crmAddClass:medium}
                 </td>
               {/if}
@@ -77,7 +77,7 @@
   </table>
 </div>
 {include file="CRM/Case/Form/ActivityToCase.tpl" contactID=$contactId}
-{if $activity_tab_filter}
+{if !empty($activity_tab_filter)}
   {literal}
   <style>
     .crm-activity-selector-{/literal}{$context}{literal} .value-highlight .select2-choices,
