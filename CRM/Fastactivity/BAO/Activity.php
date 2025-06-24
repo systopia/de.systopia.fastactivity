@@ -69,7 +69,9 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
 
     $innerQuery = "{$selectClause} WHERE {$whereClause} {$groupByClause} {$orderBy} {$limit}";
     $query = "{$outerSelectClause} FROM ({$innerQuery}) inner_result {$outerJoinQuery} {$outerGroupByClause} {$outerOrderBy}";
+    CRM_Core_DAO::disableFullGroupByMode();
     $dao = CRM_Core_DAO::executeQuery($query, $params);
+    CRM_Core_DAO::reenableFullGroupByMode();
 
     //get all activity types
     $activityTypes = self::getActivityLabels();
