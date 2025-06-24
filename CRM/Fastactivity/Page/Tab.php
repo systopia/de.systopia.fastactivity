@@ -23,6 +23,8 @@ use CRM_Fastactivity_ExtensionUtil as E;
  */
 class CRM_Fastactivity_Page_Tab extends CRM_Core_Page {
 
+  public int $_contactId;
+
   /**
    * Browse all activities for a particular contact.
    *
