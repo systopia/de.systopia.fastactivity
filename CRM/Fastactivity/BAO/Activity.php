@@ -653,7 +653,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     }
     elseif ($contactCount < 0) {
       // We didn't count so display a spinner until we load the data
-      $result .= '<div style="text-align: center"><i class="crm-i fa-spinner fa-spin fa-2x fa-fw"></i>
+      $result .= '<div style="text-align: center"><i class="crm-i fa-spinner fa-spin fa-2x fa-fw" role="img" aria-hidden="true"></i>
 <span class="sr-only">(Loading...)</span></div>';
     }
     return $result;
