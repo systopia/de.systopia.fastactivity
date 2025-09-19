@@ -72,7 +72,7 @@
       <td>
         {$form.assignee_contact_id.html}
         {if !$activityTargetCount}
-          <a href="#" class="crm-hover-button" id="swap_target_assignee" title="{ts}Swap Target and Assignee Contacts{/ts}" style="position:relative; bottom: 1em;">
+          <a href="#" class="crm-hover-button" id="swap_target_assignee" title="{ts escape='htmlattribute'}Swap Target and Assignee Contacts{/ts}" style="position:relative; bottom: 1em;">
             <span class="icon ui-icon-shuffle"></span>
           </a>
         {/if}
