@@ -48,7 +48,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
    * The _fields var can be used by sub class to set/unset/edit the
    * form fields based on their requirement
    */
-  public function setFields() {
+  public function setFields(): void {
     // Remove print document activity type
     $unwanted = CRM_Core_OptionGroup::values('activity_type', FALSE, FALSE, FALSE, "AND v.name = 'Print PDF Letter'");
     $activityTypes = array_diff_key(CRM_Core_PseudoConstant::ActivityType(FALSE), $unwanted);
@@ -160,14 +160,19 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     );
   }
 
-  public function preProcess() {
+  /**
+   * @throws \CRM_Core_Exception
+   */
+  public function preProcess(): void {
     // AJAX query for custom data is called to civicrm/fastactivity/add
     // This handles that query and returns the edit form block for customData
-    $this->_cdType = CRM_Utils_Array::value('type', $_GET);
+    $this->_cdType = CRM_Utils_Request::retrieve('type', 'String');
     $this->assign('cdType', FALSE);
     if ($this->_cdType) {
       $this->assign('cdType', TRUE);
-      return CRM_Custom_Form_CustomData::preProcess($this);
+      CRM_Custom_Form_CustomData::preProcess($this);
+
+      return;
     }
 
     CRM_Core_Form_RecurringEntity::preProcess('civicrm_activity');
@@ -224,7 +229,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
       $this->_activityTypeId = $activityRecord['activity_type_id'];
       if ($this->_activityTypeId) {
         //set activity type name and description to template
-        list($this->_activityTypeName, $activityTypeDescription) = CRM_Core_BAO_OptionValue::getActivityTypeDetails($this->_activityTypeId);
+        [$this->_activityTypeName, $activityTypeDescription] = CRM_Core_BAO_OptionValue::getActivityTypeDetails($this->_activityTypeId);
         $this->assign('activityTypeName', $this->_activityTypeName);
         $this->assign('activityTypeDescription', $activityTypeDescription);
       }
@@ -244,13 +249,9 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
         $this->assign('activityTargetCount', $this->_activityTargetCount);
       }
     }
-    elseif (!empty($this->_values)) {
-      // Do nothing
-    }
-    else {
+    elseif (empty($this->_values)) {
       $this->_values = array();
       if (isset($this->_activityId) && $this->_activityId) {
-        $params = array('id' => $this->_activityId);
         try {
           $activityRecord = civicrm_api3('Activity', 'getsingle', array(
             'sequential' => 1,
@@ -309,7 +310,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
 
     $this->setFields();
 
-    if (!empty($_POST['hidden_custom'])) {
+    if (!empty(CRM_Utils_Request::retrieve('hidden_custom', 'String'))) {
       // This ensures we don't lose custom data values on page reload (eg. if formrule fails)
       //need to assign custom data subtype to the template
       $this->set('type', 'Activity');
@@ -325,18 +326,23 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
       $this->_activityId, 0, $this->_activityTypeId);
 
     $session = CRM_Core_Session::singleton();
-    $this->context = CRM_Utils_System::url('civicrm/contact/view', "reset=1&selectedChild=fastactivity&cid={$this->_currentlyViewedContactId}");
+    $this->context = CRM_Utils_System::url('civicrm/contact/view', "reset=1&selectedChild=fastactivity&cid=$this->_currentlyViewedContactId");
     $session->pushUserContext($this->context);
     $this->controller->_destination = $this->context;
   }
 
-  public function buildQuickForm() {
+  /**
+   * @throws \CRM_Core_Exception
+   */
+  public function buildQuickForm(): void {
     $civiVersion = CRM_Core_BAO_Domain::version();
 
     if ($this->_cdType) {
       // AJAX query for custom data is called to civicrm/fastactivity/add
       // This handles that query and returns the edit form block for customData
-      return CRM_Custom_Form_CustomData::buildQuickForm($this);
+      CRM_Custom_Form_CustomData::buildQuickForm($this);
+
+      return;
     }
 
     // Get action links to display at bottom of activity (not for new activity as nothing to view/edit/delete!).
@@ -352,7 +358,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     // Add fields defined by setFields
     foreach ($this->_fields as $field => $values) {
       if (!empty($this->_fields[$field])) {
-        $attribute = CRM_Utils_Array::value('attributes', $values);
+        $attribute = $values['attributes'] ?? NULL;
         $required = !empty($values['required']);
         if ($values['type'] == 'wysiwyg') {
           if (version_compare($civiVersion, '4.7', '<')) {
@@ -374,14 +380,14 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
             if (version_compare($civiVersion, '4.7', '<')) {
               $attribute['entity'] = 'Activity';
             }
-            $this->addSelect($field, $attribute, $required, CRM_Utils_Array::value('extra', $values));
+            $this->addSelect($field, $attribute, $required);
           }
         }
         elseif ($values['type'] == 'entityRef') {
           $this->addEntityRef($field, $values['label'], $attribute, $required);
         }
         else {
-          $this->add($values['type'], $field, $values['label'], $attribute, $required, CRM_Utils_Array::value('extra', $values));
+          $this->add($values['type'], $field, $values['label'], $attribute, $required, $values['extra'] ?? NULL);
         }
       }
     }
@@ -474,13 +480,13 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
   /**
    * Add campaign elements to form
    */
-  public function buildFormElementsCampaign() {
+  public function buildFormElementsCampaign(): void {
     // Add select element for campaign
-    CRM_Campaign_BAO_Campaign::addCampaign($this, CRM_Utils_Array::value('campaign_id', $this->_values));
+    CRM_Campaign_BAO_Campaign::addCampaign($this, $this->_values['campaign_id'] ?? NULL);
 
     // Add element for engagement level
     $buildEngagementLevel = FALSE;
-    if (CRM_Campaign_BAO_Campaign::isCampaignEnable() &&
+    if (CRM_Campaign_BAO_Campaign::isComponentEnabled() &&
       CRM_Campaign_BAO_Campaign::accessCampaign()
     ) {
       $buildEngagementLevel = TRUE;
@@ -495,7 +501,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     // check for survey activity
     $this->_isSurveyActivity = FALSE;
 
-    if ($this->_activityId && CRM_Campaign_BAO_Campaign::isCampaignEnable() &&
+    if ($this->_activityId && CRM_Campaign_BAO_Campaign::isComponentEnabled() &&
       CRM_Campaign_BAO_Campaign::accessCampaign()
     ) {
 
@@ -527,27 +533,24 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
    *
    * @param array $fields
    *   The input form values.
-   * @param array $files
-   *   The uploaded files if any.
-   * @param $self
    *
    * @return bool|array
    *   true if no errors, else array of errors
    */
-  public static function formRule($fields, $files, $self) {
+  public static function formRule(array $fields) {
     // TODO: Do we want to remove any of these rules?
     // skip form rule if deleting
-    if (CRM_Utils_Array::value('_qf_Activity_next_', $fields) == 'Delete') {
+    if (($fields['_qf_Activity_next_'] ?? NULL) == 'Delete') {
       return TRUE;
     }
     $errors = array();
-    if (CRM_Utils_Array::value('activity_type_id', $fields) == 3 &&
-      CRM_Utils_Array::value('status_id', $fields) == 1
+    if (($fields['activity_type_id'] ?? NULL) == 3 &&
+      ($fields['status_id'] ?? NULL) == 1
     ) {
       $errors['status_id'] = ts('You cannot record scheduled email activity.');
     }
-    elseif (CRM_Utils_Array::value('activity_type_id', $fields) == 4 &&
-      CRM_Utils_Array::value('status_id', $fields) == 1
+    elseif (($fields['activity_type_id'] ?? NULL) == 4 &&
+      ($fields['status_id'] ?? NULL) == 1
     ) {
       $errors['status_id'] = ts('You cannot record scheduled SMS activity.');
     }
@@ -562,7 +565,10 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     return $errors;
   }
 
-  public function postProcess($params = NULL) {
+  /**
+   * @throws \CRM_Core_Exception
+   */
+  public function postProcess($params = NULL): array {
     // store the submitted values in an array
     if (!$params) {
       $params = $this->_submitValues;
@@ -577,16 +583,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     if (!empty($params['hidden_custom']) &&
       !isset($params['custom'])
     ) {
-      $customFields = CRM_Core_BAO_CustomField::getFields('Activity', FALSE, FALSE,
-        $this->_activityTypeId
-      );
-      $customFields = CRM_Utils_Array::crmArrayMerge($customFields,
-        CRM_Core_BAO_CustomField::getFields('Activity', FALSE, FALSE,
-          NULL, NULL, TRUE
-        )
-      );
       $params['custom'] = CRM_Core_BAO_CustomField::postProcess($params,
-        $customFields,
         $this->_activityId,
         'Activity'
       );
@@ -646,7 +643,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
       // set params for repeat configuration in create mode
       $params['entity_id'] = $activityId;
       $params['entity_table'] = 'civicrm_activity';
-      if (!empty($params['entity_id']) && !empty($params['entity_table'])) {
+      if (!empty($params['entity_id'])) {
         $checkParentExistsForThisId = CRM_Core_BAO_RecurringEntity::getParentFor($params['entity_id'], $params['entity_table']);
         if ($checkParentExistsForThisId) {
           $params['parent_entity_id'] = $checkParentExistsForThisId;
@@ -691,9 +688,9 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
    * @param array $params
    *   Associated array of submitted values.
    *
-   * @return self|null|object
+   * @throws \CRM_Core_Exception
    */
-  protected function processActivity(&$params) {
+  protected function processActivity(array &$params): array {
     $activityAssigned = array();
     $activityContacts = CRM_Core_OptionGroup::values('activity_contacts', FALSE, FALSE, FALSE, NULL, 'name');
     $assigneeID = CRM_Utils_Array::key('Activity Assignees', $activityContacts);
@@ -746,7 +743,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     CRM_Core_BAO_EntityTag::create($tagParams, 'civicrm_activity', $activity['id']);
 
     //save free tags
-    if (isset($params['activity_taglist']) && !empty($params['activity_taglist'])) {
+    if (!empty($params['activity_taglist'])) {
       CRM_Core_Form_Tag::postProcess($params['activity_taglist'], $activity['id'], 'civicrm_activity', $this);
     }
 
@@ -835,7 +832,7 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
     // Set activity type name for confirmation message
     $typeName = '';
     if (isset($params['activity_type_id'])) {
-      list($typeName, $activityTypeDescription) = CRM_Core_BAO_OptionValue::getActivityTypeDetails($params['activity_type_id']);
+      [$typeName, $activityTypeDescription] = CRM_Core_BAO_OptionValue::getActivityTypeDetails($params['activity_type_id']);
     }
     // Set activity state for confirmation message
     $state = '';
@@ -863,10 +860,8 @@ class CRM_Fastactivity_Form_Add extends CRM_Fastactivity_Form_Base {
    * the default values are retrieved from the database
    *
    * Most of this is based on CRM_Activity_Form_Activity
-   *
-   * @return void|array
    */
-  public function setDefaultValues() {
+  public function setDefaultValues(): array {
     if ($this->_cdType) {
       // AJAX query for custom data is called to civicrm/fastactivity/add
       // This handles that query and returns the edit form block for customData
