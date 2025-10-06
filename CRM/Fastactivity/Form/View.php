@@ -343,7 +343,7 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
       $activityDetails['engagementLevel'] = $activityRecord['engagement_level'];
       for ($i=0; $i < $activityRecord['engagement_level']; $i++) {
         // We could do this in smarty but civicrm doesn't support smarty "for"
-        $activityDetails['engagementLevelStars'] .= '<i class="crm-i fa-star"></i>';
+        $activityDetails['engagementLevelStars'] .= '<i class="crm-i fa-star" role="img" aria-hidden="true"></i>';
       }
     }
 
