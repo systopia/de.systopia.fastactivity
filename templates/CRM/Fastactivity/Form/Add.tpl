@@ -110,7 +110,7 @@
     </tr>
     <tr class="crm-activity-form-block-activity_date_time">
       <td class="label">{$form.activity_date_time.label}</td>
-      <td class="view-value">{$activity_date_time.html}</td>
+      <td class="view-value">{$form.activity_date_time.html}</td>
     </tr>
     <tr class="crm-activity-form-block-duration">
       <td class="label">{$form.duration.label}</td>
