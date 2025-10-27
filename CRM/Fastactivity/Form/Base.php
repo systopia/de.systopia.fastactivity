@@ -30,7 +30,7 @@ abstract class CRM_Fastactivity_Form_Base extends CRM_Core_Form {
       // If we were passed a title we'll use it, otherwise create below:
       if (empty($this->_activityId)) {
         // No activity Id = new activity
-        $title = 'New Activity';
+        $title = ts('New Activity');
       }
       elseif ($this->_currentlyViewedContactId) {
         // Otherwise generate a title based on activity details
@@ -42,7 +42,7 @@ abstract class CRM_Fastactivity_Form_Base extends CRM_Core_Form {
         $title = $displayName . ' - ' . $this->_activityTypeName;
       }
       else {
-        $title = ts('Activity: ' . $this->_activityTypeName);
+        $title = ts('Activity: %1', [1 => $this->_activityTypeName]);
       }
     }
     CRM_Utils_System::setTitle($title);
