@@ -228,16 +228,16 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
    */
   public static function whereClause(&$params, $sortBy = TRUE, $excludeHidden = TRUE) {
     // activity type ID clause
-    $activity_type_id = CRM_Utils_Array::value('activity_type_id', $params);
-    $activity_type_exclude_id = CRM_Utils_Array::value('activity_type_exclude_id', $params);
-    $activity_date_relative = CRM_Utils_Array::value('activity_date_relative', $params);
-    $activity_date_low = CRM_Utils_Array::value('activity_date_low', $params);
-    $activity_date_high = CRM_Utils_Array::value('activity_date_high', $params);
-    $activity_status_id = CRM_Utils_Array::value('activity_status_id', $params);
+    $activity_type_id = $params['activity_type_id'] ?? NULL;
+    $activity_type_exclude_id = $params['activity_type_exclude_id'] ?? NULL;
+    $activity_date_relative = $params['activity_date_relative'] ?? NULL;
+    $activity_date_low = $params['activity_date_low'] ?? NULL;
+    $activity_date_high = $params['activity_date_high'] ?? NULL;
+    $activity_status_id = $params['activity_status_id'] ?? NULL;
     $excludeCaseActivities = CRM_Utils_Array::value('excludeCaseActivities', $params, TRUE);
 
     // contact_id
-    $contact_id = CRM_Utils_Array::value('contact_id', $params);
+    $contact_id = $params['contact_id'] ?? NULL;
     if ($contact_id) {
       $clauses[] = "acon.contact_id = %1";
       $params[1] = array($contact_id, 'Integer');
@@ -284,7 +284,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       // optionalCols not set when triggered from fastactivity_civicrm_tabs
       if ($params['optionalCols']['campaign_title']) {
         // campaign ID clause. Match on campaign and all sub-campaigns.
-        $activity_campaign_id = CRM_Utils_Array::value('activity_campaign_id', $params);
+        $activity_campaign_id = $params['activity_campaign_id'] ?? NULL;
         if (!empty($activity_campaign_id)) {
           // Make campaign IDs into array
           $searchCampaignIds = explode(',', $activity_campaign_id);
@@ -474,10 +474,10 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     // format the params
     $params['offset'] = ($params['page'] - 1) * $params['rp'];
     $params['rowCount'] = $params['rp'];
-    $params['sort'] = CRM_Utils_Array::value('sortBy', $params);
-    $params['outerSort'] = CRM_Utils_Array::value('outerSortBy', $params);
+    $params['sort'] = $params['sortBy'] ?? NULL;
+    $params['outerSort'] = $params['outerSortBy'] ?? NULL;
     $params['caseId'] = NULL;
-    $context = CRM_Utils_Array::value('context', $params);
+    $context = $params['context'] ?? NULL;
 
     // get contact activities
     $activities = CRM_Fastactivity_BAO_Activity::getContactActivities($params);
@@ -548,8 +548,8 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
 
         $actionLinks = self::actionLinks(
           CRM_Utils_Array::value('activity_type_id', $values),
-          CRM_Utils_Array::value('activity_id', $values),
-          CRM_Utils_Array::value('contact_id', $params)
+          $values['activity_id'] ?? NULL,
+          $params['contact_id'] ?? NULL
         );
 
         $actionMask = array_sum(array_keys($actionLinks)) & $mask;

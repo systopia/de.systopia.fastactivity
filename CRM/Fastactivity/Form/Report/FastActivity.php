@@ -235,20 +235,20 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
       $this->_columnHeaders["contact_source_id"]['no_display'] = TRUE;
       return "fa_source.contact_id as contact_source_id";
     } elseif ($fieldName == 'target_sort_name') {
-      $this->_columnHeaders['target_sort_name']['title']       = CRM_Utils_Array::value('title', $field);
-      $this->_columnHeaders['target_sort_name']['type']        = CRM_Utils_Array::value('type', $field);
+      $this->_columnHeaders['target_sort_name']['title']       = $field['title'] ?? NULL;
+      $this->_columnHeaders['target_sort_name']['type']        = $field['type'] ?? NULL;
       $this->_columnHeaders['target_contact_id']['no_display'] = TRUE;
       return "GROUP_CONCAT(DISTINCT fa_target_contact.sort_name SEPARATOR ';') AS target_sort_name, GROUP_CONCAT(DISTINCT fa_target_contact.id SEPARATOR ';') AS target_contact_id";
 
     } elseif ($fieldName == 'assignee_sort_name') {
-      $this->_columnHeaders['assignee_sort_name']['title'] = CRM_Utils_Array::value('title', $field);
-      $this->_columnHeaders['assignee_sort_name']['type'] = CRM_Utils_Array::value('type', $field);
+      $this->_columnHeaders['assignee_sort_name']['title'] = $field['title'] ?? NULL;
+      $this->_columnHeaders['assignee_sort_name']['type'] = $field['type'] ?? NULL;
       $this->_columnHeaders['assignee_contact_id']['no_display'] = TRUE;
       return "GROUP_CONCAT(DISTINCT fa_assignee_contact.sort_name SEPARATOR ';') AS assignee_sort_name, GROUP_CONCAT(DISTINCT fa_assignee_contact.id SEPARATOR ';') AS assignee_contact_id";
 
     } elseif ($fieldName == 'campaign') {
-      $this->_columnHeaders['campaign']['title'] = CRM_Utils_Array::value('title', $field);
-      //$this->_columnHeaders['campaign']['type'] = CRM_Utils_Array::value('type', $field);
+      $this->_columnHeaders['campaign']['title'] = $field['title'] ?? NULL;
+      //$this->_columnHeaders['campaign']['type'] = $field['type'] ?? NULL;
       return "campaign.title AS campaign";
 
     } elseif ($fieldName == 'actions') {
