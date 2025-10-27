@@ -42,7 +42,7 @@ class CRM_Fastactivity_DetailsFilterJob {
   }
 
   /**
-   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   public function run() {
     foreach ($this->activityIds as $activityId) {
