@@ -126,13 +126,13 @@ function fastactivity_civicrm_check(&$messages) {
  *
  */
 function fastactivity_civicrm_navigationMenu(&$menu) {
-  $item[] =  array (
+  $item[] =  [
     'name'       => 'Fast Activities Tab',
     'url'        => 'civicrm/admin/fastactivity',
     'permission' => 'administer CiviCRM',
     'operator'   => NULL,
     'separator'  => NULL,
-  );
+  ];
   _fastactivity_civix_insert_navigation_menu($menu, 'Administer/Customize Data and Screens', $item[0]);
 }
 

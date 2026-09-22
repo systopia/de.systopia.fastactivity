@@ -37,7 +37,7 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
   public function preProcess()
   {
     // Array to hold details of activity for template
-    $activityDetails = array();
+    $activityDetails = [];
 
     // Get currently viewed contact ID
     $this->_currentlyViewedContactId = $this->get('contactId');
@@ -63,10 +63,10 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
     $activityDetails['activityId'] = $this->_activityId;
 
     // Check if user has edit and/or view permissions for this activity
-    if ($this->_activityId && in_array($this->_action, array(
+    if ($this->_activityId && in_array($this->_action, [
         CRM_Core_Action::UPDATE,
         CRM_Core_Action::VIEW,
-      ))
+      ])
       && !CRM_Activity_BAO_Activity::checkPermission($this->_activityId, $this->_action)) {
       CRM_Core_Error::statusBounce(ts('You do not have permission to access this page.'));
     }
@@ -79,10 +79,10 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
     }
 
     // Get activity record
-    $activityRecord = civicrm_api3('Activity', 'getsingle', array(
+    $activityRecord = civicrm_api3('Activity', 'getsingle', [
       'id' => $this->_activityId,
       'return' => ["case_id", "status_id", "activity_date_time", "activity_type_id", "subject", "details", "priority_id", "duration", "medium_id", "campaign_id", "engagement_level"],
-    ));
+    ]);
 
     // Get Activity Status
     $activityStatus = CRM_Activity_BAO_Activity::buildOptions('activity_status_id', 'validate');
@@ -105,10 +105,10 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
 
     // Case ID
     if (isset($activityRecord['case_id'])) {
-      $caseDetail = civicrm_api3('Case', 'getsingle', array(
+      $caseDetail = civicrm_api3('Case', 'getsingle', [
         'id' => CRM_Utils_Array::first($activityRecord['case_id']),
         'return' => ["subject", "case_type_id"],
-      ));
+      ]);
       $activityDetails['case_id'] = CRM_Utils_Array::first($activityRecord['case_id']);
       $activityDetails['case_type'] = CRM_Core_PseudoConstant::getLabel('CRM_Case_BAO_Case', 'case_type_id', $caseDetail['case_type_id']);
       $activityDetails['case_subject'] = $caseDetail['subject'];
@@ -193,17 +193,17 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
 
     if ($this->_action & CRM_Core_Action::DELETE) {
       // Delete activity action
-      $this->addButtons(array(
-          array(
+      $this->addButtons([
+          [
             'type' => 'next',
             'name' => ts('Delete'),
             'isDefault' => TRUE,
-          ),
-          array(
+          ],
+          [
             'type' => 'cancel',
             'name' => ts('Cancel'),
-          ),
-        )
+          ],
+        ]
       );
       return;
     }
@@ -215,11 +215,11 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
       // form should be frozen for view mode
       //$this->freeze();
 
-      $buttons = array();
-      $buttons[] = array(
+      $buttons = [];
+      $buttons[] = [
         'type' => 'cancel',
         'name' => ts('Done'),
-      );
+      ];
       $this->addButtons($buttons);
 
       parent::buildQuickForm();
@@ -232,10 +232,10 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
     if (isset($this->_activityId)) {
       if ($this->_action & CRM_Core_Action::DELETE) {
         try {
-          $result = civicrm_api3('Activity', 'delete', array(
+          $result = civicrm_api3('Activity', 'delete', [
             'sequential' => 1,
             'id' => $this->_activityId,
-          ));
+          ]);
         }
         catch (Exception $e) {
           // Delete will fail if, for example the activity is already deleted
@@ -279,12 +279,12 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
   public function getTargetContacts($activityId) {
     $contactType = "Activity Targets";
 
-    $contacts = array();
-    $contactCount = civicrm_api3('ActivityContact', 'getcount', array(
+    $contacts = [];
+    $contactCount = civicrm_api3('ActivityContact', 'getcount', [
       'sequential' => 1,
       'activity_id' => $activityId,
       'record_type_id' => $contactType,
-    ));
+    ]);
     $contacts['count'] = $contactCount;
 
     if ($contactCount > CRM_Fastactivity_Form_Add::MAX_TARGETCONTACTS) {
@@ -303,14 +303,14 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
    * @return array
    */
   public function getContacts($activityId, $contactType) {
-    $contacts = civicrm_api3('ActivityContact', 'get', array(
+    $contacts = civicrm_api3('ActivityContact', 'get', [
       'sequential' => 1,
       'activity_id' => $activityId,
       'record_type_id' => $contactType,
-    ));
+    ]);
     if (isset($contacts['count']) && ($contacts['count'] > 0)) {
       foreach ($contacts['values'] as $contact) {
-        $contactList[] = array('id' => $contact['contact_id'], 'name' => CRM_Contact_BAO_Contact::displayName($contact['contact_id']));
+        $contactList[] = ['id' => $contact['contact_id'], 'name' => CRM_Contact_BAO_Contact::displayName($contact['contact_id'])];
       }
       $contactList['count'] = $contacts['count'];
       return $contactList;
@@ -326,10 +326,10 @@ class CRM_Fastactivity_Form_View extends CRM_Fastactivity_Form_Base {
       $activityDetails['campaignId'] = $activityRecord['campaign_id'];
       // Get campaign title
       try {
-        $campaignRecord = civicrm_api3('Campaign', 'getsingle', array(
+        $campaignRecord = civicrm_api3('Campaign', 'getsingle', [
           'return' => "title",
           'id' => $activityRecord['campaign_id'],
-        ));
+        ]);
       }
       catch (Exception $e) {
         // Campaign not found

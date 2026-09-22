@@ -16,19 +16,19 @@
 
 use CRM_Fastactivity_ExtensionUtil as E;
 
-return array (
+return [
   0 => 
-  array (
+  [
     'name' => 'CRM_Fastactivity_Form_Report_FastActivity',
     'entity' => 'ReportTemplate',
     'params' => 
-    array (
+    [
         'version'     => 3,
         'label'       => E::ts('Fast Activity Report'),
         'description' => E::ts('Specialised high performance activity report.'),
         'class_name'  => 'CRM_Fastactivity_Form_Report_FastActivity',
         'report_url'  => 'de.systopia.fastactivity/fastactivity',
         'component'   => '',
-    ),
-  ),
-);
+    ],
+  ],
+];

@@ -23,8 +23,8 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +-------------------------------------------------------------------*/
 
-return array(
-  'fastactivity_replace_tab' => array(
+return [
+  'fastactivity_replace_tab' => [
       'group_name' => 'FastActivity Settings',
       'group' => 'fastactivity',
       'name' => 'fastactivity_replace_tab',
@@ -35,8 +35,8 @@ return array(
       'is_domain' => 1,
       'is_contact' => 0,
       'description' => 'Replace the (slow) default Contact Activity Tab',
-      'html_attributes' => array(),
-  ),
+      'html_attributes' => [],
+  ],
 
   'fastactivity_replace_tab_weight' => [
       'group_name' => 'FastActivity Settings',
@@ -49,7 +49,7 @@ return array(
       'is_domain' => 1,
       'is_contact' => 0,
       'description' => 'Fast Activity Tab Weight',
-      'html_attributes' => array(),
+      'html_attributes' => [],
   ],
 
   'fastactivity_replace_search' => [
@@ -94,7 +94,7 @@ return array(
       'html_attributes' => [],
   ],
 
-  'fastactivity_tab_col_duration' => array(
+  'fastactivity_tab_col_duration' => [
     'group_name' => 'FastActivity Settings',
     'group' => 'fastactivity',
     'name' => 'fastactivity_tab_col_duration',
@@ -105,10 +105,10 @@ return array(
     'is_domain' => 1,
     'is_contact' => 0,
     'description' => 'Display Duration column in contact tab',
-    'html_attributes' => array(),
-  ),
+    'html_attributes' => [],
+  ],
 
-  'fastactivity_tab_col_target_contact' => array(
+  'fastactivity_tab_col_target_contact' => [
     'group_name' => 'FastActivity Settings',
     'group' => 'fastactivity',
     'name' => 'fastactivity_tab_col_target_contact',
@@ -119,10 +119,10 @@ return array(
     'is_domain' => 1,
     'is_contact' => 0,
     'description' => 'Display Target Contact column in contact tab',
-    'html_attributes' => array(),
-  ),
+    'html_attributes' => [],
+  ],
 
-  'fastactivity_tab_col_campaign_title' => array(
+  'fastactivity_tab_col_campaign_title' => [
     'group_name' => 'FastActivity Settings',
     'group' => 'fastactivity',
     'name' => 'fastactivity_tab_col_campaign_title',
@@ -133,10 +133,10 @@ return array(
     'is_domain' => 1,
     'is_contact' => 0,
     'description' => 'Display Campaign Title column in contact tab',
-    'html_attributes' => array(),
-  ),
+    'html_attributes' => [],
+  ],
 
-  'fastactivity_tab_col_case' => array(
+  'fastactivity_tab_col_case' => [
     'group_name' => 'FastActivity Settings',
     'group' => 'fastactivity',
     'name' => 'fastactivity_tab_col_case',
@@ -147,10 +147,10 @@ return array(
     'is_domain' => 1,
     'is_contact' => 0,
     'description' => 'Display Case column in contact tab',
-    'html_attributes' => array(),
-  ),
+    'html_attributes' => [],
+  ],
 
-  'fastactivity_tab_exclude_case_activities' => array(
+  'fastactivity_tab_exclude_case_activities' => [
     'group_name' => 'FastActivity Settings',
     'group' => 'fastactivity',
     'name' => 'fastactivity_tab_exclude_case_activities',
@@ -161,9 +161,9 @@ return array(
     'is_domain' => 1,
     'is_contact' => 0,
     'description' => 'Exclude Case Activities from the activity tab',
-    'html_attributes' => array(),
-  ),
-  'fastactivity_filter_details_activity_types' => array(
+    'html_attributes' => [],
+  ],
+  'fastactivity_filter_details_activity_types' => [
     'group_name' => 'FastActivity Settings',
     'group' => 'fastactivity',
     'name' => 'fastactivity_filter_details_activity_types',
@@ -180,5 +180,5 @@ return array(
       'class' => 'crm-select2',
       'multiple' => 1,
     ],
-  ),
-);
+  ],
+];

@@ -28,11 +28,11 @@ class CRM_Fastactivity_Form_ActivityFilter extends CRM_Core_Form {
     // add activity search filter
     $this->addSelect(
       'activity_type_id',
-      array('entity' => 'Activity', 'label' => 'Activity Type(s)', 'multiple' => 'multiple', 'option_url' => NULL, 'placeholder' => ts('- any -'))
+      ['entity' => 'Activity', 'label' => 'Activity Type(s)', 'multiple' => 'multiple', 'option_url' => NULL, 'placeholder' => ts('- any -')]
     );
     $this->addSelect(
       'activity_type_exclude_id',
-      array('entity' => 'Activity', 'field' => 'activity_type_id', 'label' => 'Exclude Activity Type(s)', 'multiple' => 'multiple', 'option_url' => NULL, 'placeholder' => ts('- any -'))
+      ['entity' => 'Activity', 'field' => 'activity_type_id', 'label' => 'Exclude Activity Type(s)', 'multiple' => 'multiple', 'option_url' => NULL, 'placeholder' => ts('- any -')]
     );
     $this->addDatePickerRange(
       'activity_date',
@@ -40,7 +40,7 @@ class CRM_Fastactivity_Form_ActivityFilter extends CRM_Core_Form {
     );
 
     $this->addSelect('activity_status_id',
-      array('entity' => 'activity', 'multiple' => 'multiple', 'option_url' => NULL, 'placeholder' => ts('- any -'))
+      ['entity' => 'activity', 'multiple' => 'multiple', 'option_url' => NULL, 'placeholder' => ts('- any -')]
     );
     $this->add(
       'select',
@@ -48,7 +48,7 @@ class CRM_Fastactivity_Form_ActivityFilter extends CRM_Core_Form {
       ts('Campaigns'),
       $this->getFilterCampaigns(),
       FALSE,
-      array('id' => 'campaigns', 'multiple' => 'multiple', 'class' => 'crm-select2')
+      ['id' => 'campaigns', 'multiple' => 'multiple', 'class' => 'crm-select2']
     );
     // will always show ALL campaigns: CRM_Campaign_BAO_Campaign::addCampaignInComponentSearch($this, 'activity_campaign_id');
   }
@@ -58,7 +58,7 @@ class CRM_Fastactivity_Form_ActivityFilter extends CRM_Core_Form {
    */
   public function setDefaultValues() {
     // CRM-11761 retrieve user's activity filter preferences
-    $defaults = array();
+    $defaults = [];
     $session = CRM_Core_Session::singleton();
     $userID = $session->get('userID');
     if ($userID && Civi::settings()->get('fastactivity_preserve_activity_tab_filter')) {
@@ -79,13 +79,13 @@ class CRM_Fastactivity_Form_ActivityFilter extends CRM_Core_Form {
    * get the list of campaigns to be offered for the filter
    */
   public function getFilterCampaigns() {
-    $campaign_list = array();
-    $campaign_query = civicrm_api3('Campaign', 'get', array(
+    $campaign_list = [];
+    $campaign_query = civicrm_api3('Campaign', 'get', [
       'sequential'   => 1,
       'is_active'    => 1,
       'option.limit' => 0,
       'return'       => 'id,title'
-      ));
+      ]);
     foreach ($campaign_query['values'] as $campaign) {
       $campaign_list[$campaign['id']] = $campaign['title'];
     }

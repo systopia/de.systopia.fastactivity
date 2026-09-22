@@ -93,20 +93,20 @@ class CRM_Fastactivity_Page_AJAX {
       //Check if recurring activity
       if (!empty($value['is_recurring_activity'])) {
         $repeat = $value['is_recurring_activity'];
-        $activities[$key]['activity_type'] .= '<br/><span class="bold">' . ts('Repeating (%1 of %2)', array(1 => $repeat[0], 2 => $repeat[1])) . '</span>';
+        $activities[$key]['activity_type'] .= '<br/><span class="bold">' . ts('Repeating (%1 of %2)', [1 => $repeat[0], 2 => $repeat[1]]) . '</span>';
       }
     }
 
     // store the activity filter preference CRM-11761
     $userID = CRM_Core_Session::getLoggedInContactID();
     if (Civi::settings()->get('fastactivity_preserve_activity_tab_filter') && $userID) {
-      $activityFilter = array(
+      $activityFilter = [
         'activity_type_id' => empty($params['activity_type_id']) ? '' : CRM_Utils_Type::escape($params['activity_type_id'], 'String'),
         'activity_type_exclude_id' => empty($params['activity_type_exclude_id']) ? '' : CRM_Utils_Type::escape($params['activity_type_exclude_id'], 'String'),
         'activity_date_relative' => empty($params['activity_date_relative']) ? '' : CRM_Utils_Type::escape($params['activity_date_relative'], 'String'),
         'activity_status_id' => empty($params['activity_status_id']) ? '' : CRM_Utils_Type::escape($params['activity_status_id'], 'String'),
         'activity_campaign_id' => empty($params['activity_campaign_id']) ? '' : CRM_Utils_Type::escape($params['activity_campaign_id'], 'String'),
-      );
+      ];
       if (empty($params['activity_date_low'])) {
         $activityFilter['activity_date_low'] = '';
       }

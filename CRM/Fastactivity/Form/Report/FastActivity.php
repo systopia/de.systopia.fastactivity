@@ -48,90 +48,90 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
     }
 
 
-    $this->_columns = array(
-      'civicrm_activity' => array(
+    $this->_columns = [
+      'civicrm_activity' => [
             'dao' => 'CRM_Activity_DAO_Activity',
-            'fields' => array(
-                'id'                 => array(
+            'fields' => [
+                'id'                 => [
                     'no_display' => TRUE,
                     'title'      => E::ts('Activity ID'),
                     'required'   => TRUE,
-                ),
-              'contact_source_id' => array(
+                ],
+              'contact_source_id' => [
                 'no_display' => TRUE,
                 'title'   => E::ts('Source Contact ID'),
                 'required' => TRUE,
                 'default'  => TRUE,
-              ),
-                'target_sort_name' => array(
+              ],
+                'target_sort_name' => [
                     'title'   => E::ts('Target Contact'),
                     'default' => TRUE,
                     'type'    => CRM_Utils_Type::T_STRING,
-                ),
-                'source_record_id'   => array(
+                ],
+                'source_record_id'   => [
                     'no_display' => TRUE,
                     'required'   => TRUE,
-                ),
-                'activity_type_id'   => array(
+                ],
+                'activity_type_id'   => [
                     'title'    => E::ts('Activity Type'),
                     'required' => FALSE,
                     'type'     => CRM_Utils_Type::T_STRING,
-                ),
-                'activity_subject'   => array(
+                ],
+                'activity_subject'   => [
                     'title'   => E::ts('Subject'),
                     'default' => FALSE,
-                ),
-                'campaign'      => array(
+                ],
+                'campaign'      => [
                     'title'    => E::ts('Campaign'),
                     'required' => FALSE,
-                ),
-                'activity_date_time' => array(
+                ],
+                'activity_date_time' => [
                     'title'    => E::ts('Activity Date'),
                     'required' => TRUE,
                     'default'  => TRUE,
-                ),
-                'status_id'          => array(
+                ],
+                'status_id'          => [
                     'title'   => E::ts('Activity Status'),
                     'default' => TRUE,
                     'type'    => CRM_Utils_Type::T_STRING,
-                ),
-                'assignee_sort_name' => array(
+                ],
+                'assignee_sort_name' => [
                     'title'   => E::ts('Assignee Contact'),
                     'default' => TRUE,
                     'type'    => CRM_Utils_Type::T_STRING,
-                ),
-                'actions'   => array(
+                ],
+                'actions'   => [
                     'title'   => E::ts('Actions'),
                     'default' => TRUE,
                     'type'    => CRM_Utils_Type::T_STRING,
-                ),
-            ),
-            'filters' => array(
-                'activity_date_time' => array(
+                ],
+            ],
+            'filters' => [
+                'activity_date_time' => [
                     'default'      => 'this.month',
                     'operatorType' => CRM_Report_Form::OP_DATE,
-                ),
-                'activity_subject'   => array(
+                ],
+                'activity_subject'   => [
                     'title' => E::ts('Activity Subject')
-                ),
-                'activity_type_id'   => array(
+                ],
+                'activity_type_id'   => [
                     'title'        => E::ts('Activity Type'),
                     'operatorType' => CRM_Report_Form::OP_MULTISELECT,
                     'options'      => $this->activityTypes,
-                ),
-                'status_id'          => array(
+                ],
+                'status_id'          => [
                     'title'        => E::ts('Activity Status'),
                     'type'         => CRM_Utils_Type::T_STRING,
                     'operatorType' => CRM_Report_Form::OP_MULTISELECT,
                     'options'      => CRM_Core_PseudoConstant::activityStatus(),
-                ),
-                'campaign_id'      => array(
+                ],
+                'campaign_id'      => [
                     'title'        => E::ts('Campaign(s)'),
                     'type'         => CRM_Utils_Type::T_INT,
                     'operatorType' => CRM_Report_Form::OP_MULTISELECT,
                     'options'      => $this->getAllCampaigns(),
-                ),
-                'assignee_ids' => array(
+                ],
+                'assignee_ids' => [
                     'title'   => E::ts('Assigned To'),
                     'default' => FALSE,
                     'type'    => CRM_Utils_Type::T_STRING,
@@ -140,8 +140,8 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
                         'entity'   => 'Contact',
                     ],
                     'operatorType' => CRM_Report_Form::OP_ENTITYREF,
-                ),
-                'source_ids' => array(
+                ],
+                'source_ids' => [
                     'title'   => E::ts('Created By'),
                     'default' => FALSE,
                     'type'    => CRM_Utils_Type::T_STRING,
@@ -150,32 +150,32 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
                         'entity'   => 'Contact',
                     ],
                     'operatorType' => CRM_Report_Form::OP_ENTITYREF,
-                ),
-                'priority_id'        => array(
+                ],
+                'priority_id'        => [
                     'title'        => E::ts('Activity Priority'),
                     'type'         => CRM_Utils_Type::T_STRING,
                     'operatorType' => CRM_Report_Form::OP_MULTISELECT,
                     'options'      => CRM_Core_PseudoConstant::get('CRM_Activity_DAO_Activity', 'priority_id'),
-                ),
-            ),
-            'order_bys' => array(
-                'activity_date_time' => array(
+                ],
+            ],
+            'order_bys' => [
+                'activity_date_time' => [
                     'title'          => E::ts('Activity Date'),
                     'default_weight' => '1',
                     'dbAlias'        => "activity_date_time",
-                ),
-            ),
-        'group_bys' => array(
-          'id' => array(
+                ],
+            ],
+        'group_bys' => [
+          'id' => [
             'no_display' => TRUE,
             'title' => E::ts('Activity ID'),
             'required' => TRUE,
             'default' => TRUE,
-          ),
-        ),
+          ],
+        ],
             'alias' => 'activity',
-        ),
-    );
+        ],
+    ];
     parent::__construct();
   }
 
@@ -373,7 +373,7 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
       if (!empty($row['target_sort_name']) && !empty($row['target_contact_id'])) {
         $targetNames = explode(';', $row['target_sort_name']);
         $targetContactIds = explode(';', $row['target_contact_id']);
-        $link = array();
+        $link = [];
         foreach ($targetContactIds as $id => $value) {
           if (isset($value) && isset($targetNames[$id])) {
             $url = CRM_Utils_System::url("civicrm/contact/view", 'reset=1&cid=' . $value, $this->_absoluteUrl);
@@ -387,7 +387,7 @@ class CRM_Fastactivity_Form_Report_FastActivity extends CRM_Report_Form {
       if (!empty($row['assignee_sort_name']) && !empty($row['assignee_contact_id'])) {
         $assigneeNames = explode(';', $row['assignee_sort_name']);
         $assigneeContactIds = explode(';', $row['assignee_contact_id']);
-        $link = array();
+        $link = [];
         foreach ($assigneeContactIds as $id => $value) {
           if (isset($value) && isset($assigneeNames[$id])) {
             $url = CRM_Utils_System::url("civicrm/contact/view", 'reset=1&cid=' . $value, $this->_absoluteUrl);

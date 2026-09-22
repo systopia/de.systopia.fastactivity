@@ -76,7 +76,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     //get all activity types
     $activityTypes = self::getActivityLabels();
 
-    $values = array();
+    $values = [];
     while ($dao->fetch()) {
       $activityID = $dao->activity_id;
       $values[$activityID]['activity_id'] = $dao->activity_id;
@@ -173,7 +173,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     // Assemble GROUP BY clause
     $groupByQuery = 'GROUP BY ';
     $groupByQuery .= implode(',', $groupBy);
-    return array($selectQuery, $joinQuery, $groupByQuery);
+    return [$selectQuery, $joinQuery, $groupByQuery];
   }
 
   public static function selectClause($params) {
@@ -215,7 +215,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     // Assemble GROUP BY clause
     $groupByQuery = 'GROUP BY ';
     $groupByQuery .= implode(',', $groupBy);
-    return array($selectQuery, $groupByQuery);
+    return [$selectQuery, $groupByQuery];
   }
 
   /**
@@ -240,7 +240,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     $contact_id = $params['contact_id'] ?? NULL;
     if ($contact_id) {
       $clauses[] = "acon.contact_id = %1";
-      $params[1] = array($contact_id, 'Integer');
+      $params[1] = [$contact_id, 'Integer'];
     }
 
     if (!empty($activity_type_id)) {
@@ -354,7 +354,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
    * @return array of labels
    */
   public static function getActivityLabels($optionValueName = 'activity_type') {
-    CRM_Core_OptionValue::getValues(array('name' => $optionValueName), $all_types);
+    CRM_Core_OptionValue::getValues(['name' => $optionValueName], $all_types);
     foreach ($all_types as $activity_type_id => $activity_type) {
       $labels[$activity_type['value']] = $activity_type['label'];
     }
@@ -382,7 +382,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       }
       catch (Exception $e) {
         Civi::log()->debug('fastactivity addTargetContacts: Error: '.$e->getMessage());
-        return array();
+        return [];
       }
 
       // Return an array of Ids that we deleted
@@ -390,7 +390,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     }
     else {
       // We should always have values to remove, but in case we don't
-      return array();
+      return [];
     }
   }
 
@@ -419,27 +419,27 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       }
       catch (Exception $e) {
         Civi::log()->debug('fastactivity addTargetContacts: Error: '.$e->getMessage());
-        return array();
+        return [];
       }
       // Return an array of Ids that we added
       return $contactIds;
     }
     else {
       // We should always have values to add, but in case we don't
-      return array();
+      return [];
     }
   }
 
   private static function isNotTargetContact($activityId, $targetIds) {
     if (empty($targetIds) || empty($activityId)) {
-      return array();
+      return [];
     }
 
     // activity_id, contact_id, record_type_id=3
     // Build query to find all matching target contacts
     $query="SELECT DISTINCT(contact_id) FROM `civicrm_activity_contact` WHERE record_type_id=3 and activity_id=%1 and contact_id IN (%2)";
-    $params[1] = array($activityId, 'Integer');
-    $params[2] = array(implode(',', $targetIds), 'String');
+    $params[1] = [$activityId, 'Integer'];
+    $params[2] = [implode(',', $targetIds), 'String'];
 
     // Run query
     try {
@@ -447,11 +447,11 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     }
     catch (Exception $e) {
       Civi::log()->debug('fastactivity isNotTargetContact: Error: '.$e->getMessage());
-      return array();
+      return [];
     }
 
     // Build list of existing Ids
-    $targetExistingIds = array();
+    $targetExistingIds = [];
     while ($dao->fetch()) {
       // Each $dao->contact_id is a contact that is already a target contact so remove it from array
       $targetExistingIds[] = $dao->contact_id;
@@ -486,7 +486,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     $params['total'] = CRM_Fastactivity_BAO_Activity::getContactActivitiesCount($params);
 
     // format params and add links
-    $contactActivities = array();
+    $contactActivities = [];
 
     if (!empty($activities)) {
       //$activityStatus = CRM_Core_PseudoConstant::activityStatus();
@@ -495,7 +495,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       // check logged in user for permission
       $page = new CRM_Core_Page();
       CRM_Contact_Page_View::checkUserPermission($page, $params['contact_id']);
-      $permissions = array($page->_permission);
+      $permissions = [$page->_permission];
       if (CRM_Core_Permission::check('delete activities')) {
         $permissions[] = CRM_Core_Permission::DELETE;
       }
@@ -556,7 +556,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
 
         $contactActivities[$activityId]['links'] = CRM_Core_Action::formLink($actionLinks,
           $actionMask,
-          array(),
+          [],
           ts('more'),
           FALSE,
           'activity.tab.row',
@@ -583,10 +583,10 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
   private static function formatCaseLink($contactId, $caseId) {
     if (empty($caseId)) return '';
 
-    $caseContacts = civicrm_api3('Case', 'getvalue', array(
+    $caseContacts = civicrm_api3('Case', 'getvalue', [
       'return' => "contact_id",
       'id' => $caseId,
-    ));
+    ]);
 
     $isClientOfCase = FALSE;
     foreach ($caseContacts as $caseContactId) {
@@ -603,10 +603,10 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
       $label = "ID: {$caseId}";
     }
     else {
-      $contactName = civicrm_api3('Contact', 'getvalue', array(
+      $contactName = civicrm_api3('Contact', 'getvalue', [
         'return' => "display_name",
         'id' => $firstCaseContactId,
-      ));
+      ]);
       $label = "ID: {$caseId}<br />({$contactName})";
     }
     $url = CRM_Utils_System::url('civicrm/contact/view/case', "reset=1&id={$caseId}&cid={$firstCaseContactId}&action=view");
@@ -674,7 +674,7 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
     $showDelete = TRUE; //FIXME: May want to limit what types of activity can be deleted
     $showUpdate = TRUE;
     $qsUpdate = NULL;
-    $actionLinks = array();
+    $actionLinks = [];
 
     if (empty($activityTypeId)) {
       // this case caused crashes
@@ -703,16 +703,16 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
 
     if (CRM_Activity_BAO_Activity::checkPermission($activityId, CRM_Core_Action::VIEW)) {
       if ($showView) {
-        $actionLinks += array(
+        $actionLinks += [
           CRM_Core_Action::
-          VIEW => array(
+          VIEW => [
             'name' => ts('View'),
             'url' => $url,
             'qs' => $qsView,
             'title' => ts('View Activity'),
             'icon' => '<i class="crm-i fa-eye" aria-hidden="true"></i>',
-          ),
-        );
+          ],
+        ];
       }
     }
 
@@ -725,44 +725,44 @@ class CRM_Fastactivity_BAO_Activity extends CRM_Activity_DAO_Activity {
         $updateUrl = 'civicrm/activity/pdf/add';
       }
       if (CRM_Activity_BAO_Activity::checkPermission($activityId, CRM_Core_Action::UPDATE)) {
-        $actionLinks += array(
+        $actionLinks += [
           CRM_Core_Action::
-          UPDATE => array(
+          UPDATE => [
             'name' => ts('Edit'),
             'url' => $updateUrl,
             'qs' => $qsUpdate,
             'title' => ts('Update Activity'),
             'icon' => '<i class="crm-i fa-pencil" aria-hidden="true"></i>',
-          ),
-        );
+          ],
+        ];
       }
     }
 
     if (!$skipFileOnCase && $activityTypeName &&
       CRM_Case_BAO_Case::checkPermission($activityId, 'File On Case', $activityTypeId)) {
-      $actionLinks += array(
+      $actionLinks += [
         CRM_Core_Action::
-        ADD => array(
+        ADD => [
           'name' => ts('File on Case'),
           'url' => '#',
           'extra' => 'onclick="javascript:fileOnCase( \'file\', ' . $activityId . ', null, this ); return false;"',
           'title' => ts('File on Case'),
-        ),
-      );
+        ],
+      ];
     }
 
     if (CRM_Core_Permission::check('delete activities')) {
       if ($showDelete) {
-        $actionLinks += array(
+        $actionLinks += [
           CRM_Core_Action::
-          DELETE => array(
+          DELETE => [
             'name' => ts('Delete'),
             'url' => $url,
             'qs' => $qsDelete,
             'title' => ts('Delete Activity'),
             'icon' => '<i class="crm-i fa-trash" aria-hidden="true"></i>',
-          ),
-        );
+          ],
+        ];
       }
     }
 

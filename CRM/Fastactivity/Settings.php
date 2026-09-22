@@ -19,7 +19,7 @@ class CRM_Fastactivity_Settings {
    * @return array
    */
   public static function getFilter() {
-    return array('group' => 'fastactivity');
+    return ['group' => 'fastactivity'];
   }
 
   /**
@@ -54,7 +54,7 @@ class CRM_Fastactivity_Settings {
    */
   public static function getValue($name) {
     $className = E::CLASS_PREFIX . '_Settings';
-    $settings = civicrm_api3('setting', 'get', array('return' => $className::getName($name,true)));
+    $settings = civicrm_api3('setting', 'get', ['return' => $className::getName($name,true)]);
     $domainID = CRM_Core_Config::domainID();
     if (isset($settings['values'][$domainID][$className::getName($name,true)])) {
       return $settings['values'][$domainID][$className::getName($name, true)];
@@ -70,7 +70,7 @@ class CRM_Fastactivity_Settings {
    */
   public static function get($settings) {
     if ((!is_array($settings) || empty($settings))) {
-      return array();
+      return [];
     }
 
     $domainID = CRM_Core_Config::domainID();
@@ -78,14 +78,14 @@ class CRM_Fastactivity_Settings {
     foreach ($settings as $name) {
       $prefixedSettings[] = self::getName($name, TRUE);
     }
-    $settingsResult = civicrm_api3('setting', 'get', array('return' => $prefixedSettings));
+    $settingsResult = civicrm_api3('setting', 'get', ['return' => $prefixedSettings]);
     if (isset($settingsResult['values'][$domainID])) {
       foreach ($settingsResult['values'][$domainID] as $name => $value) {
         $unprefixedSettings[self::getName($name)] = $value;
       }
       return empty($unprefixedSettings) ? NULL : $unprefixedSettings;
     }
-    return array();
+    return [];
   }
 
 }
