@@ -48,7 +48,7 @@ class CRM_Fastactivity_Form_Settings extends CRM_Core_Form {
       if (isset($setting['html_type'])) {
         Switch (strtolower($setting['html_type'])) {
           case 'text':
-            $this->addElement('text', $name, ts($setting['description']), $setting['html_attributes'], array());
+            $this->addElement('text', $name, ts($setting['description']), $setting['html_attributes'], []);
             break;
           case 'checkbox':
             $this->addElement('checkbox', $name, ts($setting['description']), '', '');
@@ -64,7 +64,7 @@ class CRM_Fastactivity_Form_Settings extends CRM_Core_Form {
             $this->add('datepicker', $name, ts($setting['description']), $setting['html_attributes'], FALSE, $setting['html_extra']);
             break;
           case 'select':
-            $optionValues = array();
+            $optionValues = [];
             if (!empty($setting['pseudoconstant']) && !empty($setting['pseudoconstant']['optionGroupName'])) {
               $optionValues = CRM_Core_OptionGroup::values($setting['pseudoconstant']['optionGroupName'], FALSE, FALSE, FALSE, NULL, 'name');
             }
@@ -97,17 +97,17 @@ class CRM_Fastactivity_Form_Settings extends CRM_Core_Form {
       }
     }
 
-    $this->addButtons(array(
-      array (
+    $this->addButtons([
+      [
         'type' => 'submit',
         'name' => ts('Submit'),
         'isDefault' => TRUE,
-      ),
-      array (
+      ],
+      [
         'type' => 'cancel',
         'name' => ts('Cancel'),
-      )
-    ));
+      ]
+    ]);
 
     // export form elements
     $this->assign('elementGroups', $elementGroups);
@@ -145,8 +145,8 @@ class CRM_Fastactivity_Form_Settings extends CRM_Core_Form {
    */
   function getFormSettings($metadata=TRUE) {
     $className = E::CLASS_PREFIX . '_Settings';
-    $unprefixedSettings = array();
-    $settings = civicrm_api3('setting', 'getfields', array('filters' => $className::getFilter()));
+    $unprefixedSettings = [];
+    $settings = civicrm_api3('setting', 'getfields', ['filters' => $className::getFilter()]);
     if (!empty($settings['values'])) {
       foreach ($settings['values'] as $name => $values) {
         if ($metadata) {
@@ -168,7 +168,7 @@ class CRM_Fastactivity_Form_Settings extends CRM_Core_Form {
   function setDefaultValues() {
     $className = E::CLASS_PREFIX . '_Settings';
     $settings = $this->getFormSettings(FALSE);
-    $defaults = array();
+    $defaults = [];
 
     $existing = $className::get(array_keys($settings));
     if ($existing) {

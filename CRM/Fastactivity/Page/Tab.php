@@ -93,7 +93,7 @@ class CRM_Fastactivity_Page_Tab extends CRM_Core_Page {
 
     //do check for view operation.
     if ($this->_id &&
-      in_array($action, array(CRM_Core_Action::VIEW))
+      in_array($action, [CRM_Core_Action::VIEW])
     ) {
       if (!CRM_Activity_BAO_Activity::checkPermission($this->_id, $action)) {
         CRM_Core_Session::singleton()->pushUserContext(CRM_Utils_System::url('civicrm', 'reset=1'));
