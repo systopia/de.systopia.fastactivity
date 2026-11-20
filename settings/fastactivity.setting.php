@@ -75,7 +75,7 @@ return [
     'default' => 0,
     'add' => '4.6',
     'is_domain' => 1,
-    'is_contact' => 1,
+    'is_contact' => 0,
     'description' => 'Preserve individual filter settings in Activity tab',
     'html_attributes' => [],
   ],
